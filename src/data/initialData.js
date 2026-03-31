@@ -15,12 +15,11 @@ const MATCH_PAIRS = [
 
 export function generateGroupMatches(groups = DEFAULT_GROUPS) {
   const matches = []
-  let seq = 1
   GROUP_LETTERS.forEach(group => {
     const teams = groups[group] || ['', '', '', '']
-    MATCH_PAIRS.forEach(([h, a]) => {
+    MATCH_PAIRS.forEach(([h, a], i) => {
       matches.push({
-        id: `g${seq++}`,
+        id: `g${group}${i + 1}`,   // ej: gA1..gA6, gL1..gL6 (ordenable)
         phase: 'groups',
         group,
         homeTeam: teams[h] || '',
