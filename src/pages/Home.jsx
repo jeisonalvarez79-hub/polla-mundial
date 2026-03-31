@@ -21,7 +21,10 @@ export default function Home() {
     config
   )
   const top3 = ranking.slice(0, 3)
-  const finishedMatches = matches.filter(m => m.status === 'finished').length
+  const finishedGroups  = matches.filter(m => m.status === 'finished').length
+  const finishedBracket = bracketMatches.filter(m => m.status === 'finished').length
+  const finishedMatches = finishedGroups + finishedBracket
+  const totalMatches    = matches.length + bracketMatches.length  // 72 + 32 = 104
   const pts = config?.pts
 
   return (
@@ -49,10 +52,10 @@ export default function Home() {
       {/* Stats rápidas */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: 'Participantes',    value: participants.length,                      icon: '👥' },
-          { label: 'Partidos jugados', value: finishedMatches,                          icon: '✅' },
-          { label: 'Por jugar',        value: matches.length - finishedMatches,         icon: '🕐' },
-          { label: 'Fase actual',      value: finishedMatches < matches.length ? 'Grupos' : 'Eliminatoria', icon: '🏆' },
+          { label: 'Participantes',      value: participants.length,                icon: '👥' },
+          { label: 'Partidos jugados',   value: finishedMatches,                    icon: '✅' },
+          { label: 'Por jugar',          value: totalMatches - finishedMatches,     icon: '🕐' },
+          { label: 'Total de partidos',  value: `${finishedMatches}/${totalMatches}`, icon: '🏆' },
         ].map(stat => (
           <div key={stat.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4 text-center">
             <div className="text-2xl mb-1">{stat.icon}</div>
