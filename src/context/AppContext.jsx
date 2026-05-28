@@ -5,18 +5,29 @@ import {
   generateBracketMatches,
   DEFAULT_CONFIG,
   DEFAULT_PTS,
+  DEFAULT_LOCKS,
   GROUP_LETTERS,
+  R32_BRACKET_MAP,
 } from '../data/initialData'
+import { calcR32Qualifiers } from '../utils/scoring'
 
 const AppContext = createContext(null)
+
+// ─── Credenciales de administradores (acceso local directo) ──────────────────
+// NOTA: esta contraseña es visible en el bundle JS — no reutilices en otros servicios
+export const ADMIN_EMAILS = [
+  'jeisonalvarez79@gmail.com',
+  'andres858@gmail.com',
+]
+const ADMIN_PASSWORD = 'Mundial2026*'  // ← Cambia por la contraseña que prefieras
 
 const EMPTY_STANDINGS = Object.fromEntries(GROUP_LETTERS.map(g => [g, ['', '', '', '']]))
 
 function dbToMatch(row) {
-  return { id: row.id, phase: row.phase, group: row.group, homeTeam: row.home_team, awayTeam: row.away_team, date: row.date, homeScore: row.home_score, awayScore: row.away_score, status: row.status }
+  return { id: row.id, phase: row.phase, group: row.group, homeTeam: row.home_team, awayTeam: row.away_team, date: row.date, hora: row.hora || '', jornada: row.jornada || '', homeScore: row.home_score, awayScore: row.away_score, status: row.status }
 }
 function matchToDb(m) {
-  return { id: m.id, phase: m.phase, group: m.group, home_team: m.homeTeam, away_team: m.awayTeam, date: m.date, home_score: m.homeScore, away_score: m.awayScore, status: m.status }
+  return { id: m.id, phase: m.phase, group: m.group, home_team: m.homeTeam, away_team: m.awayTeam, date: m.date, hora: m.hora || '', jornada: m.jornada || '', home_score: m.homeScore, away_score: m.awayScore, status: m.status }
 }
 function matchUpdatesToDb(u) {
   const db = {}
@@ -26,6 +37,8 @@ function matchUpdatesToDb(u) {
   if (u.awayScore !== undefined) db.away_score = u.awayScore
   if (u.status    !== undefined) db.status     = u.status
   if (u.date      !== undefined) db.date       = u.date
+  if (u.hora      !== undefined) db.hora       = u.hora
+  if (u.jornada   !== undefined) db.jornada    = u.jornada
   return db
 }
 function dbToBracket(row) {
@@ -47,8 +60,26 @@ function bracketUpdatesToDb(u) {
 function dbToPrediction(row) {
   return { id: row.id, participantId: row.participant_id, matchId: row.match_id, homeScore: row.home_score, awayScore: row.away_score }
 }
+function encodeBracketPred(winner, homeScore, awayScore) {
+  const w = winner || ''
+  if (homeScore !== null && awayScore !== null) return `${w}|${homeScore}|${awayScore}`
+  return w || null
+}
+function decodeBracketPred(raw) {
+  if (!raw) return { predictedWinner: null, predictedHomeScore: null, predictedAwayScore: null }
+  const parts = raw.split('|')
+  const predictedWinner = parts[0] || null
+  const predictedHomeScore = parts.length > 1 && parts[1] !== '' ? Number(parts[1]) : null
+  const predictedAwayScore = parts.length > 2 && parts[2] !== '' ? Number(parts[2]) : null
+  return { predictedWinner, predictedHomeScore, predictedAwayScore }
+}
 function dbToBracketPrediction(row) {
-  return { id: row.id, participantId: row.participant_id, bracketMatchId: row.bracket_match_id, predictedWinner: row.predicted_winner }
+  return {
+    id: row.id,
+    participantId: row.participant_id,
+    bracketMatchId: row.bracket_match_id,
+    ...decodeBracketPred(row.predicted_winner),
+  }
 }
 function dbToStandingsPrediction(row) {
   return { id: row.id, participantId: row.participant_id, group: row.group, standings: row.standings }
@@ -58,27 +89,68 @@ function dbToScorerPrediction(row) {
 }
 
 export function AppProvider({ children }) {
-  const [loading, setLoading] = useState(true)
-  const [config, setConfig] = useState({ ...DEFAULT_CONFIG, pts: { ...DEFAULT_PTS } })
-  const [participants, setParticipants] = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [config, setConfig]     = useState({ ...DEFAULT_CONFIG, pts: { ...DEFAULT_PTS }, locks: { ...DEFAULT_LOCKS } })
+  const [pollas, setPollas]     = useState([])
+  const [allParticipants, setAllParticipants] = useState([])
+  const [isAdmin, setIsAdmin]   = useState(false)
   const [currentParticipantId, setCurrentParticipantIdState] = useState(() => {
     try { return localStorage.getItem('pm_current_participant') } catch { return null }
   })
-  const [matches, setMatches] = useState([])
-  const [predictions, setPredictions] = useState([])
-  const [bracketMatches, setBracketMatches] = useState([])
+  const [currentPollaId, setCurrentPollaIdState] = useState(() => {
+    try { return localStorage.getItem('pm_current_polla') } catch { return null }
+  })
+  const [matches, setMatches]                   = useState([])
+  const [predictions, setPredictions]           = useState([])
+  const [bracketMatches, setBracketMatches]     = useState([])
   const [bracketPredictions, setBracketPredictions] = useState([])
-  const [groupStandings, setGroupStandings] = useState(EMPTY_STANDINGS)
+  const [groupStandings, setGroupStandings]     = useState(EMPTY_STANDINGS)
   const [standingsPredictions, setStandingsPredictions] = useState([])
-  const [topScorers, setTopScorers] = useState(['', '', ''])
+  const [topScorers, setTopScorers]             = useState(['', '', ''])
   const [scorerPredictions, setScorerPredictions] = useState([])
 
+  // Escuchar cambios de sesión Supabase Auth (admin)
+  useEffect(() => {
+    // Restaurar sesión local de admin (bypass) si existe
+    if (sessionStorage.getItem('pm_admin_bypass') === '1') {
+      setIsAdmin(true)
+    } else {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        const email = session?.user?.email?.toLowerCase()
+        if (!!email && ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email)) {
+          setIsAdmin(true)
+        }
+      })
+    }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      // No sobreescribir si hay bypass local activo
+      if (sessionStorage.getItem('pm_admin_bypass') === '1') return
+      const email = session?.user?.email?.toLowerCase()
+      setIsAdmin(!!email && ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email))
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
   useEffect(() => { loadAll() }, [])
+
+  // Participants filtered by current polla (falls back to all if no polla system yet)
+  const hasPollaData = allParticipants.some(p => p.polla_id)
+  const participants = (currentPollaId && pollas.length > 0 && hasPollaData)
+    ? allParticipants.filter(p => p.polla_id === currentPollaId)
+    : allParticipants
+
+  const currentParticipant = allParticipants.find(p => p.id === currentParticipantId) || null
 
   async function loadAll() {
     setLoading(true)
     try {
-      await Promise.all([loadConfig(), loadParticipants(), loadPredictions(), loadBracketPredictions(), loadGroupStandings(), loadStandingsPredictions(), loadTopScorers(), loadScorerPredictions()])
+      await Promise.all([
+        loadConfig(), loadAllParticipants(),
+        loadPredictions(), loadBracketPredictions(),
+        loadGroupStandings(), loadStandingsPredictions(),
+        loadTopScorers(), loadScorerPredictions(),
+      ])
       await loadMatches()
       await loadBracketMatches()
     } finally {
@@ -88,12 +160,34 @@ export function AppProvider({ children }) {
 
   async function loadConfig() {
     const { data } = await supabase.from('config').select('*').eq('id', 1).single()
-    if (data) setConfig({ name: data.name, tournamentName: data.tournament_name, year: data.year, adminPassword: data.admin_password, pts: { ...DEFAULT_PTS, ...(data.pts || {}) } })
+    if (data) {
+      const { phase_locks, ...ptValues } = data.pts || {}
+      setConfig({
+        name: data.name,
+        tournamentName: data.tournament_name,
+        year: data.year,
+        adminPassword: data.admin_password,
+        pts: { ...DEFAULT_PTS, ...ptValues },
+        locks: { ...DEFAULT_LOCKS, ...(phase_locks || {}) },
+      })
+      // Pollas se guardan en config.pollas (JSONB array)
+      const pollasData = Array.isArray(data.pollas) ? data.pollas : []
+      setPollas(pollasData)
+      if (pollasData.length > 0) {
+        const saved = (() => { try { return localStorage.getItem('pm_current_polla') } catch { return null } })()
+        if (!saved || !pollasData.find(p => p.id === saved)) {
+          setCurrentPollaIdState(pollasData[0].id)
+          localStorage.setItem('pm_current_polla', pollasData[0].id)
+        }
+      }
+    }
   }
-  async function loadParticipants() {
+
+  async function loadAllParticipants() {
     const { data } = await supabase.from('participants').select('*').order('created_at')
-    if (data) setParticipants(data)
+    if (data) setAllParticipants(data)
   }
+
   async function loadMatches() {
     const { data } = await supabase.from('matches').select('*').order('id')
     if (data && data.length > 0) {
@@ -104,6 +198,7 @@ export function AppProvider({ children }) {
       if (seeded) setMatches(seeded.map(dbToMatch))
     }
   }
+
   async function loadBracketMatches() {
     const { data } = await supabase.from('bracket_matches').select('*').order('id')
     if (data && data.length > 0) {
@@ -114,6 +209,7 @@ export function AppProvider({ children }) {
       if (seeded) setBracketMatches(seeded.map(dbToBracket))
     }
   }
+
   async function loadPredictions() {
     const { data } = await supabase.from('predictions').select('*')
     if (data) setPredictions(data.map(dbToPrediction))
@@ -143,26 +239,182 @@ export function AppProvider({ children }) {
     if (data) setScorerPredictions(data.map(dbToScorerPrediction))
   }
 
-  const currentParticipant = participants.find(p => p.id === currentParticipantId) || null
+  // ─── Pollas ───────────────────────────────────────────────────────────────────
 
-  const addParticipant = useCallback(async (name) => {
+  const setCurrentPolla = useCallback((id) => {
+    setCurrentPollaIdState(id)
+    if (id) localStorage.setItem('pm_current_polla', id)
+    else localStorage.removeItem('pm_current_polla')
+    // Deselect current participant if they don't belong to the new polla
+    if (id && currentParticipantId) {
+      const inNewPolla = allParticipants.find(p => p.id === currentParticipantId && p.polla_id === id)
+      if (!inNewPolla) {
+        setCurrentParticipantIdState(null)
+        localStorage.removeItem('pm_current_participant')
+      }
+    }
+  }, [allParticipants, currentParticipantId])
+
+  // Guarda el array de pollas en config.pollas (JSONB)
+  async function savePollasToConfig(updatedPollas) {
+    const { error } = await supabase.from('config').update({ pollas: updatedPollas }).eq('id', 1)
+    return error
+  }
+
+  const addPolla = useCallback(async (name) => {
+    const trimmed = name.trim()
+    if (!trimmed) return { data: null, error: 'El nombre no puede estar vacío' }
+    const newP = { id: `polla_${Date.now()}`, name: trimmed, valor_polla: 0 }
+    const updatedPollas = [...pollas, newP]
+    const error = await savePollasToConfig(updatedPollas)
+    if (error) return { data: null, error: error.message }
+    setPollas(updatedPollas)
+    return { data: newP, error: null }
+  }, [pollas])
+
+  const updatePolla = useCallback(async (id, name, valorPolla) => {
+    const trimmed = name?.trim() || ''
+    if (!trimmed) return
+    const updatedPollas = pollas.map(p =>
+      p.id === id ? { ...p, name: trimmed, valor_polla: Number(valorPolla) || 0 } : p
+    )
+    await savePollasToConfig(updatedPollas)
+    setPollas(updatedPollas)
+  }, [pollas])
+
+  const deletePolla = useCallback(async (id) => {
+    const hasParticipants = allParticipants.some(p => p.polla_id === id)
+    if (hasParticipants) return 'La polla tiene participantes activos'
+    const updatedPollas = pollas.filter(p => p.id !== id)
+    const error = await savePollasToConfig(updatedPollas)
+    if (error) return 'Error al eliminar la polla'
+    setPollas(updatedPollas)
+    if (currentPollaId === id) {
+      const next = updatedPollas[0]
+      setCurrentPollaIdState(next?.id ?? null)
+      if (next) localStorage.setItem('pm_current_polla', next.id)
+      else localStorage.removeItem('pm_current_polla')
+    }
+    return null
+  }, [pollas, allParticipants, currentPollaId])
+
+  // ─── Participantes ────────────────────────────────────────────────────────────
+
+  // ─── Auth ────────────────────────────────────────────────────────────────────
+
+  const isAuthenticated = isAdmin || !!currentParticipantId
+
+  const loginParticipant = useCallback(async (participantId, pin) => {
+    const participant = allParticipants.find(p => p.id === participantId)
+    if (!participant) return false
+    if (String(participant.pin) !== String(pin)) return false
+    setCurrentParticipantIdState(participantId)
+    localStorage.setItem('pm_current_participant', participantId)
+    if (participant.polla_id) {
+      setCurrentPollaIdState(participant.polla_id)
+      localStorage.setItem('pm_current_polla', participant.polla_id)
+    }
+    return true
+  }, [allParticipants])
+
+  const loginAdmin = useCallback(async (email, password) => {
+    const emailLower = email.toLowerCase().trim()
+
+    // ── Bypass local: correo autorizado + contraseña maestra ──────────────────
+    if (
+      ADMIN_EMAILS.map(e => e.toLowerCase()).includes(emailLower) &&
+      password === ADMIN_PASSWORD
+    ) {
+      sessionStorage.setItem('pm_admin_bypass', '1')
+      setIsAdmin(true)
+      return true
+    }
+
+    // ── Fallback: Supabase Auth (si ya tienen cuenta confirmada) ───────────────
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      if (!error && data.user) {
+        if (ADMIN_EMAILS.map(e => e.toLowerCase()).includes(data.user.email.toLowerCase())) {
+          return true
+        }
+        await supabase.auth.signOut()
+      }
+    } catch { /* Supabase Auth no disponible — bypass local ya cubrió el caso */ }
+
+    return false
+  }, [])
+
+  const logout = useCallback(async () => {
+    sessionStorage.removeItem('pm_admin_bypass')
+    setIsAdmin(false)
+    await supabase.auth.signOut()
+    setCurrentParticipantIdState(null)
+    localStorage.removeItem('pm_current_participant')
+  }, [])
+
+  // ─── Participantes ────────────────────────────────────────────────────────────
+
+  // Solo el Admin llama esta función; targetPollaId indica la polla destino
+  const addParticipant = useCallback(async (name, targetPollaId, pin) => {
     const trimmed = name.trim()
     if (!trimmed) return null
-    if (participants.some(p => p.name.toLowerCase() === trimmed.toLowerCase())) return null
-    const newP = { id: `p_${Date.now()}`, name: trimmed }
-    const { data, error } = await supabase.from('participants').insert(newP).select().single()
-    if (error || !data) return null
-    setParticipants(prev => [...prev, data])
-    setCurrentParticipantIdState(data.id)
-    localStorage.setItem('pm_current_participant', data.id)
+    const pollaId = targetPollaId || currentPollaId || null
+
+    // Duplicado solo dentro de la misma polla
+    const hasPollaCol = allParticipants.some(p => p.polla_id)
+    const dupeList = hasPollaCol
+      ? allParticipants.filter(p => p.polla_id === pollaId)
+      : []
+    if (dupeList.some(p => p.name.toLowerCase() === trimmed.toLowerCase())) return null
+
+    const id = `p_${Date.now()}`
+    const { data, error } = await supabase.from('participants')
+      .insert({ id, name: trimmed, polla_id: pollaId, pin: pin || null })
+      .select().single()
+
+    if (error) { console.error('Error creando participante:', error.message); return null }
+    if (!data) return null
+    setAllParticipants(prev => [...prev, data])
     return data
-  }, [participants])
+  }, [allParticipants, currentPollaId])
+
+  // Asignar o reasignar un participante a una polla (fix de orphans)
+  const assignParticipantPolla = useCallback(async (participantId, pollaId) => {
+    const { error } = await supabase.from('participants')
+      .update({ polla_id: pollaId }).eq('id', participantId)
+    if (!error) {
+      setAllParticipants(prev =>
+        prev.map(p => p.id === participantId ? { ...p, polla_id: pollaId } : p)
+      )
+    }
+    return !error
+  }, [])
+
+  const updateParticipantPin = useCallback(async (participantId, newPin) => {
+    const { error } = await supabase.from('participants')
+      .update({ pin: newPin }).eq('id', participantId)
+    if (!error) {
+      setAllParticipants(prev =>
+        prev.map(p => p.id === participantId ? { ...p, pin: newPin } : p)
+      )
+    }
+    return !error
+  }, [])
 
   const setCurrentParticipant = useCallback((id) => {
     setCurrentParticipantIdState(id)
-    if (id) localStorage.setItem('pm_current_participant', id)
-    else localStorage.removeItem('pm_current_participant')
-  }, [])
+    if (id) {
+      localStorage.setItem('pm_current_participant', id)
+      // Auto-switch to the participant's polla so they only see their group
+      const participant = allParticipants.find(p => p.id === id)
+      if (participant?.polla_id) {
+        setCurrentPollaIdState(participant.polla_id)
+        localStorage.setItem('pm_current_polla', participant.polla_id)
+      }
+    } else {
+      localStorage.removeItem('pm_current_participant')
+    }
+  }, [allParticipants])
 
   const removeParticipant = useCallback(async (id) => {
     await supabase.from('predictions').delete().eq('participant_id', id)
@@ -170,17 +422,23 @@ export function AppProvider({ children }) {
     await supabase.from('standings_predictions').delete().eq('participant_id', id)
     await supabase.from('scorer_predictions').delete().eq('participant_id', id)
     await supabase.from('participants').delete().eq('id', id)
-    setParticipants(prev => prev.filter(p => p.id !== id))
+    setAllParticipants(prev => prev.filter(p => p.id !== id))
     setPredictions(prev => prev.filter(p => p.participantId !== id))
     setBracketPredictions(prev => prev.filter(p => p.participantId !== id))
     setStandingsPredictions(prev => prev.filter(p => p.participantId !== id))
     setScorerPredictions(prev => prev.filter(p => p.participantId !== id))
-    if (currentParticipantId === id) { setCurrentParticipantIdState(null); localStorage.removeItem('pm_current_participant') }
+    if (currentParticipantId === id) {
+      setCurrentParticipantIdState(null)
+      localStorage.removeItem('pm_current_participant')
+    }
   }, [currentParticipantId])
 
+  // ─── Pronósticos ──────────────────────────────────────────────────────────────
+
   const savePrediction = useCallback(async (participantId, matchId, homeScore, awayScore) => {
-    const { data } = await supabase.from('predictions')
+    const { data, error } = await supabase.from('predictions')
       .upsert({ participant_id: participantId, match_id: matchId, home_score: homeScore, away_score: awayScore }, { onConflict: 'participant_id,match_id' }).select().single()
+    if (error) { console.error('Error guardando pronóstico:', error.message); return }
     if (data) setPredictions(prev => [...prev.filter(p => !(p.participantId === participantId && p.matchId === matchId)), dbToPrediction(data)])
   }, [])
 
@@ -188,10 +446,21 @@ export function AppProvider({ children }) {
     predictions.find(p => p.participantId === participantId && p.matchId === matchId) || null
   , [predictions])
 
-  const saveBracketPrediction = useCallback(async (participantId, bracketMatchId, predictedWinner) => {
-    const { data } = await supabase.from('bracket_predictions')
-      .upsert({ participant_id: participantId, bracket_match_id: bracketMatchId, predicted_winner: predictedWinner }, { onConflict: 'participant_id,bracket_match_id' }).select().single()
-    if (data) setBracketPredictions(prev => [...prev.filter(p => !(p.participantId === participantId && p.bracketMatchId === bracketMatchId)), dbToBracketPrediction(data)])
+  const saveBracketPrediction = useCallback(async (participantId, bracketMatchId, predictedWinner, homeScore = null, awayScore = null) => {
+    const encoded = encodeBracketPred(predictedWinner, homeScore, awayScore)
+    const { data, error } = await supabase.from('bracket_predictions')
+      .upsert({
+        participant_id: participantId,
+        bracket_match_id: bracketMatchId,
+        predicted_winner: encoded,
+      }, { onConflict: 'participant_id,bracket_match_id' }).select().single()
+    if (error) { console.error('Error guardando pronóstico bracket:', error.message); return }
+    if (data) {
+      setBracketPredictions(prev => [
+        ...prev.filter(p => !(p.participantId === participantId && p.bracketMatchId === bracketMatchId)),
+        dbToBracketPrediction(data),
+      ])
+    }
   }, [])
 
   const getBracketPrediction = useCallback((participantId, bracketMatchId) =>
@@ -228,6 +497,8 @@ export function AppProvider({ children }) {
     scorerPredictions.find(p => p.participantId === participantId) || null
   , [scorerPredictions])
 
+  // ─── Partidos ─────────────────────────────────────────────────────────────────
+
   const updateMatch = useCallback(async (matchId, updates) => {
     await supabase.from('matches').update(matchUpdatesToDb(updates)).eq('id', matchId)
     setMatches(prev => prev.map(m => m.id === matchId ? { ...m, ...updates } : m))
@@ -255,9 +526,79 @@ export function AppProvider({ children }) {
   const updateConfig = useCallback(async (updates) => {
     const next = { ...config, ...updates }
     if (updates.pts) next.pts = { ...config.pts, ...updates.pts }
-    await supabase.from('config').update({ name: next.name, tournament_name: next.tournamentName, year: next.year, admin_password: next.adminPassword, pts: next.pts }).eq('id', 1)
+    const ptsToSave = { ...next.pts, phase_locks: next.locks || config.locks }
+    await supabase.from('config').update({
+      name: next.name,
+      tournament_name: next.tournamentName,
+      year: next.year,
+      admin_password: next.adminPassword,
+      pts: ptsToSave,
+    }).eq('id', 1)
     setConfig(next)
   }, [config])
+
+  const updateLocks = useCallback(async (newLocks) => {
+    const merged = { ...DEFAULT_LOCKS, ...newLocks }
+    const ptsToSave = { ...config.pts, phase_locks: merged }
+    await supabase.from('config').update({ pts: ptsToSave }).eq('id', 1)
+    setConfig(prev => ({ ...prev, locks: merged }))
+  }, [config.pts])
+
+  const generateBracket = useCallback(async () => {
+    const qualifiers = calcR32Qualifiers(matches)
+    const updates = R32_BRACKET_MAP.map(({ pos, home, away }) => ({
+      id: `r32_${pos}`,
+      homeTeam: qualifiers[home] || '',
+      awayTeam: qualifiers[away] || '',
+    }))
+    await Promise.all(updates.map(u =>
+      supabase.from('bracket_matches').update({ home_team: u.homeTeam, away_team: u.awayTeam }).eq('id', u.id)
+    ))
+    setBracketMatches(prev => prev.map(m => {
+      const upd = updates.find(u => u.id === m.id)
+      return upd ? { ...m, homeTeam: upd.homeTeam, awayTeam: upd.awayTeam } : m
+    }))
+    return qualifiers
+  }, [matches])
+
+  const propagateBracketRound = useCallback(async (toRound) => {
+    const updates = []
+    if (toRound === 'r16') {
+      for (let pos = 1; pos <= 8; pos++) {
+        const m1 = bracketMatches.find(m => m.id === `r32_${pos * 2 - 1}`)
+        const m2 = bracketMatches.find(m => m.id === `r32_${pos * 2}`)
+        updates.push({ id: `r16_${pos}`, homeTeam: m1?.winner || '', awayTeam: m2?.winner || '' })
+      }
+    } else if (toRound === 'qf') {
+      for (let pos = 1; pos <= 4; pos++) {
+        const m1 = bracketMatches.find(m => m.id === `r16_${pos * 2 - 1}`)
+        const m2 = bracketMatches.find(m => m.id === `r16_${pos * 2}`)
+        updates.push({ id: `qf_${pos}`, homeTeam: m1?.winner || '', awayTeam: m2?.winner || '' })
+      }
+    } else if (toRound === 'sf') {
+      for (let pos = 1; pos <= 2; pos++) {
+        const m1 = bracketMatches.find(m => m.id === `qf_${pos * 2 - 1}`)
+        const m2 = bracketMatches.find(m => m.id === `qf_${pos * 2}`)
+        updates.push({ id: `sf_${pos}`, homeTeam: m1?.winner || '', awayTeam: m2?.winner || '' })
+      }
+    } else if (toRound === 'final') {
+      const sf1 = bracketMatches.find(m => m.id === 'sf_1')
+      const sf2 = bracketMatches.find(m => m.id === 'sf_2')
+      const loser1 = sf1?.winner ? (sf1.homeTeam === sf1.winner ? sf1.awayTeam : sf1.homeTeam) : ''
+      const loser2 = sf2?.winner ? (sf2.homeTeam === sf2.winner ? sf2.awayTeam : sf2.homeTeam) : ''
+      updates.push({ id: 'third_1', homeTeam: loser1, awayTeam: loser2 })
+      updates.push({ id: 'final_1', homeTeam: sf1?.winner || '', awayTeam: sf2?.winner || '' })
+    }
+    if (!updates.length) return
+    await Promise.all(updates.map(u =>
+      supabase.from('bracket_matches').update({ home_team: u.homeTeam, away_team: u.awayTeam }).eq('id', u.id)
+    ))
+    setBracketMatches(prev => prev.map(m => {
+      const upd = updates.find(u => u.id === m.id)
+      return upd ? { ...m, homeTeam: upd.homeTeam, awayTeam: upd.awayTeam } : m
+    }))
+    return updates
+  }, [bracketMatches])
 
   const resetTournament = useCallback(async () => {
     await supabase.from('predictions').delete().neq('id', 0)
@@ -273,22 +614,124 @@ export function AppProvider({ children }) {
     const newBracket = generateBracketMatches()
     await supabase.from('matches').insert(newMatches.map(matchToDb))
     await supabase.from('bracket_matches').insert(newBracket.map(bracketToDb))
-    setParticipants([]); setCurrentParticipantIdState(null); localStorage.removeItem('pm_current_participant')
+    setAllParticipants([])
+    setCurrentParticipantIdState(null)
+    localStorage.removeItem('pm_current_participant')
     setPredictions([]); setBracketPredictions([]); setGroupStandings(EMPTY_STANDINGS)
     setStandingsPredictions([]); setTopScorers(['', '', '']); setScorerPredictions([])
     setMatches(newMatches); setBracketMatches(newBracket)
   }, [])
 
+  // ─── Importar backup CSV ──────────────────────────────────────────────────────
+
+  async function importCSVBackup(sections) {
+    if (sections.pollas && sections.pollas.length > 0) {
+      const imported = sections.pollas
+        .filter(p => p.id && p.name)
+        .map(p => ({ id: p.id, name: p.name, valor_polla: Number(p.valor_polla) || 0 }))
+      // Merge: keep existing pollas not in the CSV, add new ones from CSV
+      const merged = [...pollas]
+      for (const ip of imported) {
+        const idx = merged.findIndex(p => p.id === ip.id)
+        if (idx >= 0) merged[idx] = { ...merged[idx], ...ip }
+        else merged.push(ip)
+      }
+      await supabase.from('config').update({ pollas: merged }).eq('id', 1)
+    }
+    if (sections.participants) {
+      for (const p of sections.participants) {
+        if (p.id && p.name) {
+          await supabase.from('participants').upsert(
+            { id: p.id, name: p.name, polla_id: p.polla_id || null, pin: p.pin || null },
+            { onConflict: 'id' }
+          )
+        }
+      }
+    }
+    if (sections.predictions) {
+      for (const p of sections.predictions) {
+        if (p.participant_id && p.match_id) {
+          await supabase.from('predictions').upsert({
+            participant_id: p.participant_id,
+            match_id: p.match_id,
+            home_score: p.home_score !== '' ? parseInt(p.home_score) : null,
+            away_score: p.away_score !== '' ? parseInt(p.away_score) : null,
+          }, { onConflict: 'participant_id,match_id' })
+        }
+      }
+    }
+    if (sections.bracket_predictions) {
+      for (const p of sections.bracket_predictions) {
+        if (p.participant_id && p.bracket_match_id) {
+          const encoded = encodeBracketPred(
+            p.predicted_winner || null,
+            p.home_score !== '' ? parseInt(p.home_score) : null,
+            p.away_score !== '' ? parseInt(p.away_score) : null,
+          )
+          await supabase.from('bracket_predictions').upsert({
+            participant_id: p.participant_id,
+            bracket_match_id: p.bracket_match_id,
+            predicted_winner: encoded,
+          }, { onConflict: 'participant_id,bracket_match_id' })
+        }
+      }
+    }
+    if (sections.standings_predictions) {
+      for (const p of sections.standings_predictions) {
+        if (p.participant_id && p.group) {
+          await supabase.from('standings_predictions').upsert({
+            participant_id: p.participant_id,
+            group: p.group,
+            standings: [p.pos1 || '', p.pos2 || '', p.pos3 || '', p.pos4 || ''],
+          }, { onConflict: 'participant_id,group' })
+        }
+      }
+    }
+    if (sections.scorer_predictions) {
+      for (const p of sections.scorer_predictions) {
+        if (p.participant_id) {
+          await supabase.from('scorer_predictions').upsert({
+            participant_id: p.participant_id,
+            scorers: [p.scorer || ''],
+          }, { onConflict: 'participant_id' })
+        }
+      }
+    }
+    if (sections.top_scorers && sections.top_scorers.length > 0) {
+      const row = sections.top_scorers[0]
+      await supabase.from('top_scorers').upsert({
+        id: 1,
+        scorers: [row.scorer1 || ''],
+      })
+    }
+    if (sections.group_standings) {
+      for (const row of sections.group_standings) {
+        if (row.group) {
+          await supabase.from('group_standings').upsert({
+            group: row.group,
+            standings: [row.pos1 || '', row.pos2 || '', row.pos3 || '', row.pos4 || ''],
+          }, { onConflict: 'group' })
+        }
+      }
+    }
+    await loadAll()
+  }
+
   return (
     <AppContext.Provider value={{
-      loading, config, participants, currentParticipant, currentParticipantId,
+      loading, config,
+      isAdmin, isAuthenticated, loginParticipant, loginAdmin, logout,
+      pollas, currentPollaId, setCurrentPolla, addPolla, updatePolla, deletePolla,
+      participants, allParticipants, currentParticipant, currentParticipantId,
       matches, predictions, bracketMatches, bracketPredictions,
       groupStandings, standingsPredictions, topScorers, scorerPredictions,
-      addParticipant, setCurrentParticipant, removeParticipant,
+      addParticipant, setCurrentParticipant, removeParticipant, assignParticipantPolla, updateParticipantPin,
       savePrediction, getPrediction, saveBracketPrediction, getBracketPrediction,
       updateGroupStandings, saveStandingsPrediction, getStandingsPrediction,
       updateTopScorers, saveScorerPrediction, getScorerPrediction,
-      updateMatch, updateGroupTeams, updateBracketMatch, updateConfig, resetTournament,
+      updateMatch, updateGroupTeams, updateBracketMatch,
+      updateConfig, updateLocks, resetTournament, generateBracket, propagateBracketRound,
+      importCSVBackup,
     }}>
       {children}
     </AppContext.Provider>
