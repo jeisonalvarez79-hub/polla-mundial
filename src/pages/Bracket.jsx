@@ -74,13 +74,17 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
   // ── funciones de guardado ──
   const doSave = useCallback(async (winner, home, away) => {
     if (!participantId) return
-    hasPendingRef.current = false
     setSaving(true)
     setSaved(false)
     try {
-      await onSaveRef.current(match.id, winner, home, away)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
+      const ok = await onSaveRef.current(match.id, winner, home, away)
+      // Solo marcar como "sin pendientes" si el guardado fue exitoso;
+      // si falló, hasPendingRef queda true para que el flush al desmontar reintente.
+      if (ok !== false) {
+        hasPendingRef.current = false
+        setSaved(true)
+        setTimeout(() => setSaved(false), 2000)
+      }
     } finally {
       setSaving(false)
     }
@@ -117,14 +121,12 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
   // Guardado inmediato al elegir ganador en empate
   function handleTieWinner(team) {
     clearTimeout(timerRef.current)
-    hasPendingRef.current = false
     doSave(team, homeRef.current, awayRef.current)
   }
 
   // Botón Guardar explícito
   function handleSaveBtn() {
     clearTimeout(timerRef.current)
-    hasPendingRef.current = false
     const h = homeRef.current
     const a = awayRef.current
     const winner = h !== null && a !== null && h !== a

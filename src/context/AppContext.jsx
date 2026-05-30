@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
+import { localCache } from '../lib/localCache'
 import {
   generateGroupMatches,
   generateBracketMatches,
@@ -88,6 +89,53 @@ function dbToScorerPrediction(row) {
   return { id: row.id, participantId: row.participant_id, scorers: row.scorers }
 }
 
+// Combina datos de Supabase con items pendientes del cache local.
+// Los items locales pendientes toman precedencia (son más recientes).
+function mergePendingPredictions(fromDB, pending) {
+  const map = new Map(fromDB.map(p => [`${p.participantId}:${p.matchId}`, p]))
+  pending.forEach(item => {
+    map.set(`${item.participantId}:${item.matchId}`, {
+      participantId: item.participantId,
+      matchId: item.matchId,
+      homeScore: item.homeScore,
+      awayScore: item.awayScore,
+    })
+  })
+  return [...map.values()]
+}
+
+function mergePendingBracket(fromDB, pending) {
+  const map = new Map(fromDB.map(p => [`${p.participantId}:${p.bracketMatchId}`, p]))
+  pending.forEach(item => {
+    map.set(`${item.participantId}:${item.bracketMatchId}`, {
+      participantId: item.participantId,
+      bracketMatchId: item.bracketMatchId,
+      ...decodeBracketPred(encodeBracketPred(item.winner, item.homeScore, item.awayScore)),
+    })
+  })
+  return [...map.values()]
+}
+
+function mergePendingStandings(fromDB, pending) {
+  const map = new Map(fromDB.map(p => [`${p.participantId}:${p.group}`, p]))
+  pending.forEach(item => {
+    map.set(`${item.participantId}:${item.group}`, {
+      participantId: item.participantId,
+      group: item.group,
+      standings: item.standings,
+    })
+  })
+  return [...map.values()]
+}
+
+function mergePendingScorers(fromDB, pending) {
+  const map = new Map(fromDB.map(p => [p.participantId, p]))
+  pending.forEach(item => {
+    map.set(item.participantId, { participantId: item.participantId, scorers: item.scorers })
+  })
+  return [...map.values()]
+}
+
 export function AppProvider({ children }) {
   const [loading, setLoading]   = useState(true)
   const [config, setConfig]     = useState({ ...DEFAULT_CONFIG, pts: { ...DEFAULT_PTS }, locks: { ...DEFAULT_LOCKS } })
@@ -108,6 +156,9 @@ export function AppProvider({ children }) {
   const [standingsPredictions, setStandingsPredictions] = useState([])
   const [topScorers, setTopScorers]             = useState(['', '', ''])
   const [scorerPredictions, setScorerPredictions] = useState([])
+
+  // Conteo de pronósticos pendientes de sincronizar con Supabase
+  const [pendingSyncCount, setPendingSyncCount] = useState(() => localCache.getPendingCount())
 
   // Escuchar cambios de sesión Supabase Auth (admin)
   useEffect(() => {
@@ -191,7 +242,21 @@ export function AppProvider({ children }) {
   async function loadMatches() {
     const { data } = await supabase.from('matches').select('*').order('id')
     if (data && data.length > 0) {
-      setMatches(data.map(dbToMatch))
+      const fromDB = data.map(dbToMatch)
+      const pending = localCache.getPendingMatchUpdates()
+      if (pending.length > 0) {
+        const map = new Map(fromDB.map(m => [m.id, m]))
+        pending.forEach(item => {
+          const existing = map.get(item.matchId)
+          if (existing) {
+            const { matchId, synced, ts, ...delta } = item
+            map.set(matchId, { ...existing, ...delta })
+          }
+        })
+        setMatches([...map.values()])
+      } else {
+        setMatches(fromDB)
+      }
     } else {
       const initial = generateGroupMatches().map(matchToDb)
       const { data: seeded } = await supabase.from('matches').insert(initial).select()
@@ -202,7 +267,21 @@ export function AppProvider({ children }) {
   async function loadBracketMatches() {
     const { data } = await supabase.from('bracket_matches').select('*').order('id')
     if (data && data.length > 0) {
-      setBracketMatches(data.map(dbToBracket))
+      const fromDB = data.map(dbToBracket)
+      const pending = localCache.getPendingBracketMatchUpdates()
+      if (pending.length > 0) {
+        const map = new Map(fromDB.map(m => [m.id, m]))
+        pending.forEach(item => {
+          const existing = map.get(item.bracketMatchId)
+          if (existing) {
+            const { bracketMatchId, synced, ts, ...delta } = item
+            map.set(bracketMatchId, { ...existing, ...delta })
+          }
+        })
+        setBracketMatches([...map.values()])
+      } else {
+        setBracketMatches(fromDB)
+      }
     } else {
       const initial = generateBracketMatches().map(bracketToDb)
       const { data: seeded } = await supabase.from('bracket_matches').insert(initial).select()
@@ -212,12 +291,18 @@ export function AppProvider({ children }) {
 
   async function loadPredictions() {
     const { data } = await supabase.from('predictions').select('*')
-    if (data) setPredictions(data.map(dbToPrediction))
+    const fromDB = data ? data.map(dbToPrediction) : []
+    const pending = localCache.getPendingPredictions()
+    setPredictions(pending.length > 0 ? mergePendingPredictions(fromDB, pending) : fromDB)
   }
+
   async function loadBracketPredictions() {
     const { data } = await supabase.from('bracket_predictions').select('*')
-    if (data) setBracketPredictions(data.map(dbToBracketPrediction))
+    const fromDB = data ? data.map(dbToBracketPrediction) : []
+    const pending = localCache.getPendingBracketPredictions()
+    setBracketPredictions(pending.length > 0 ? mergePendingBracket(fromDB, pending) : fromDB)
   }
+
   async function loadGroupStandings() {
     const { data } = await supabase.from('group_standings').select('*')
     if (data && data.length > 0) {
@@ -226,18 +311,124 @@ export function AppProvider({ children }) {
       setGroupStandings(s)
     }
   }
+
   async function loadStandingsPredictions() {
     const { data } = await supabase.from('standings_predictions').select('*')
-    if (data) setStandingsPredictions(data.map(dbToStandingsPrediction))
+    const fromDB = data ? data.map(dbToStandingsPrediction) : []
+    const pending = localCache.getPendingStandingsPredictions()
+    setStandingsPredictions(pending.length > 0 ? mergePendingStandings(fromDB, pending) : fromDB)
   }
+
   async function loadTopScorers() {
     const { data } = await supabase.from('top_scorers').select('*').eq('id', 1).single()
     if (data) setTopScorers(data.scorers || ['', '', ''])
   }
+
   async function loadScorerPredictions() {
     const { data } = await supabase.from('scorer_predictions').select('*')
-    if (data) setScorerPredictions(data.map(dbToScorerPrediction))
+    const fromDB = data ? data.map(dbToScorerPrediction) : []
+    const pending = localCache.getPendingScorerPredictions()
+    setScorerPredictions(pending.length > 0 ? mergePendingScorers(fromDB, pending) : fromDB)
   }
+
+  // ─── Sincronizar cache local pendiente con Supabase ───────────────────────────
+  // Se llama automáticamente al reconectar internet y al cargar la app.
+
+  const syncPendingCache = useCallback(async () => {
+    let synced = false
+
+    for (const item of localCache.getPendingPredictions()) {
+      const { data, error } = await supabase.from('predictions')
+        .upsert({ participant_id: item.participantId, match_id: item.matchId, home_score: item.homeScore, away_score: item.awayScore }, { onConflict: 'participant_id,match_id' }).select().single()
+      if (!error && data) {
+        localCache.markPredictionSynced(item.participantId, item.matchId)
+        setPredictions(prev => [...prev.filter(p => !(p.participantId === item.participantId && p.matchId === item.matchId)), dbToPrediction(data)])
+        synced = true
+      }
+    }
+
+    for (const item of localCache.getPendingBracketPredictions()) {
+      const encoded = encodeBracketPred(item.winner, item.homeScore, item.awayScore)
+      const { data, error } = await supabase.from('bracket_predictions')
+        .upsert({ participant_id: item.participantId, bracket_match_id: item.bracketMatchId, predicted_winner: encoded }, { onConflict: 'participant_id,bracket_match_id' }).select().single()
+      if (!error && data) {
+        localCache.markBracketPredictionSynced(item.participantId, item.bracketMatchId)
+        setBracketPredictions(prev => [...prev.filter(p => !(p.participantId === item.participantId && p.bracketMatchId === item.bracketMatchId)), dbToBracketPrediction(data)])
+        synced = true
+      }
+    }
+
+    for (const item of localCache.getPendingStandingsPredictions()) {
+      const { data } = await supabase.from('standings_predictions')
+        .upsert({ participant_id: item.participantId, group: item.group, standings: item.standings }, { onConflict: 'participant_id,group' }).select().single()
+      if (data) {
+        localCache.markStandingsPredictionSynced(item.participantId, item.group)
+        setStandingsPredictions(prev => [...prev.filter(p => !(p.participantId === item.participantId && p.group === item.group)), dbToStandingsPrediction(data)])
+        synced = true
+      }
+    }
+
+    for (const item of localCache.getPendingScorerPredictions()) {
+      const { data } = await supabase.from('scorer_predictions')
+        .upsert({ participant_id: item.participantId, scorers: item.scorers }, { onConflict: 'participant_id' }).select().single()
+      if (data) {
+        localCache.markScorerPredictionSynced(item.participantId)
+        setScorerPredictions(prev => [...prev.filter(p => p.participantId !== item.participantId), dbToScorerPrediction(data)])
+        synced = true
+      }
+    }
+
+    // Resultados reales de partidos (admin)
+    for (const item of localCache.getPendingMatchUpdates()) {
+      const { matchId, synced: _s, ts: _t, ...delta } = item
+      const { error } = await supabase.from('matches').update(matchUpdatesToDb(delta)).eq('id', matchId)
+      if (!error) {
+        localCache.markMatchUpdateSynced(matchId)
+        setMatches(prev => prev.map(m => m.id === matchId ? { ...m, ...delta } : m))
+        synced = true
+      }
+    }
+
+    // Resultados reales de bracket (admin)
+    for (const item of localCache.getPendingBracketMatchUpdates()) {
+      const { bracketMatchId, synced: _s, ts: _t, ...delta } = item
+      const { error } = await supabase.from('bracket_matches').update(bracketUpdatesToDb(delta)).eq('id', bracketMatchId)
+      if (!error) {
+        localCache.markBracketMatchUpdateSynced(bracketMatchId)
+        setBracketMatches(prev => prev.map(m => m.id === bracketMatchId ? { ...m, ...delta } : m))
+        synced = true
+      }
+    }
+
+    if (synced) setPendingSyncCount(localCache.getPendingCount())
+    return synced
+  }, [])
+
+  // Al recuperar internet → sincronizar automáticamente
+  useEffect(() => {
+    const handleOnline = () => { syncPendingCache() }
+    window.addEventListener('online', handleOnline)
+    return () => window.removeEventListener('online', handleOnline)
+  }, [syncPendingCache])
+
+  // Después de la carga inicial → sincronizar pendientes + limpiar cache viejo
+  useEffect(() => {
+    if (!loading) {
+      syncPendingCache()
+      localCache.cleanup()
+    }
+  }, [loading, syncPendingCache])
+
+  // Reintento periódico cada 30 s mientras haya pendientes.
+  // Cubre el caso donde Supabase estaba caído pero el internet seguía activo
+  // (el evento 'online' no dispara en ese escenario).
+  // El intervalo solo existe cuando hay pendientes; cuando llega a 0 se cancela.
+  const hasPendingSync = pendingSyncCount > 0
+  useEffect(() => {
+    if (!hasPendingSync) return
+    const interval = setInterval(() => { syncPendingCache() }, 30_000)
+    return () => clearInterval(interval)
+  }, [hasPendingSync, syncPendingCache])
 
   // ─── Pollas ───────────────────────────────────────────────────────────────────
 
@@ -436,10 +627,27 @@ export function AppProvider({ children }) {
   // ─── Pronósticos ──────────────────────────────────────────────────────────────
 
   const savePrediction = useCallback(async (participantId, matchId, homeScore, awayScore) => {
+    // 1. Guardar en localStorage de forma inmediata (nunca falla, funciona sin internet)
+    localCache.savePrediction(participantId, matchId, homeScore, awayScore)
+    // 2. Actualización optimista del estado React (UI muestra el valor aunque Supabase falle)
+    setPredictions(prev => [
+      ...prev.filter(p => !(p.participantId === participantId && p.matchId === matchId)),
+      { participantId, matchId, homeScore, awayScore },
+    ])
+    setPendingSyncCount(localCache.getPendingCount())
+    // 3. Intentar guardar en Supabase
     const { data, error } = await supabase.from('predictions')
       .upsert({ participant_id: participantId, match_id: matchId, home_score: homeScore, away_score: awayScore }, { onConflict: 'participant_id,match_id' }).select().single()
-    if (error) { console.error('Error guardando pronóstico:', error.message); return }
-    if (data) setPredictions(prev => [...prev.filter(p => !(p.participantId === participantId && p.matchId === matchId)), dbToPrediction(data)])
+    if (error) {
+      console.error('Error guardando pronóstico:', error.message)
+      return false
+    }
+    if (data) {
+      localCache.markPredictionSynced(participantId, matchId)
+      setPredictions(prev => [...prev.filter(p => !(p.participantId === participantId && p.matchId === matchId)), dbToPrediction(data)])
+      setPendingSyncCount(localCache.getPendingCount())
+    }
+    return !!data
   }, [])
 
   const getPrediction = useCallback((participantId, matchId) =>
@@ -447,6 +655,19 @@ export function AppProvider({ children }) {
   , [predictions])
 
   const saveBracketPrediction = useCallback(async (participantId, bracketMatchId, predictedWinner, homeScore = null, awayScore = null) => {
+    // 1. Guardar en localStorage de forma inmediata
+    localCache.saveBracketPrediction(participantId, bracketMatchId, predictedWinner, homeScore, awayScore)
+    // 2. Actualización optimista
+    setBracketPredictions(prev => [
+      ...prev.filter(p => !(p.participantId === participantId && p.bracketMatchId === bracketMatchId)),
+      {
+        participantId,
+        bracketMatchId,
+        ...decodeBracketPred(encodeBracketPred(predictedWinner, homeScore, awayScore)),
+      },
+    ])
+    setPendingSyncCount(localCache.getPendingCount())
+    // 3. Intentar guardar en Supabase
     const encoded = encodeBracketPred(predictedWinner, homeScore, awayScore)
     const { data, error } = await supabase.from('bracket_predictions')
       .upsert({
@@ -454,13 +675,19 @@ export function AppProvider({ children }) {
         bracket_match_id: bracketMatchId,
         predicted_winner: encoded,
       }, { onConflict: 'participant_id,bracket_match_id' }).select().single()
-    if (error) { console.error('Error guardando pronóstico bracket:', error.message); return }
+    if (error) {
+      console.error('Error guardando pronóstico bracket:', error.message)
+      return false
+    }
     if (data) {
+      localCache.markBracketPredictionSynced(participantId, bracketMatchId)
       setBracketPredictions(prev => [
         ...prev.filter(p => !(p.participantId === participantId && p.bracketMatchId === bracketMatchId)),
         dbToBracketPrediction(data),
       ])
+      setPendingSyncCount(localCache.getPendingCount())
     }
+    return !!data
   }, [])
 
   const getBracketPrediction = useCallback((participantId, bracketMatchId) =>
@@ -473,9 +700,22 @@ export function AppProvider({ children }) {
   }, [])
 
   const saveStandingsPrediction = useCallback(async (participantId, group, standings) => {
+    // 1. Guardar en localStorage de forma inmediata
+    localCache.saveStandingsPrediction(participantId, group, standings)
+    // 2. Actualización optimista
+    setStandingsPredictions(prev => [
+      ...prev.filter(p => !(p.participantId === participantId && p.group === group)),
+      { participantId, group, standings },
+    ])
+    setPendingSyncCount(localCache.getPendingCount())
+    // 3. Intentar Supabase
     const { data } = await supabase.from('standings_predictions')
       .upsert({ participant_id: participantId, group, standings }, { onConflict: 'participant_id,group' }).select().single()
-    if (data) setStandingsPredictions(prev => [...prev.filter(p => !(p.participantId === participantId && p.group === group)), dbToStandingsPrediction(data)])
+    if (data) {
+      localCache.markStandingsPredictionSynced(participantId, group)
+      setStandingsPredictions(prev => [...prev.filter(p => !(p.participantId === participantId && p.group === group)), dbToStandingsPrediction(data)])
+      setPendingSyncCount(localCache.getPendingCount())
+    }
   }, [])
 
   const getStandingsPrediction = useCallback((participantId, group) =>
@@ -488,9 +728,22 @@ export function AppProvider({ children }) {
   }, [])
 
   const saveScorerPrediction = useCallback(async (participantId, scorers) => {
+    // 1. Guardar en localStorage de forma inmediata
+    localCache.saveScorerPrediction(participantId, scorers)
+    // 2. Actualización optimista
+    setScorerPredictions(prev => [
+      ...prev.filter(p => p.participantId !== participantId),
+      { participantId, scorers },
+    ])
+    setPendingSyncCount(localCache.getPendingCount())
+    // 3. Intentar Supabase
     const { data } = await supabase.from('scorer_predictions')
       .upsert({ participant_id: participantId, scorers }, { onConflict: 'participant_id' }).select().single()
-    if (data) setScorerPredictions(prev => [...prev.filter(p => p.participantId !== participantId), dbToScorerPrediction(data)])
+    if (data) {
+      localCache.markScorerPredictionSynced(participantId)
+      setScorerPredictions(prev => [...prev.filter(p => p.participantId !== participantId), dbToScorerPrediction(data)])
+      setPendingSyncCount(localCache.getPendingCount())
+    }
   }, [])
 
   const getScorerPrediction = useCallback((participantId) =>
@@ -500,8 +753,20 @@ export function AppProvider({ children }) {
   // ─── Partidos ─────────────────────────────────────────────────────────────────
 
   const updateMatch = useCallback(async (matchId, updates) => {
-    await supabase.from('matches').update(matchUpdatesToDb(updates)).eq('id', matchId)
+    // 1. Guardar en localStorage (acumula con updates previos del mismo partido)
+    localCache.saveMatchUpdate(matchId, updates)
+    // 2. Actualización optimista
     setMatches(prev => prev.map(m => m.id === matchId ? { ...m, ...updates } : m))
+    setPendingSyncCount(localCache.getPendingCount())
+    // 3. Intentar Supabase
+    const { error } = await supabase.from('matches').update(matchUpdatesToDb(updates)).eq('id', matchId)
+    if (error) {
+      console.error('Error actualizando partido:', error.message)
+      return false
+    }
+    localCache.markMatchUpdateSynced(matchId)
+    setPendingSyncCount(localCache.getPendingCount())
+    return true
   }, [])
 
   const updateGroupTeams = useCallback(async (group, teams) => {
@@ -519,8 +784,20 @@ export function AppProvider({ children }) {
   }, [matches])
 
   const updateBracketMatch = useCallback(async (bracketMatchId, updates) => {
-    await supabase.from('bracket_matches').update(bracketUpdatesToDb(updates)).eq('id', bracketMatchId)
+    // 1. Guardar en localStorage
+    localCache.saveBracketMatchUpdate(bracketMatchId, updates)
+    // 2. Actualización optimista
     setBracketMatches(prev => prev.map(m => m.id === bracketMatchId ? { ...m, ...updates } : m))
+    setPendingSyncCount(localCache.getPendingCount())
+    // 3. Intentar Supabase
+    const { error } = await supabase.from('bracket_matches').update(bracketUpdatesToDb(updates)).eq('id', bracketMatchId)
+    if (error) {
+      console.error('Error actualizando bracket:', error.message)
+      return false
+    }
+    localCache.markBracketMatchUpdateSynced(bracketMatchId)
+    setPendingSyncCount(localCache.getPendingCount())
+    return true
   }, [])
 
   const updateConfig = useCallback(async (updates) => {
@@ -732,6 +1009,7 @@ export function AppProvider({ children }) {
       updateMatch, updateGroupTeams, updateBracketMatch,
       updateConfig, updateLocks, resetTournament, generateBracket, propagateBracketRound,
       importCSVBackup,
+      pendingSyncCount, syncPendingCache,
     }}>
       {children}
     </AppContext.Provider>

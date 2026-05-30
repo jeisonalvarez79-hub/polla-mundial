@@ -1,20 +1,14 @@
-import { useState } from 'react'
 import { useApp } from '../context/AppContext'
 import { buildRanking } from '../utils/scoring'
 
 export default function Registro() {
   const {
-    participants, currentParticipant, addParticipant,
-    setCurrentParticipant, removeParticipant,
+    participants, currentParticipant,
     matches, predictions, bracketMatches, bracketPredictions,
     groupStandings, standingsPredictions,
     topScorers, scorerPredictions,
-    config,
+    config, pollas, currentPollaId,
   } = useApp()
-
-  const [nombre, setNombre] = useState('')
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
 
   const ranking = buildRanking(
     participants, matches, predictions,
@@ -24,106 +18,57 @@ export default function Registro() {
     config
   )
 
-  function handleAdd(e) {
-    e.preventDefault()
-    setError('')
-    setSuccess('')
-    const result = addParticipant(nombre)
-    if (!result) {
-      setError('El nombre ya existe o está vacío.')
-    } else {
-      setSuccess(`¡${result.name} se unió! Ahora puedes hacer pronósticos.`)
-      setNombre('')
-    }
-  }
-
-  function handleSelect(id) {
-    setCurrentParticipant(id)
-    setSuccess('')
-  }
-
-  function handleRemove(id, name) {
-    if (window.confirm(`¿Eliminar a ${name} y todos sus pronósticos?`)) {
-      removeParticipant(id)
-    }
-  }
+  const currentPolla = pollas.find(p => p.id === currentPollaId)
 
   return (
-    <div className="max-w-xl mx-auto space-y-8">
+    <div className="max-w-xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white mb-1">Participantes</h1>
-        <p className="text-gray-400 text-sm">
-          Añade tu nombre para empezar a hacer pronósticos. Puedes cambiar de jugador en cualquier momento desde la barra de navegación.
-        </p>
+        {currentPolla && <p className="text-gray-400 text-sm">{currentPolla.name}</p>}
       </div>
 
-      {/* Formulario */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h2 className="text-white font-semibold mb-4">Unirse al torneo</h2>
-        <form onSubmit={handleAdd} className="flex gap-3">
-          <input
-            type="text"
-            value={nombre}
-            onChange={e => setNombre(e.target.value)}
-            placeholder="Tu nombre..."
-            maxLength={30}
-            className="flex-1 bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2 placeholder-gray-500 focus:outline-none focus:border-green-600"
-          />
-          <button type="submit"
-            className="bg-green-600 hover:bg-green-500 text-white font-semibold px-5 py-2 rounded-lg transition-colors">
-            Unirse
-          </button>
-        </form>
-        {error   && <p className="text-red-400 text-sm mt-2">{error}</p>}
-        {success && <p className="text-green-400 text-sm mt-2">✓ {success}</p>}
-      </div>
+      {currentParticipant && (
+        <div className="bg-green-900/20 border border-green-800 rounded-xl px-5 py-3 flex items-center gap-2">
+          <span className="text-green-400 text-sm font-medium">
+            Participando como: <strong>{currentParticipant.name}</strong>
+          </span>
+          {currentPolla && (
+            <span className="ml-auto text-xs text-green-600">{currentPolla.name}</span>
+          )}
+        </div>
+      )}
 
-      {/* Lista de participantes */}
-      {participants.length > 0 && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h2 className="text-white font-semibold mb-4">Participantes ({participants.length})</h2>
-          <div className="space-y-2">
+      {participants.length === 0 ? (
+        <div className="text-center py-16 text-gray-600">
+          <div className="text-5xl mb-4">👥</div>
+          <p className="text-lg">No hay participantes en esta polla.</p>
+          <p className="text-xs mt-2 text-gray-700">El administrador debe agregarlos desde el Panel Admin.</p>
+        </div>
+      ) : (
+        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+          <div className="bg-gray-800 px-5 py-3">
+            <p className="text-white font-semibold text-sm">
+              Clasificación · {participants.length} participante{participants.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+          <div className="divide-y divide-gray-800">
             {ranking.map(({ participant, stats, position }) => {
               const isMe = participant.id === currentParticipant?.id
               return (
-                <div key={participant.id}
-                  className={`flex items-center justify-between rounded-lg px-4 py-3 border transition-colors ${
-                    isMe ? 'bg-green-900/30 border-green-700' : 'bg-gray-800 border-gray-700'
-                  }`}
+                <div
+                  key={participant.id}
+                  className={`flex items-center gap-3 px-5 py-3 ${isMe ? 'bg-green-900/20' : ''}`}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-gray-500 text-sm w-5 text-center">{position}</span>
-                    <div>
-                      <span className="font-medium text-white">{participant.name}</span>
-                      {isMe && (
-                        <span className="ml-2 text-xs bg-green-700 text-green-200 px-2 py-0.5 rounded-full">Tú</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-green-400 font-bold">{stats.total} pts</span>
-                    {!isMe && (
-                      <button onClick={() => handleSelect(participant.id)}
-                        className="text-xs text-blue-400 hover:text-blue-300 border border-blue-800 hover:border-blue-600 px-2 py-1 rounded transition-colors">
-                        Seleccionar
-                      </button>
-                    )}
-                    <button onClick={() => handleRemove(participant.id, participant.name)}
-                      className="text-xs text-red-600 hover:text-red-400 transition-colors">
-                      ✕
-                    </button>
-                  </div>
+                  <span className="text-gray-500 text-sm w-5 text-center shrink-0">{position}</span>
+                  <span className={`font-medium flex-1 ${isMe ? 'text-green-400' : 'text-white'}`}>
+                    {participant.name}
+                    {isMe && <span className="ml-2 text-xs bg-green-700 text-green-200 px-2 py-0.5 rounded-full">Tú</span>}
+                  </span>
+                  <span className="text-green-400 font-bold text-sm shrink-0">{stats.total} pts</span>
                 </div>
               )
             })}
           </div>
-        </div>
-      )}
-
-      {participants.length === 0 && (
-        <div className="text-center py-12 text-gray-600">
-          <div className="text-4xl mb-3">👥</div>
-          <p>Todavía no hay participantes. ¡Sé el primero!</p>
         </div>
       )}
     </div>

@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS config (
 CREATE TABLE IF NOT EXISTS participants (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
+  pin TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -27,6 +28,8 @@ CREATE TABLE IF NOT EXISTS matches (
   home_team TEXT DEFAULT '',
   away_team TEXT DEFAULT '',
   date TEXT DEFAULT '',
+  hora TEXT DEFAULT '',
+  jornada TEXT DEFAULT '',
   home_score INTEGER,
   away_score INTEGER,
   status TEXT DEFAULT 'pending'
@@ -59,8 +62,14 @@ CREATE TABLE IF NOT EXISTS bracket_predictions (
   participant_id TEXT,
   bracket_match_id TEXT,
   predicted_winner TEXT,
+  predicted_home_score INTEGER,
+  predicted_away_score INTEGER,
   UNIQUE(participant_id, bracket_match_id)
 );
+
+-- MIGRACIÓN (ejecutar si la tabla ya existe):
+-- ALTER TABLE bracket_predictions ADD COLUMN IF NOT EXISTS predicted_home_score INTEGER;
+-- ALTER TABLE bracket_predictions ADD COLUMN IF NOT EXISTS predicted_away_score INTEGER;
 
 CREATE TABLE IF NOT EXISTS group_standings (
   "group" TEXT PRIMARY KEY,
@@ -114,9 +123,23 @@ CREATE POLICY "public_all" ON scorer_predictions FOR ALL TO anon USING (true) WI
 
 INSERT INTO config (id, name, tournament_name, year, admin_password, pts)
 VALUES (1, 'Polla Mundial', 'Mundial 2026', '2026', 'admin123',
-  '{"exacto":3,"resultado":1,"clasificado":2,"ordenGrupo":1,"goleador":2}'::jsonb)
+  '{"exacto":3,"resultado":1,"clasificado":2,"ordenGrupo":1,"goleador":10}'::jsonb)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO top_scorers (id, scorers)
 VALUES (1, '["","",""]'::jsonb)
 ON CONFLICT (id) DO NOTHING;
+
+-- =====================================================
+-- MIGRACIÓN v2: Múltiples pollas
+-- Ejecutar en Supabase > SQL Editor si ya tienes la BD creada
+-- =====================================================
+
+-- Las pollas se almacenan en config.pollas (JSONB) — NO en tabla separada
+ALTER TABLE config ADD COLUMN IF NOT EXISTS pollas JSONB DEFAULT '[]'::jsonb;
+
+-- Agregar polla_id a participants (si no existe)
+ALTER TABLE participants ADD COLUMN IF NOT EXISTS polla_id TEXT;
+
+-- Agregar pin a participants (si no existe)
+ALTER TABLE participants ADD COLUMN IF NOT EXISTS pin TEXT;

@@ -6,19 +6,20 @@ export const DEFAULT_GROUPS = Object.fromEntries(
 )
 
 // Pares de partidos por jornada: [local_idx, visitante_idx]
-// C(4,2) = 6 combinaciones
+// C(4,2) = 6 combinaciones — índices 0-1 = J1, 2-3 = J2, 4-5 = J3
 const MATCH_PAIRS = [
   [0, 1], [2, 3],
   [0, 2], [1, 3],
   [0, 3], [1, 2],
 ]
+const JORNADAS = ['J1', 'J1', 'J2', 'J2', 'J3', 'J3']
 
 export function generateGroupMatches(groups = DEFAULT_GROUPS) {
   const matches = []
   let seq = 1
   GROUP_LETTERS.forEach(group => {
     const teams = groups[group] || ['', '', '', '']
-    MATCH_PAIRS.forEach(([h, a]) => {
+    MATCH_PAIRS.forEach(([h, a], pairIdx) => {
       matches.push({
         id: `g${seq++}`,
         phase: 'groups',
@@ -26,6 +27,8 @@ export function generateGroupMatches(groups = DEFAULT_GROUPS) {
         homeTeam: teams[h] || '',
         awayTeam: teams[a] || '',
         date: '',
+        hora: '',
+        jornada: JORNADAS[pairIdx],
         homeScore: null,
         awayScore: null,
         status: 'pending',
@@ -64,13 +67,58 @@ export function generateBracketMatches() {
   return matches
 }
 
-// Puntos por defecto — modificables desde Admin > Configuración
+// Mapa de llaves para el R32 según sorteo oficial FIFA 2026 (M73–M88)
+// "1A"=1°GrupoA  "2A"=2°GrupoA  "t1"–"t8"=mejores 3eros (por ranking)
+// Los "t" se asignan por ranking entre los 8 mejores 3eros; el mapa exacto
+// de qué grupo va a qué partido depende de la tabla de 495 combinaciones
+// de FIFA (Anexo C). El admin puede ajustar manualmente si lo necesita.
+export const R32_BRACKET_MAP = [
+  { pos: 1,  home: '2A', away: '2B' },  // M73
+  { pos: 2,  home: '1E', away: 't1' },  // M74
+  { pos: 3,  home: '1F', away: '2C' },  // M75
+  { pos: 4,  home: '1C', away: '2F' },  // M76
+  { pos: 5,  home: '1I', away: 't2' },  // M77
+  { pos: 6,  home: '2E', away: '2I' },  // M78
+  { pos: 7,  home: '1A', away: 't3' },  // M79
+  { pos: 8,  home: '1L', away: 't4' },  // M80
+  { pos: 9,  home: '1D', away: 't5' },  // M81
+  { pos: 10, home: '1G', away: 't6' },  // M82
+  { pos: 11, home: '2K', away: '2L' },  // M83
+  { pos: 12, home: '1H', away: '2J' },  // M84
+  { pos: 13, home: '1B', away: 't7' },  // M85
+  { pos: 14, home: '1J', away: '2H' },  // M86
+  { pos: 15, home: '1K', away: 't8' },  // M87
+  { pos: 16, home: '2D', away: '2G' },  // M88
+]
+
+// Puntos por defecto — fase de grupos (modificables desde Admin > Configuración)
 export const DEFAULT_PTS = {
-  exacto:      3,  // Marcador exacto (score exacto)
+  exacto:      3,  // Marcador exacto
   resultado:   1,  // Equipo ganador / empate correcto
-  clasificado: 2,  // Clasificado correcto en bracket
+  clasificado: 2,  // Clasificado a 2da ronda (top 2 de grupo, independiente de posición)
   ordenGrupo:  1,  // Posición exacta en tabla de grupo (por equipo)
-  goleador:    2,  // Goleador en la posición correcta (por posición)
+  goleador:   10,  // Goleador correcto
+}
+
+// Puntos por fase eliminatoria — fijos (no configurables)
+export const BRACKET_PTS = {
+  r32:   3,   // 16avos: llave acertada completamente
+  r16:   4,   // Octavos: llave acertada completamente
+  qf:    8,   // Cuartos: llave acertada completamente
+  sf:    8,   // Semis: finalista acertado
+  third: 8,   // Tercer lugar: llave acertada
+  final: 12,  // Final: acertada completamente
+}
+
+// Bloqueos por fase: false = abierto, true = bloqueado
+export const DEFAULT_LOCKS = {
+  groups: false,
+  r32:    false,
+  r16:    false,
+  qf:     false,
+  sf:     false,
+  third:  false,
+  final:  false,
 }
 
 export const DEFAULT_CONFIG = {
@@ -79,4 +127,5 @@ export const DEFAULT_CONFIG = {
   year:           '2026',
   adminPassword:  'admin123',
   pts:            { ...DEFAULT_PTS },
+  locks:          { ...DEFAULT_LOCKS },
 }

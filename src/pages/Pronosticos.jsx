@@ -154,9 +154,11 @@ function PartidosTab() {
       const away = local.away !== undefined ? local.away : (pred?.awayScore ?? null)
       if (home !== null && away !== null) {
         setSavingIds(s => new Set([...s, matchId]))
-        await savePrediction(participant.id, matchId, home, away)
+        const ok = await savePrediction(participant.id, matchId, home, away)
         setSavingIds(s => { const n = new Set(s); n.delete(matchId); return n })
-        setLocalScores(prev => { const c = { ...prev }; delete c[matchId]; return c })
+        // Solo limpiar el estado local si el guardado fue exitoso;
+        // si falló, el flush al desmontar puede reintentar.
+        if (ok) setLocalScores(prev => { const c = { ...prev }; delete c[matchId]; return c })
       }
     }, 700)
   }
@@ -174,9 +176,9 @@ function PartidosTab() {
     const away = getLocal(matchId, 'away', pred)
     if (home !== null && away !== null) {
       setSavingIds(s => new Set([...s, matchId]))
-      savePrediction(currentParticipant.id, matchId, home, away).then(() => {
+      savePrediction(currentParticipant.id, matchId, home, away).then((ok) => {
         setSavingIds(s => { const n = new Set(s); n.delete(matchId); return n })
-        setLocalScores(prev => { const c = { ...prev }; delete c[matchId]; return c })
+        if (ok) setLocalScores(prev => { const c = { ...prev }; delete c[matchId]; return c })
       })
     }
   }

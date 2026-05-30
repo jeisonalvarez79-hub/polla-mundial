@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AppProvider, useApp } from './context/AppContext'
 import Layout from './components/Layout'
+import Login from './pages/Login'
 import Home from './pages/Home'
 import Registro from './pages/Registro'
 import Pronosticos from './pages/Pronosticos'
@@ -9,7 +10,7 @@ import Tabla from './pages/Tabla'
 import Admin from './pages/Admin'
 
 function AppContent() {
-  const { loading } = useApp()
+  const { loading, isAuthenticated } = useApp()
 
   if (loading) {
     return (
@@ -31,26 +32,30 @@ function AppContent() {
     )
   }
 
+  if (!isAuthenticated) {
+    return <Login />
+  }
+
   return (
-    <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route path="/"            element={<Home />} />
-          <Route path="/registro"    element={<Registro />} />
-          <Route path="/pronosticos" element={<Pronosticos />} />
-          <Route path="/bracket"     element={<Bracket />} />
-          <Route path="/tabla"       element={<Tabla />} />
-          <Route path="/admin"       element={<Admin />} />
-        </Routes>
-      </Layout>
-    </BrowserRouter>
+    <Layout>
+      <Routes>
+        <Route path="/"            element={<Home />} />
+        <Route path="/registro"    element={<Registro />} />
+        <Route path="/pronosticos" element={<Pronosticos />} />
+        <Route path="/bracket"     element={<Bracket />} />
+        <Route path="/tabla"       element={<Tabla />} />
+        <Route path="/admin"       element={<Admin />} />
+      </Routes>
+    </Layout>
   )
 }
 
 export default function App() {
   return (
     <AppProvider>
-      <AppContent />
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
     </AppProvider>
   )
 }
