@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 
@@ -15,8 +16,15 @@ export default function Navbar() {
   const {
     config, isAdmin, currentParticipant, logout,
     pollas, currentPollaId, setCurrentPolla,
-    pendingSyncCount, syncPendingCache,
+    pendingSyncCount, syncPendingCache, refreshData,
   } = useApp()
+  const [refreshing, setRefreshing] = useState(false)
+
+  async function handleRefresh() {
+    setRefreshing(true)
+    await refreshData()
+    setRefreshing(false)
+  }
 
   const currentPolla = pollas.find(p => p.id === currentPollaId)
 
@@ -77,6 +85,16 @@ export default function Navbar() {
                 <span className="sm:hidden">!</span>
               </button>
             )}
+
+            {/* Actualizar datos */}
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              title="Recargar datos desde la nube"
+              className="text-xs text-green-300 hover:text-white border border-green-700 hover:border-green-500 px-2.5 py-1 rounded transition-colors disabled:opacity-50"
+            >
+              {refreshing ? '...' : '↻'}
+            </button>
 
             {/* Salir */}
             <button

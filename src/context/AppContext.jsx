@@ -331,6 +331,17 @@ export function AppProvider({ children }) {
     setScorerPredictions(pending.length > 0 ? mergePendingScorers(fromDB, pending) : fromDB)
   }
 
+  // ─── Recargar todos los datos desde Supabase ─────────────────────────────────
+  const refreshData = useCallback(async () => {
+    await Promise.all([
+      loadPredictions(),
+      loadBracketPredictions(),
+      loadStandingsPredictions(),
+      loadScorerPredictions(),
+      loadGroupStandings(),
+    ])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // ─── Sincronizar cache local pendiente con Supabase ───────────────────────────
   // Se llama automáticamente al reconectar internet y al cargar la app.
 
@@ -1009,7 +1020,7 @@ export function AppProvider({ children }) {
       updateMatch, updateGroupTeams, updateBracketMatch,
       updateConfig, updateLocks, resetTournament, generateBracket, propagateBracketRound,
       importCSVBackup,
-      pendingSyncCount, syncPendingCache,
+      pendingSyncCount, syncPendingCache, refreshData,
     }}>
       {children}
     </AppContext.Provider>
