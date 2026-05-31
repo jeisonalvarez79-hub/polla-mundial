@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AppProvider, useApp } from './context/AppContext'
+import { localCache } from './lib/localCache'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import Home from './pages/Home'
@@ -11,6 +13,17 @@ import Admin from './pages/Admin'
 
 function AppContent() {
   const { loading, isAuthenticated } = useApp()
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (localCache.getPendingCount() > 0) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [])
 
   if (loading) {
     return (
