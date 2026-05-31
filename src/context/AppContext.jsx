@@ -327,8 +327,8 @@ export function AppProvider({ children }) {
   }
 
   async function loadStandingsPredictions() {
-    const { data } = await supabase.from('standings_predictions').select('*')
-    const fromDB = data ? data.map(dbToStandingsPrediction) : []
+    const rows = await fetchAllRows('standings_predictions')
+    const fromDB = rows.map(dbToStandingsPrediction)
     const pending = localCache.getPendingStandingsPredictions()
     setStandingsPredictions(pending.length > 0 ? mergePendingStandings(fromDB, pending) : fromDB)
   }
@@ -339,8 +339,8 @@ export function AppProvider({ children }) {
   }
 
   async function loadScorerPredictions() {
-    const { data } = await supabase.from('scorer_predictions').select('*')
-    const fromDB = data ? data.map(dbToScorerPrediction) : []
+    const rows = await fetchAllRows('scorer_predictions')
+    const fromDB = rows.map(dbToScorerPrediction)
     const pending = localCache.getPendingScorerPredictions()
     setScorerPredictions(pending.length > 0 ? mergePendingScorers(fromDB, pending) : fromDB)
   }
