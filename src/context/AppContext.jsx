@@ -289,16 +289,30 @@ export function AppProvider({ children }) {
     }
   }
 
+  async function fetchAllRows(table) {
+    const PAGE = 1000
+    const all = []
+    let from = 0
+    while (true) {
+      const { data, error } = await supabase.from(table).select('*').range(from, from + PAGE - 1)
+      if (error || !data || data.length === 0) break
+      all.push(...data)
+      if (data.length < PAGE) break
+      from += PAGE
+    }
+    return all
+  }
+
   async function loadPredictions() {
-    const { data } = await supabase.from('predictions').select('*')
-    const fromDB = data ? data.map(dbToPrediction) : []
+    const rows = await fetchAllRows('predictions')
+    const fromDB = rows.map(dbToPrediction)
     const pending = localCache.getPendingPredictions()
     setPredictions(pending.length > 0 ? mergePendingPredictions(fromDB, pending) : fromDB)
   }
 
   async function loadBracketPredictions() {
-    const { data } = await supabase.from('bracket_predictions').select('*')
-    const fromDB = data ? data.map(dbToBracketPrediction) : []
+    const rows = await fetchAllRows('bracket_predictions')
+    const fromDB = rows.map(dbToBracketPrediction)
     const pending = localCache.getPendingBracketPredictions()
     setBracketPredictions(pending.length > 0 ? mergePendingBracket(fromDB, pending) : fromDB)
   }
