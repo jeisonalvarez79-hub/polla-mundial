@@ -1368,7 +1368,6 @@ function ConfigTab() {
     name:           config.name,
     tournamentName: config.tournamentName,
     year:           config.year,
-    adminPassword:  config.adminPassword,
   })
   const [pts, setPts]       = useState({ ...config.pts })
   const [saved, setSaved]   = useState(false)
@@ -1467,7 +1466,6 @@ function ConfigTab() {
             { id: 'name',           label: 'Nombre de la app',    placeholder: 'Polla Mundial' },
             { id: 'tournamentName', label: 'Nombre del torneo',   placeholder: 'Mundial 2026' },
             { id: 'year',           label: 'Año',                 placeholder: '2026' },
-            { id: 'adminPassword',  label: 'Contraseña de admin', placeholder: 'admin123' },
           ].map(f => (
             <div key={f.id}>
               <label className="text-xs text-gray-400 mb-1 block">{f.label}</label>

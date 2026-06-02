@@ -125,7 +125,6 @@ export const DEFAULT_CONFIG = {
   name:           'Polla Mundial',
   tournamentName: 'Mundial 2026',
   year:           '2026',
-  adminPassword:  'admin123',
   pts:            { ...DEFAULT_PTS },
   locks:          { ...DEFAULT_LOCKS },
 }

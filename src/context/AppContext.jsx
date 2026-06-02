@@ -217,7 +217,6 @@ export function AppProvider({ children }) {
         name: data.name,
         tournamentName: data.tournament_name,
         year: data.year,
-        adminPassword: data.admin_password,
         pts: { ...DEFAULT_PTS, ...ptValues },
         locks: { ...DEFAULT_LOCKS, ...(phase_locks || {}) },
       })
@@ -523,7 +522,11 @@ export function AppProvider({ children }) {
   const loginParticipant = useCallback(async (participantId, pin) => {
     const participant = allParticipants.find(p => p.id === participantId)
     if (!participant) return false
-    if (String(participant.pin) !== String(pin)) return false
+    const { data: valid, error } = await supabase.rpc('verify_participant_pin', {
+      p_participant_id: participantId,
+      p_pin: String(pin),
+    })
+    if (error || !valid) return false
     setCurrentParticipantIdState(participantId)
     localStorage.setItem('pm_current_participant', participantId)
     if (participant.polla_id) {
@@ -833,7 +836,6 @@ export function AppProvider({ children }) {
       name: next.name,
       tournament_name: next.tournamentName,
       year: next.year,
-      admin_password: next.adminPassword,
       pts: ptsToSave,
     }).eq('id', 1)
     setConfig(next)
