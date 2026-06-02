@@ -120,7 +120,13 @@ function PartidosTab() {
   const groupsLocked = config?.locks?.groups ?? false
 
   const groups = [...new Set(matches.filter(m => m.phase === 'groups').map(m => m.group))].sort()
-  const groupMatches = matches.filter(m => m.group === activeGroup)
+  const groupMatches = matches
+    .filter(m => m.group === activeGroup)
+    .sort((a, b) => {
+      const ja = parseInt((a.jornada || '0').replace(/\D/g, '')) || 0
+      const jb = parseInt((b.jornada || '0').replace(/\D/g, '')) || 0
+      return ja - jb
+    })
   const standings = calcGroupStandings(matches, activeGroup)
 
   // Tabla calculada con los pronósticos del participante actual
