@@ -355,8 +355,12 @@ export function calcParticipantStats(
     else if (score > 0)     ptsResultado += score
   }
 
-  // --- Clasificación de grupos (1 pt por posición exacta, auto-calculada desde pronósticos) ---
+  // --- Clasificación de grupos (1 pt por posición exacta, solo cuando el grupo está completo) ---
   for (const group of GROUP_LETTERS) {
+    const groupMatches = matches.filter(m => m.group === group && m.phase === 'groups')
+    if (!groupMatches.length) continue
+    const allFinished = groupMatches.every(m => m.homeScore !== null && m.awayScore !== null)
+    if (!allFinished) continue
     const actual    = calcGroupStandings(matches, group)
     const predicted = calcPredictedGroupStandings(matches, predictions, participantId, group)
     for (let i = 0; i < 4; i++) {
