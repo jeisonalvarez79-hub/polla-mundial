@@ -6,7 +6,7 @@ const NAV_LINKS = [
   { to: '/',            label: 'Inicio' },
   { to: '/registro',    label: 'Participantes' },
   { to: '/pronosticos', label: 'Pronósticos' },
-  { to: '/bracket',     label: 'Bracket' },
+  { to: '/bracket',     label: 'Llaves' },
   { to: '/tabla',       label: 'Tabla' },
   { to: '/admin',       label: 'Admin', adminOnly: true },
 ]

@@ -2,7 +2,6 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { calcGroupScore, calcGroupStandings, calcPredictedGroupStandings } from '../utils/scoring'
-import { GROUP_LETTERS } from '../data/initialData'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -409,180 +408,6 @@ function PartidosTab() {
   )
 }
 
-// ─── Tab: Tabla de Grupos (pronósticos de clasificación) ──────────────────────
-
-function TablaGruposTab() {
-  const {
-    matches, groupStandings,
-    currentParticipant, saveStandingsPrediction, getStandingsPrediction,
-    config,
-  } = useApp()
-  const [activeGroup, setActiveGroup] = useState('A')
-
-  function getGroupTeams(group) {
-    const gm = matches.filter(m => m.group === group)
-    const all = gm.flatMap(m => [m.homeTeam, m.awayTeam]).filter(Boolean)
-    return [...new Set(all)]
-  }
-
-  const teams   = getGroupTeams(activeGroup)
-  const actual  = groupStandings?.[activeGroup] || ['', '', '', '']
-  const pred    = currentParticipant
-    ? (getStandingsPrediction(currentParticipant.id, activeGroup) || null)
-    : null
-  const calcStandings = calcGroupStandings(matches, activeGroup)
-
-  const [standings, setStandings] = useState(pred?.standings || ['', '', '', ''])
-
-  function handleGroupChange(g) {
-    setActiveGroup(g)
-    const p = currentParticipant
-      ? getStandingsPrediction(currentParticipant.id, g) : null
-    setStandings(p?.standings || ['', '', '', ''])
-  }
-
-  function handleSelect(pos, team) {
-    setStandings(prev => {
-      const next = [...prev]
-      for (let i = 0; i < 4; i++) {
-        if (i !== pos && next[i] === team) next[i] = ''
-      }
-      next[pos] = team
-      return next
-    })
-  }
-
-  function handleSave() {
-    if (!currentParticipant) return
-    saveStandingsPrediction(currentParticipant.id, activeGroup, standings)
-  }
-
-  const allFilled = standings.every(t => t)
-  const changed   = JSON.stringify(standings) !== JSON.stringify(pred?.standings || ['', '', '', ''])
-  const pts = config?.pts
-
-  return (
-    <div className="space-y-5">
-      <div className="bg-blue-950/30 border border-blue-900 rounded-xl p-4 text-sm text-blue-300">
-        <strong>¿Cómo funciona?</strong> Predice el orden final de cada grupo (1°, 2°, 3°, 4°).
-        Ganas <strong>{pts?.clasificado ?? 2} pts</strong> por cada equipo del top-2 que realmente clasificó
-        (independiente de la posición) y <strong>{pts?.ordenGrupo ?? 1} pt adicional</strong> por posición exacta.
-      </div>
-
-      {!currentParticipant && (
-        <div className="bg-yellow-900/20 border border-yellow-800 rounded-xl p-4 text-yellow-300 text-sm">
-          ⚠️ Selecciona o{' '}
-          <Link to="/registro" className="underline hover:text-yellow-200">registra un participante</Link>
-          {' '}para guardar pronósticos.
-        </div>
-      )}
-
-      {/* Tabs de grupos */}
-      <div className="flex gap-1 flex-wrap">
-        {GROUP_LETTERS.map(g => {
-          const gPred = currentParticipant
-            ? getStandingsPrediction(currentParticipant.id, g) : null
-          return (
-            <button key={g} onClick={() => handleGroupChange(g)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors relative ${
-                activeGroup === g ? 'bg-green-700 text-white' : 'bg-gray-900 text-gray-400 hover:text-white border border-gray-800'
-              }`}
-            >
-              {g}
-              {gPred?.standings?.every(t => t) && (
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full" />
-              )}
-            </button>
-          )
-        })}
-      </div>
-
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Mi pronóstico */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h3 className="text-white font-semibold mb-4">Mi pronóstico · Grupo {activeGroup}</h3>
-
-          {teams.length === 0 ? (
-            <p className="text-gray-600 text-sm py-4 text-center">
-              Los equipos del Grupo {activeGroup} aún no están configurados.
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {[0,1,2,3].map(i => (
-                <div key={i} className="flex items-center gap-3">
-                  <span className="text-gray-400 text-sm font-medium w-5 shrink-0">{i+1}°</span>
-                  <select
-                    value={standings[i]}
-                    onChange={e => handleSelect(i, e.target.value)}
-                    disabled={!currentParticipant}
-                    className="flex-1 bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600 disabled:opacity-50"
-                  >
-                    <option value="">— Seleccionar —</option>
-                    {teams.map(team => (
-                      <option key={team} value={team}
-                        disabled={standings.includes(team) && standings[i] !== team}>
-                        {team}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              ))}
-
-              {currentParticipant && (
-                <button
-                  onClick={handleSave}
-                  disabled={!allFilled || !changed}
-                  className="mt-3 w-full bg-green-700 hover:bg-green-600 disabled:opacity-40 text-white text-sm py-2 rounded-lg transition-colors"
-                >
-                  {pred ? 'Actualizar pronóstico' : 'Guardar pronóstico'}
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Tabla calculada en tiempo real */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h3 className="text-white font-semibold mb-4">Posiciones en tiempo real · Grupo {activeGroup}</h3>
-          <StandingsTable standings={calcStandings} />
-        </div>
-
-        {/* Clasificación real (admin) vs mi pronóstico */}
-        {actual.some(t => t) && (
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-            <h3 className="text-white font-semibold mb-4">Clasificación oficial · Grupo {activeGroup}</h3>
-            <div className="space-y-2">
-              {actual.map((team, i) => {
-                const exactMatch = pred?.standings?.[i] === team && team
-                const classified = i < 2 && pred?.standings?.slice(0, 2).includes(team) && team
-                return (
-                  <div key={i} className={`flex items-center gap-3 rounded-lg px-3 py-2 border ${
-                    exactMatch  ? 'bg-yellow-900/20 border-yellow-700' :
-                    classified  ? 'bg-green-900/20 border-green-800'  :
-                    'bg-gray-800 border-gray-700'
-                  }`}>
-                    <span className="text-gray-400 text-sm font-medium w-5">{i+1}°</span>
-                    <span className="text-white font-medium flex-1">{team || '—'}</span>
-                    {exactMatch && (
-                      <span className="text-yellow-400 text-xs font-bold">
-                        +{(config?.pts?.clasificado ?? 2) + (config?.pts?.ordenGrupo ?? 1)}pt
-                      </span>
-                    )}
-                    {!exactMatch && classified && (
-                      <span className="text-green-400 text-xs font-bold">
-                        +{config?.pts?.clasificado ?? 2}pt
-                      </span>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
 
 // ─── Tab: Goleadores ──────────────────────────────────────────────────────────
 
@@ -680,7 +505,6 @@ function GoleadoresTab() {
 
 const TABS = [
   { id: 'partidos',   label: '⚽ Partidos de Grupos' },
-  { id: 'tabla',      label: '📊 Tabla de Grupos' },
   { id: 'goleadores', label: '⭐ Goleadores' },
 ]
 
@@ -729,7 +553,6 @@ export default function Pronosticos() {
       </div>
 
       {tab === 'partidos'   && <PartidosTab />}
-      {tab === 'tabla'      && <TablaGruposTab />}
       {tab === 'goleadores' && <GoleadoresTab />}
     </div>
   )

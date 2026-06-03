@@ -345,7 +345,7 @@ export default function Bracket() {
       {/* Encabezado */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-1">Bracket · Fase Eliminatoria</h1>
+          <h1 className="text-2xl font-bold text-white mb-1">Llaves · Fase Eliminatoria</h1>
           <p className="text-gray-400 text-sm">
             Ingresa el marcador de cada llave. El ganador pasa automáticamente a la siguiente fase.
           </p>
