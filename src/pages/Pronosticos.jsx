@@ -505,7 +505,7 @@ function GoleadoresTab() {
 
 const TABS = [
   { id: 'partidos',   label: '⚽ Partidos de Grupos' },
-  { id: 'goleadores', label: '⭐ Goleadores' },
+  { id: 'goleadores', label: '⭐ Goleador' },
 ]
 
 export default function Pronosticos() {

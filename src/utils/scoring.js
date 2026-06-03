@@ -355,14 +355,15 @@ export function calcParticipantStats(
     else if (score > 0)     ptsResultado += score
   }
 
-  // --- Clasificación de grupos (clasificado + posición exacta) ---
-  for (const group of Object.keys(groupStandings || {})) {
-    const actual = groupStandings[group]
-    if (!actual || actual.every(t => !t)) continue
-    const pred = (standingsPredictions || []).find(
-      pr => pr.participantId === participantId && pr.group === group
-    )
-    ptsStandings += calcStandingsScore(pred?.standings, actual, config)
+  // --- Clasificación de grupos (1 pt por posición exacta, auto-calculada desde pronósticos) ---
+  for (const group of GROUP_LETTERS) {
+    const actual    = calcGroupStandings(matches, group)
+    const predicted = calcPredictedGroupStandings(matches, predictions, participantId, group)
+    for (let i = 0; i < 4; i++) {
+      if (predicted[i]?.name && actual[i]?.name && predicted[i].name === actual[i].name) {
+        ptsStandings += 1
+      }
+    }
   }
 
   // --- Bracket ---
