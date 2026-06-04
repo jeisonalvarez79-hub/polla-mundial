@@ -1129,8 +1129,14 @@ function ParticipantesTab() {
     setAdding(true)
     setAddError('')
     const result = await addParticipant(nombre.trim(), pollaId, pin)
-    if (!result) {
-      setAddError(`"${nombre.trim()}" ya existe en esa polla, o hubo un error al guardar.`)
+    if (!result || result.error) {
+      if (result?.error === 'duplicate') {
+        setAddError(`"${nombre.trim()}" ya existe en esa polla (nombre duplicado).`)
+      } else if (result?.error) {
+        setAddError(`Error al guardar en la base de datos: ${result.error}`)
+      } else {
+        setAddError(`No se pudo guardar "${nombre.trim()}". Intenta de nuevo.`)
+      }
     } else {
       const pollaName = pollas.find(p => p.id === pollaId)?.name || ''
       setAddSuccess(`${result.name} agregado a "${pollaName}" · PIN: ${pin}`)

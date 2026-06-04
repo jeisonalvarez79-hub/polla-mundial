@@ -584,15 +584,20 @@ export function AppProvider({ children }) {
     const dupeList = hasPollaCol
       ? allParticipants.filter(p => p.polla_id === pollaId)
       : []
-    if (dupeList.some(p => p.name.toLowerCase() === trimmed.toLowerCase())) return null
+    if (dupeList.some(p => p.name.toLowerCase() === trimmed.toLowerCase())) {
+      return { error: 'duplicate' }
+    }
 
     const id = `p_${Date.now()}`
     const { data, error } = await supabase.from('participants')
       .insert({ id, name: trimmed, polla_id: pollaId, pin: pin || null })
       .select().single()
 
-    if (error) { console.error('Error creando participante:', error.message); return null }
-    if (!data) return null
+    if (error) {
+      console.error('Error creando participante:', error.message)
+      return { error: error.message || 'db_error' }
+    }
+    if (!data) return { error: 'no_data' }
     setAllParticipants(prev => [...prev, data])
     return data
   }, [allParticipants, currentPollaId])
