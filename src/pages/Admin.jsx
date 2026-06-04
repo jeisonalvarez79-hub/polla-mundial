@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { useApp } from '../context/AppContext'
-import { GROUP_LETTERS, R32_BRACKET_MAP, DEFAULT_LOCKS } from '../data/initialData'
-import { buildRanking } from '../utils/scoring'
+import { GROUP_LETTERS, R32_BRACKET_MAP, DEFAULT_LOCKS, BRACKET_PTS } from '../data/initialData'
+import { buildRanking, calcGroupScore, calcBracketScore, calcPredictedBracketTeams } from '../utils/scoring'
 
 // ─── CSV helpers ──────────────────────────────────────────────────────────────
 
@@ -1550,10 +1550,336 @@ function ConfigTab() {
   )
 }
 
+// ─── Ver Pronósticos (admin read-only) ───────────────────────────────────────
+
+const ROUND_LABEL_ADMIN = {
+  r32: '16avos de Final', r16: 'Octavos de Final', qf: 'Cuartos de Final',
+  sf: 'Semifinal', third: 'Tercer Lugar', final: 'Final',
+}
+const ROUND_ORDER_ADMIN = ['r32', 'r16', 'qf', 'sf', 'third', 'final']
+
+function VerPronosticosTab() {
+  const {
+    allParticipants, pollas, currentPollaId,
+    matches, predictions,
+    bracketMatches, bracketPredictions,
+    topScorers, scorerPredictions,
+    config,
+  } = useApp()
+
+  const [selectedPollaId, setSelectedPollaId]     = useState(currentPollaId || pollas[0]?.id || '')
+  const [selectedParticipantId, setSelectedParticipantId] = useState('')
+  const [viewTab, setViewTab]   = useState('partidos')
+  const [activeGroup, setActiveGroup] = useState('A')
+
+  const pollaParticipants = selectedPollaId
+    ? allParticipants.filter(p => p.polla_id === selectedPollaId)
+    : allParticipants
+
+  const participant = allParticipants.find(p => p.id === selectedParticipantId) || null
+
+  const groups = [...new Set(matches.filter(m => m.phase === 'groups').map(m => m.group))].sort()
+
+  const groupMatches = matches
+    .filter(m => m.group === activeGroup)
+    .sort((a, b) => {
+      const ja = parseInt((a.jornada || '0').replace(/\D/g, '')) || 0
+      const jb = parseInt((b.jornada || '0').replace(/\D/g, '')) || 0
+      return ja - jb
+    })
+
+  function getPred(matchId) {
+    if (!participant) return null
+    return predictions.find(p => p.participantId === participant.id && p.matchId === matchId) || null
+  }
+
+  const ptExacto    = config?.pts?.exacto    ?? 3
+  const ptResultado = config?.pts?.resultado ?? 1
+  const ptGoleador  = config?.pts?.goleador  ?? 10
+
+  const predCount        = participant ? predictions.filter(p => p.participantId === participant.id).length : 0
+  const bracketPredCount = participant ? bracketPredictions.filter(p => p.participantId === participant.id).length : 0
+  const scorerPred       = participant ? (scorerPredictions.find(p => p.participantId === participant.id) || null) : null
+
+  const predictedTeamMap = useMemo(() => {
+    if (!participant) return null
+    return calcPredictedBracketTeams(matches, predictions, bracketPredictions, participant.id, bracketMatches)
+  }, [matches, predictions, bracketPredictions, participant, bracketMatches])
+
+  const byRound = ROUND_ORDER_ADMIN.reduce((acc, r) => {
+    acc[r] = bracketMatches.filter(m => m.round === r)
+    return acc
+  }, {})
+
+  return (
+    <div className="space-y-5 max-w-4xl">
+
+      {/* Selectores */}
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-wrap gap-4 items-end">
+        {pollas.length > 1 && (
+          <div>
+            <label className="text-xs text-gray-400 mb-1 block">Polla</label>
+            <select
+              value={selectedPollaId}
+              onChange={e => { setSelectedPollaId(e.target.value); setSelectedParticipantId('') }}
+              className="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+            >
+              {pollas.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+        )}
+        <div className="flex-1 min-w-[200px]">
+          <label className="text-xs text-gray-400 mb-1 block">Participante</label>
+          <select
+            value={selectedParticipantId}
+            onChange={e => setSelectedParticipantId(e.target.value)}
+            className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+          >
+            <option value="">— Selecciona un participante —</option>
+            {pollaParticipants
+              .slice()
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map(p => <option key={p.id} value={p.id}>{p.name}</option>)
+            }
+          </select>
+        </div>
+      </div>
+
+      {!participant && (
+        <p className="text-gray-600 text-sm text-center py-8">Selecciona un participante para ver sus pronósticos.</p>
+      )}
+
+      {participant && (
+        <>
+          {/* Cabecera del participante */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <h3 className="text-white font-bold text-lg">{participant.name}</h3>
+            <span className="text-xs bg-gray-800 text-gray-400 px-2 py-1 rounded">
+              Grupos: {predCount}/{matches.filter(m => m.phase === 'groups').length} pronosticados
+            </span>
+            <span className="text-xs bg-gray-800 text-gray-400 px-2 py-1 rounded">
+              Llaves: {bracketPredCount} guardados
+            </span>
+          </div>
+
+          {/* Sub-tabs */}
+          <div className="flex gap-1 border-b border-gray-800">
+            {[
+              { id: 'partidos',  label: '⚽ Partidos de Grupos' },
+              { id: 'llaves',    label: '🎯 Llaves' },
+              { id: 'goleador',  label: '⭐ Goleador' },
+            ].map(t => (
+              <button key={t.id} onClick={() => setViewTab(t.id)}
+                className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 -mb-px transition-colors ${
+                  viewTab === t.id
+                    ? 'border-green-500 text-green-400'
+                    : 'border-transparent text-gray-400 hover:text-white'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {/* ── Tab Partidos de Grupos ── */}
+          {viewTab === 'partidos' && (
+            <div className="space-y-4">
+              <div className="flex gap-1 flex-wrap">
+                {groups.map(g => (
+                  <button key={g} onClick={() => setActiveGroup(g)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      activeGroup === g ? 'bg-green-700 text-white' : 'bg-gray-900 text-gray-400 hover:text-white border border-gray-800'
+                    }`}
+                  >
+                    Grupo {g}
+                  </button>
+                ))}
+              </div>
+              <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-gray-800 text-gray-400 text-xs">
+                        <th className="text-left px-3 py-2 font-semibold">Jor.</th>
+                        <th className="text-right px-3 py-2 font-semibold">Local</th>
+                        <th className="text-center px-2 py-2 font-semibold text-blue-400">Pred.</th>
+                        <th className="text-center px-2 py-2 font-semibold text-blue-400">Pred.</th>
+                        <th className="text-left px-3 py-2 font-semibold">Visitante</th>
+                        <th className="text-center px-2 py-2 font-semibold text-yellow-400">Real</th>
+                        <th className="text-center px-2 py-2 font-semibold text-green-400">Pts</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {groupMatches.map((match, idx) => {
+                        const pred     = getPred(match.id)
+                        const hasResult = match.homeScore !== null && match.awayScore !== null
+                        const score    = hasResult && pred ? calcGroupScore(pred, match, config) : null
+                        return (
+                          <tr key={match.id} className={`border-b border-gray-800 last:border-0 ${idx % 2 === 0 ? 'bg-gray-900' : 'bg-gray-900/60'}`}>
+                            <td className="px-3 py-2">
+                              <span className="text-xs font-semibold text-blue-400 bg-blue-900/30 px-1.5 py-0.5 rounded">
+                                {match.jornada || '—'}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 text-right">
+                              <span className="font-medium text-white text-xs whitespace-nowrap">{match.homeTeam || '—'}</span>
+                            </td>
+                            <td className="px-2 py-2 text-center">
+                              {pred ? (
+                                <span className="font-bold text-blue-300 text-sm">{pred.homeScore ?? '?'}</span>
+                              ) : (
+                                <span className="text-gray-700 text-xs">—</span>
+                              )}
+                            </td>
+                            <td className="px-2 py-2 text-center">
+                              {pred ? (
+                                <span className="font-bold text-blue-300 text-sm">{pred.awayScore ?? '?'}</span>
+                              ) : (
+                                <span className="text-gray-700 text-xs">—</span>
+                              )}
+                            </td>
+                            <td className="px-3 py-2">
+                              <span className="font-medium text-white text-xs whitespace-nowrap">{match.awayTeam || '—'}</span>
+                            </td>
+                            <td className="px-2 py-2 text-center text-xs text-yellow-400 font-bold">
+                              {hasResult ? `${match.homeScore}–${match.awayScore}` : '—'}
+                            </td>
+                            <td className="px-2 py-2 text-center">
+                              {score !== null ? (
+                                <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
+                                  score === ptExacto    ? 'bg-yellow-700 text-yellow-200' :
+                                  score === ptResultado ? 'bg-blue-900 text-blue-300' :
+                                  'bg-gray-800 text-gray-500'
+                                }`}>+{score}</span>
+                              ) : (
+                                <span className="text-gray-700 text-xs">—</span>
+                              )}
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Tab Llaves ── */}
+          {viewTab === 'llaves' && (
+            <div className="space-y-6">
+              {ROUND_ORDER_ADMIN.map(round => {
+                const roundMatches = byRound[round]
+                if (!roundMatches?.length) return null
+                return (
+                  <div key={round}>
+                    <h3 className="text-white font-bold mb-3 flex items-center gap-2">
+                      {round === 'final' && '🏆 '}{round === 'third' && '🥉 '}
+                      {ROUND_LABEL_ADMIN[round]}
+                    </h3>
+                    <div className="flex flex-wrap gap-3">
+                      {roundMatches.map(match => {
+                        const teams = predictedTeamMap?.[match.id]
+                        const homeTeam = teams?.homeTeam || match.homeTeam || ''
+                        const awayTeam = teams?.awayTeam || match.awayTeam || ''
+                        const pred = participant
+                          ? bracketPredictions.find(p => p.participantId === participant.id && p.bracketMatchId === match.id) || null
+                          : null
+                        const score = match.winner && pred ? calcBracketScore(pred, match, config) : null
+                        if (!homeTeam && !awayTeam) {
+                          return (
+                            <div key={match.id} className="bg-gray-900/50 border border-dashed border-gray-800 rounded-xl p-3 min-w-[200px]">
+                              <p className="text-xs text-gray-600 text-center">{match.label}</p>
+                              <p className="text-xs text-gray-700 text-center mt-1">Pendiente</p>
+                            </div>
+                          )
+                        }
+                        return (
+                          <div key={match.id} className={`bg-gray-900 border rounded-xl p-3 min-w-[200px] ${round === 'final' ? 'border-yellow-700' : 'border-gray-800'}`}>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs text-gray-500">{match.label}</span>
+                              {score !== null && (
+                                <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${score > 0 ? 'bg-green-800 text-green-300' : 'bg-gray-800 text-gray-500'}`}>
+                                  {score} pts
+                                </span>
+                              )}
+                            </div>
+                            {[
+                              { team: homeTeam, predScore: pred?.predictedHomeScore, realScore: match.homeScore },
+                              { team: awayTeam, predScore: pred?.predictedAwayScore, realScore: match.awayScore },
+                            ].map(({ team, predScore, realScore }) => (
+                              <div key={team} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border mb-1 ${
+                                match.winner === team   ? 'bg-green-800/30 border-green-700' :
+                                pred?.predictedWinner === team ? 'bg-blue-900/30 border-blue-700' :
+                                'bg-gray-800/50 border-gray-700'
+                              }`}>
+                                <span className="flex-1 text-xs font-medium text-white truncate">{team}</span>
+                                {predScore !== null && predScore !== undefined && (
+                                  <span className="text-xs font-bold text-blue-300 shrink-0">{predScore}</span>
+                                )}
+                                {realScore !== null && realScore !== undefined && (
+                                  <span className="text-xs text-yellow-400 shrink-0">({realScore})</span>
+                                )}
+                                {match.winner === team && <span className="text-xs shrink-0">✅</span>}
+                                {pred?.predictedWinner === team && !match.winner && <span className="text-blue-400 text-xs shrink-0">★</span>}
+                              </div>
+                            ))}
+                            {!pred && (
+                              <p className="text-xs text-gray-700 text-center mt-1">Sin pronóstico</p>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* ── Tab Goleador ── */}
+          {viewTab === 'goleador' && (
+            <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 max-w-sm space-y-3">
+              <h3 className="text-white font-semibold">Pronóstico Goleador</h3>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Pronóstico de {participant.name}</p>
+                {scorerPred?.scorers?.[0] ? (
+                  <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${
+                    scorerPred.scorers[0] === topScorers?.[0]
+                      ? 'bg-green-900/30 border-green-700'
+                      : 'bg-gray-800 border-gray-700'
+                  }`}>
+                    <span className="text-white font-medium flex-1">{scorerPred.scorers[0]}</span>
+                    {scorerPred.scorers[0] === topScorers?.[0] && (
+                      <span className="text-green-400 text-xs font-bold">+{ptGoleador}pt</span>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-gray-600 text-sm">Sin pronóstico de goleador.</p>
+                )}
+              </div>
+              {topScorers?.[0] && (
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Goleador oficial</p>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-yellow-900/20 border-yellow-700">
+                    <span className="text-lg">🥇</span>
+                    <span className="text-white font-medium">{topScorers[0]}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
 // ─── Admin principal ──────────────────────────────────────────────────────────
 
 const TABS = [
   { id: 'participantes',  label: '👥 Participantes' },
+  { id: 'ver',            label: '🔍 Ver Pronósticos' },
   { id: 'equipos',        label: '⚽ Equipos & Partidos' },
   { id: 'clasificacion',  label: '📊 Clasificación Grupos' },
   { id: 'bracket',        label: '🎯 Bracket' },
@@ -1684,6 +2010,7 @@ export default function Admin() {
       </div>
 
       {tab === 'participantes' && <ParticipantesTab />}
+      {tab === 'ver'           && <VerPronosticosTab />}
       {tab === 'equipos'       && <EquiposTab />}
       {tab === 'clasificacion' && <ClasificacionTab />}
       {tab === 'bracket'       && <BracketTab />}
