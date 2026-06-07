@@ -1016,8 +1016,11 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
   const isOrphan  = !p.polla_id || !pollaName
   const [assignId, setAssignId]     = useState('')
   const [editingPin, setEditingPin] = useState(false)
-  const [pinInput, setPinInput]     = useState(p.pin || '')
+  const [pinInput, setPinInput]     = useState('')
   const [savingPin, setSavingPin]   = useState(false)
+
+  const pinIsHashed = p.pin && (p.pin.startsWith('$2a$') || p.pin.startsWith('$2b$'))
+  const pinDisplay  = pinIsHashed ? null : (p.pin || null)
   const [editingName, setEditingName] = useState(false)
   const [nameInput, setNameInput]     = useState(p.name)
   const [savingName, setSavingName]   = useState(false)
@@ -1106,7 +1109,7 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
             {savingPin ? '…' : 'OK'}
           </button>
           <button
-            onClick={() => { setEditingPin(false); setPinInput(p.pin || '') }}
+            onClick={() => { setEditingPin(false); setPinInput('') }}
             className="text-xs text-gray-500 hover:text-gray-300 px-1"
           >
             ✕
@@ -1114,11 +1117,17 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
         </div>
       ) : (
         <button
-          onClick={() => setEditingPin(true)}
-          title="Editar PIN"
-          className="font-mono bg-gray-800 border border-gray-700 text-yellow-400 hover:border-yellow-600 px-2 py-0.5 rounded text-xs tracking-widest shrink-0 transition-colors"
+          onClick={() => { setPinInput(pinDisplay || ''); setEditingPin(true) }}
+          title={pinIsHashed ? 'PIN cifrado — establece uno nuevo' : 'Editar PIN'}
+          className={`font-mono bg-gray-800 border px-2 py-0.5 rounded text-xs tracking-widest shrink-0 transition-colors ${
+            pinIsHashed
+              ? 'border-red-800 text-red-400 hover:border-red-600'
+              : pinDisplay
+              ? 'border-gray-700 text-yellow-400 hover:border-yellow-600'
+              : 'border-gray-700 text-gray-500 hover:border-gray-500'
+          }`}
         >
-          {p.pin || 'Sin PIN'}
+          {pinIsHashed ? '🔒 Restablecer' : pinDisplay || 'Sin PIN'}
         </button>
       )}
 
@@ -1222,7 +1231,8 @@ function ParticipantesTab() {
 
   function getWhatsAppUrl(p) {
     const pollaName = pollas.find(x => x.id === p.polla_id)?.name || 'la polla'
-    const msg = `¡Hola ${p.name}! Ya estás activo en la ${pollaName} 🏆. Puedes ingresar a meter tus marcadores aquí: ${APP_URL}. Tu PIN de acceso exclusivo es: ${p.pin || '----'} 🔑. ¡Muchos éxitos!`
+    const pin = p.pin && !p.pin.startsWith('$2a$') && !p.pin.startsWith('$2b$') ? p.pin : '----'
+    const msg = `¡Hola ${p.name}! Ya estás activo en la ${pollaName} 🏆. Puedes ingresar a meter tus marcadores aquí: ${APP_URL}. Tu PIN de acceso exclusivo es: ${pin} 🔑. ¡Muchos éxitos!`
     return `https://wa.me/?text=${encodeURIComponent(msg)}`
   }
 
