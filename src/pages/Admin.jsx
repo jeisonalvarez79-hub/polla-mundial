@@ -1020,7 +1020,7 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
   const [savingPin, setSavingPin]   = useState(false)
 
   const pinIsHashed = p.pin && (p.pin.startsWith('$2a$') || p.pin.startsWith('$2b$'))
-  const pinDisplay  = pinIsHashed ? null : (p.pin || null)
+  const pinDisplay  = pinIsHashed ? '••••' : (p.pin || 'Sin PIN')
   const [editingName, setEditingName] = useState(false)
   const [nameInput, setNameInput]     = useState(p.name)
   const [savingName, setSavingName]   = useState(false)
@@ -1116,19 +1116,15 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
           </button>
         </div>
       ) : (
-        <button
-          onClick={() => { setPinInput(pinDisplay || ''); setEditingPin(true) }}
-          title={pinIsHashed ? 'PIN cifrado — establece uno nuevo' : 'Editar PIN'}
-          className={`font-mono bg-gray-800 border px-2 py-0.5 rounded text-xs tracking-widest shrink-0 transition-colors ${
-            pinIsHashed
-              ? 'border-red-800 text-red-400 hover:border-red-600'
-              : pinDisplay
-              ? 'border-gray-700 text-yellow-400 hover:border-yellow-600'
-              : 'border-gray-700 text-gray-500 hover:border-gray-500'
+        <span
+          title="Clic para cambiar PIN"
+          onClick={() => !pinIsHashed && setEditingPin(true)}
+          className={`font-mono bg-gray-800 border border-gray-700 px-2 py-0.5 rounded text-xs tracking-widest shrink-0 ${
+            pinIsHashed ? 'text-gray-500 cursor-default' : 'text-yellow-400 hover:border-yellow-600 cursor-pointer'
           }`}
         >
-          {pinIsHashed ? '🔒 Restablecer' : pinDisplay || 'Sin PIN'}
-        </button>
+          {pinDisplay}
+        </span>
       )}
 
       {/* Asignar polla (orphan) */}
