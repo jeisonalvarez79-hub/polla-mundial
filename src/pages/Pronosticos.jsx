@@ -76,7 +76,7 @@ function StandingsTable({ standings }) {
 }
 
 function PartidosTab() {
-  const { matches, predictions, currentParticipant, savePrediction, config } = useApp()
+  const { matches, predictions, currentParticipant, savePrediction, saveStandingsPrediction, config } = useApp()
   const [activeGroup, setActiveGroup] = useState('A')
   const [localScores, setLocalScores] = useState({})
   const [savingIds, setSavingIds] = useState(new Set())
@@ -87,11 +87,27 @@ function PartidosTab() {
   const participantRef = useRef(currentParticipant)
   const localRef = useRef(localScores)
   const savePredictionRef = useRef(savePrediction)
+  const matchesRef = useRef(matches)
+  const saveStandingsPredictionRef = useRef(saveStandingsPrediction)
 
   useEffect(() => { predictionsRef.current = predictions }, [predictions])
   useEffect(() => { participantRef.current = currentParticipant }, [currentParticipant])
   useEffect(() => { localRef.current = localScores }, [localScores])
   useEffect(() => { savePredictionRef.current = savePrediction }, [savePrediction])
+  useEffect(() => { matchesRef.current = matches }, [matches])
+  useEffect(() => { saveStandingsPredictionRef.current = saveStandingsPrediction }, [saveStandingsPrediction])
+
+  // Recalcula y guarda la posición de grupo derivada de los pronósticos de partidos
+  function autoSaveGroupStandings(matchId, participantId, homeScore, awayScore) {
+    const match = matchesRef.current.find(m => m.id === matchId)
+    if (!match?.group) return
+    const updatedPreds = [
+      ...predictionsRef.current.filter(p => !(p.participantId === participantId && p.matchId === matchId)),
+      { participantId, matchId, homeScore, awayScore },
+    ]
+    const standings = calcPredictedGroupStandings(matchesRef.current, updatedPreds, participantId, match.group)
+    saveStandingsPredictionRef.current(participantId, match.group, standings.map(t => t.name))
+  }
 
   // Al desmontar: vaciar timers pendientes guardando inmediatamente los cambios locales
   useEffect(() => {
@@ -111,6 +127,7 @@ function PartidosTab() {
         const away = local.away !== undefined ? local.away : (pred?.awayScore ?? null)
         if (home !== null && away !== null) {
           savePredictionRef.current(participant.id, matchId, home, away)
+          autoSaveGroupStandings(matchId, participant.id, home, away)
         }
       })
     }
@@ -159,11 +176,14 @@ function PartidosTab() {
       const away = local.away !== undefined ? local.away : (pred?.awayScore ?? null)
       if (home !== null && away !== null) {
         setSavingIds(s => new Set([...s, matchId]))
-        const ok = await savePrediction(participant.id, matchId, home, away)
+        const ok = await savePredictionRef.current(participant.id, matchId, home, away)
         setSavingIds(s => { const n = new Set(s); n.delete(matchId); return n })
         // Solo limpiar el estado local si el guardado fue exitoso;
         // si falló, el flush al desmontar puede reintentar.
-        if (ok) setLocalScores(prev => { const c = { ...prev }; delete c[matchId]; return c })
+        if (ok) {
+          setLocalScores(prev => { const c = { ...prev }; delete c[matchId]; return c })
+          autoSaveGroupStandings(matchId, participant.id, home, away)
+        }
       }
     }, 700)
   }
@@ -183,7 +203,10 @@ function PartidosTab() {
       setSavingIds(s => new Set([...s, matchId]))
       savePrediction(currentParticipant.id, matchId, home, away).then((ok) => {
         setSavingIds(s => { const n = new Set(s); n.delete(matchId); return n })
-        if (ok) setLocalScores(prev => { const c = { ...prev }; delete c[matchId]; return c })
+        if (ok) {
+          setLocalScores(prev => { const c = { ...prev }; delete c[matchId]; return c })
+          autoSaveGroupStandings(matchId, currentParticipant.id, home, away)
+        }
       })
     }
   }

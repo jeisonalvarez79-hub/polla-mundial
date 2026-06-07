@@ -771,13 +771,15 @@ function BloqueosTab() {
     allParticipants, predictions, bracketPredictions,
     standingsPredictions, scorerPredictions, topScorers,
     matches, bracketMatches, groupStandings, pollas,
-    importCSVBackup,
+    importCSVBackup, syncAllStandingsPredictions,
   } = useApp()
   const locks = config.locks || DEFAULT_LOCKS
   const [saving, setSaving]           = useState(null)
   const [backupDone, setBackupDone]   = useState(false)
   const [importing, setImporting]     = useState(false)
   const [importResult, setImportResult] = useState('')
+  const [syncing, setSyncing]         = useState(false)
+  const [syncResult, setSyncResult]   = useState('')
   const fileInputRef = useRef(null)
 
   async function toggleLock(phaseId) {
@@ -822,6 +824,16 @@ function BloqueosTab() {
     URL.revokeObjectURL(url)
     setBackupDone(true)
     setTimeout(() => setBackupDone(false), 3000)
+  }
+
+  async function handleSyncStandings() {
+    if (!window.confirm(`¿Sincronizar posiciones de grupo para los ${allParticipants.length} participantes?\nSe calcularán automáticamente desde sus pronósticos de partidos existentes.`)) return
+    setSyncing(true)
+    setSyncResult('')
+    const count = await syncAllStandingsPredictions()
+    setSyncResult(`✓ ${count} grupos sincronizados (${allParticipants.length} participantes)`)
+    setSyncing(false)
+    setTimeout(() => setSyncResult(''), 6000)
   }
 
   async function handleImportCSV(e) {
@@ -910,7 +922,20 @@ function BloqueosTab() {
             {importing ? 'Importando...' : '📤 Cargar backup CSV'}
           </button>
         </div>
+        <button
+          onClick={handleSyncStandings}
+          disabled={syncing}
+          className="flex items-center gap-2 bg-yellow-700 hover:bg-yellow-600 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+        >
+          {syncing ? 'Sincronizando...' : '🔄 Sincronizar posiciones de grupo'}
+        </button>
       </div>
+
+      {syncResult && (
+        <div className="bg-green-900/40 border border-green-700 text-green-300 rounded-xl px-4 py-3 text-sm font-medium">
+          {syncResult}
+        </div>
+      )}
 
       {importResult && (
         <div className={`rounded-xl px-4 py-3 text-sm font-medium ${

@@ -10,7 +10,7 @@ import {
   GROUP_LETTERS,
   R32_BRACKET_MAP,
 } from '../data/initialData'
-import { calcR32Qualifiers } from '../utils/scoring'
+import { calcR32Qualifiers, calcPredictedGroupStandings } from '../utils/scoring'
 
 const AppContext = createContext(null)
 
@@ -853,6 +853,33 @@ export function AppProvider({ children }) {
     setConfig(prev => ({ ...prev, locks: merged }))
   }, [config.pts])
 
+  // Recalcula y guarda standings_predictions para todos los participantes
+  // desde sus pronósticos de partidos existentes. Útil para sincronizar
+  // participantes que llenaron antes de que existiera el auto-guardado.
+  const syncAllStandingsPredictions = useCallback(async () => {
+    let count = 0
+    for (const participant of allParticipants) {
+      for (const group of GROUP_LETTERS) {
+        const groupMatches = matches.filter(m => m.group === group && m.phase === 'groups')
+        if (!groupMatches.length) continue
+        const hasPreds = groupMatches.some(m =>
+          predictions.find(p => p.participantId === participant.id && p.matchId === m.id)
+        )
+        if (!hasPreds) continue
+        const standings = calcPredictedGroupStandings(matches, predictions, participant.id, group)
+        const names = standings.map(t => t.name)
+        const { error } = await supabase.from('standings_predictions').upsert(
+          { participant_id: participant.id, group, standings: names },
+          { onConflict: 'participant_id,group' }
+        )
+        if (!error) count++
+      }
+    }
+    const rows = await fetchAllRows('standings_predictions')
+    setStandingsPredictions(rows.map(dbToStandingsPrediction))
+    return count
+  }, [allParticipants, matches, predictions])
+
   const generateBracket = useCallback(async () => {
     const qualifiers = calcR32Qualifiers(matches)
     const updates = R32_BRACKET_MAP.map(({ pos, home, away }) => ({
@@ -1039,7 +1066,7 @@ export function AppProvider({ children }) {
       updateGroupStandings, saveStandingsPrediction, getStandingsPrediction,
       updateTopScorers, saveScorerPrediction, getScorerPrediction,
       updateMatch, updateGroupTeams, updateBracketMatch,
-      updateConfig, updateLocks, resetTournament, generateBracket, propagateBracketRound,
+      updateConfig, updateLocks, resetTournament, generateBracket, propagateBracketRound, syncAllStandingsPredictions,
       importCSVBackup,
       pendingSyncCount, syncPendingCache, refreshData,
     }}>
