@@ -857,7 +857,7 @@ export function AppProvider({ children }) {
   // desde sus pronósticos de partidos existentes. Útil para sincronizar
   // participantes que llenaron antes de que existiera el auto-guardado.
   const syncAllStandingsPredictions = useCallback(async () => {
-    let count = 0
+    const rows = []
     for (const participant of allParticipants) {
       for (const group of GROUP_LETTERS) {
         const groupMatches = matches.filter(m => m.group === group && m.phase === 'groups')
@@ -867,17 +867,16 @@ export function AppProvider({ children }) {
         )
         if (!hasPreds) continue
         const standings = calcPredictedGroupStandings(matches, predictions, participant.id, group)
-        const names = standings.map(t => t.name)
-        const { error } = await supabase.from('standings_predictions').upsert(
-          { participant_id: participant.id, group, standings: names },
-          { onConflict: 'participant_id,group' }
-        )
-        if (!error) count++
+        rows.push({ participant_id: participant.id, group, standings: standings.map(t => t.name) })
       }
     }
-    const rows = await fetchAllRows('standings_predictions')
-    setStandingsPredictions(rows.map(dbToStandingsPrediction))
-    return count
+    if (rows.length > 0) {
+      await supabase.from('standings_predictions')
+        .upsert(rows, { onConflict: 'participant_id,group' })
+    }
+    const fresh = await fetchAllRows('standings_predictions')
+    setStandingsPredictions(fresh.map(dbToStandingsPrediction))
+    return rows.length
   }, [allParticipants, matches, predictions])
 
   const generateBracket = useCallback(async () => {
