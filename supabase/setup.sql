@@ -121,6 +121,8 @@ CREATE POLICY "public_all" ON top_scorers FOR ALL TO anon USING (true) WITH CHEC
 CREATE POLICY "public_all" ON scorer_predictions FOR ALL TO anon USING (true) WITH CHECK (true);
 
 -- 3. FUNCION DE VERIFICACION DE PIN (PIN nunca sale del servidor)
+-- Los PINs nuevos se guardan en texto plano (visibles en admin).
+-- Los PINs anteriores con hash bcrypt siguen funcionando.
 
 CREATE OR REPLACE FUNCTION public.verify_participant_pin(
     p_participant_id TEXT,
@@ -132,43 +134,25 @@ SECURITY DEFINER
 SET search_path = public, extensions, pg_catalog, pg_temp
 AS $$
 DECLARE
-    stored_hash TEXT;
+    stored_pin TEXT;
 BEGIN
-    SELECT pin INTO stored_hash
+    SELECT pin INTO stored_pin
     FROM public.participants
     WHERE id = p_participant_id;
-    IF stored_hash IS NULL THEN
+    IF stored_pin IS NULL THEN
         RETURN FALSE;
     END IF;
-    RETURN stored_hash = extensions.crypt(p_pin, stored_hash);
+    IF stored_pin LIKE '$2a$%' OR stored_pin LIKE '$2b$%' THEN
+        RETURN stored_pin = extensions.crypt(p_pin, stored_pin);
+    END IF;
+    RETURN stored_pin = p_pin;
 END;
 $$;
 
 REVOKE ALL ON FUNCTION public.verify_participant_pin(TEXT, TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.verify_participant_pin(TEXT, TEXT) TO anon, authenticated;
 
--- 4. TRIGGER: hashea automaticamente los PINs al crear/actualizar participantes
-
-CREATE OR REPLACE FUNCTION public.hash_pin_on_save()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public, extensions, pg_catalog, pg_temp
-AS $$
-BEGIN
-    IF NEW.pin IS NOT NULL AND NEW.pin NOT LIKE '$2a$%' THEN
-        NEW.pin = extensions.crypt(NEW.pin, extensions.gen_salt('bf', 8));
-    END IF;
-    RETURN NEW;
-END;
-$$;
-
-CREATE OR REPLACE TRIGGER hash_pin_before_save
-    BEFORE INSERT OR UPDATE OF pin ON public.participants
-    FOR EACH ROW
-    EXECUTE FUNCTION public.hash_pin_on_save();
-
--- 5. DATOS INICIALES
+-- 4. DATOS INICIALES
 
 INSERT INTO config (id, name, tournament_name, year, pts, pollas)
 VALUES (1, 'Polla Mundial', 'Mundial 2026', '2026',
