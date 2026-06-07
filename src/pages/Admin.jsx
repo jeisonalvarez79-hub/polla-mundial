@@ -1011,13 +1011,16 @@ function generatePin() {
   return String(Math.floor(1000 + Math.random() * 9000))
 }
 
-function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAssign, onUpdatePin }) {
+function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAssign, onUpdatePin, onUpdateName }) {
   const pollaName = pollas.find(x => x.id === p.polla_id)?.name
   const isOrphan  = !p.polla_id || !pollaName
-  const [assignId, setAssignId]   = useState('')
+  const [assignId, setAssignId]     = useState('')
   const [editingPin, setEditingPin] = useState(false)
   const [pinInput, setPinInput]     = useState(p.pin || '')
   const [savingPin, setSavingPin]   = useState(false)
+  const [editingName, setEditingName] = useState(false)
+  const [nameInput, setNameInput]     = useState(p.name)
+  const [savingName, setSavingName]   = useState(false)
 
   async function handleSavePin() {
     if (pinInput.length !== 4) return
@@ -1027,10 +1030,50 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
     setEditingPin(false)
   }
 
+  async function handleSaveName() {
+    const trimmed = nameInput.trim().replace(/^[,;\s]+|[,;\s]+$/g, '')
+    if (!trimmed) return
+    setSavingName(true)
+    await onUpdateName(p.id, trimmed)
+    setSavingName(false)
+    setEditingName(false)
+  }
+
   return (
     <div className={`flex items-center gap-2 px-4 py-3 flex-wrap text-sm ${isOrphan ? 'bg-red-950/20' : ''}`}>
       <span className="text-gray-600 w-5 shrink-0 text-center">{index + 1}</span>
-      <span className="text-white font-medium flex-1 min-w-[80px]">{p.name}</span>
+
+      {/* Nombre editable */}
+      {editingName ? (
+        <div className="flex items-center gap-1 flex-1 min-w-[120px]">
+          <input
+            type="text"
+            value={nameInput}
+            onChange={e => setNameInput(e.target.value)}
+            autoFocus
+            className="flex-1 bg-gray-800 border border-blue-600 text-white rounded px-2 py-0.5 text-sm focus:outline-none"
+          />
+          <button
+            onClick={handleSaveName}
+            disabled={!nameInput.trim() || savingName}
+            className="text-xs bg-blue-700 hover:bg-blue-600 disabled:opacity-40 text-white px-2 py-0.5 rounded"
+          >
+            {savingName ? '…' : 'OK'}
+          </button>
+          <button
+            onClick={() => { setEditingName(false); setNameInput(p.name) }}
+            className="text-xs text-gray-500 hover:text-gray-300 px-1"
+          >✕</button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setEditingName(true)}
+          title="Editar nombre"
+          className="text-white font-medium flex-1 min-w-[80px] text-left hover:text-blue-300 transition-colors"
+        >
+          {p.name}
+        </button>
+      )}
 
       {/* Polla badge */}
       {pollaName ? (
@@ -1126,7 +1169,7 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
 function ParticipantesTab() {
   const {
     allParticipants, pollas, currentPollaId,
-    addParticipant, removeParticipant, assignParticipantPolla, updateParticipantPin,
+    addParticipant, removeParticipant, assignParticipantPolla, updateParticipantPin, updateParticipantName,
   } = useApp()
 
   const defaultPolla = currentPollaId || pollas[0]?.id || ''
@@ -1298,6 +1341,7 @@ function ParticipantesTab() {
                 onWhatsApp={getWhatsAppUrl}
                 onAssign={assignParticipantPolla}
                 onUpdatePin={updateParticipantPin}
+                onUpdateName={updateParticipantName}
               />
             ))}
           </div>

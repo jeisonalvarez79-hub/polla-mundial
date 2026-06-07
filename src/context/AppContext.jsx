@@ -575,7 +575,7 @@ export function AppProvider({ children }) {
 
   // Solo el Admin llama esta función; targetPollaId indica la polla destino
   const addParticipant = useCallback(async (name, targetPollaId, pin) => {
-    const trimmed = name.trim()
+    const trimmed = name.trim().replace(/^[,;\s]+|[,;\s]+$/g, '')
     if (!trimmed) return null
     const pollaId = targetPollaId || currentPollaId || null
 
@@ -620,6 +620,19 @@ export function AppProvider({ children }) {
     if (!error) {
       setAllParticipants(prev =>
         prev.map(p => p.id === participantId ? { ...p, pin: newPin } : p)
+      )
+    }
+    return !error
+  }, [])
+
+  const updateParticipantName = useCallback(async (participantId, newName) => {
+    const trimmed = newName.trim().replace(/^[,;\s]+|[,;\s]+$/g, '')
+    if (!trimmed) return false
+    const { error } = await supabase.from('participants')
+      .update({ name: trimmed }).eq('id', participantId)
+    if (!error) {
+      setAllParticipants(prev =>
+        prev.map(p => p.id === participantId ? { ...p, name: trimmed } : p)
       )
     }
     return !error
@@ -1060,7 +1073,7 @@ export function AppProvider({ children }) {
       participants, allParticipants, currentParticipant, currentParticipantId,
       matches, predictions, bracketMatches, bracketPredictions,
       groupStandings, standingsPredictions, topScorers, scorerPredictions,
-      addParticipant, setCurrentParticipant, removeParticipant, assignParticipantPolla, updateParticipantPin,
+      addParticipant, setCurrentParticipant, removeParticipant, assignParticipantPolla, updateParticipantPin, updateParticipantName,
       savePrediction, getPrediction, saveBracketPrediction, getBracketPrediction,
       updateGroupStandings, saveStandingsPrediction, getStandingsPrediction,
       updateTopScorers, saveScorerPrediction, getScorerPrediction,
