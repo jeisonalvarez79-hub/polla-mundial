@@ -236,6 +236,7 @@ export function AppProvider({ children }) {
   async function loadAllParticipants() {
     const { data } = await supabase.from('participants').select('*').order('created_at')
     if (data) setAllParticipants(data)
+    return data || []
   }
 
   async function loadMatches() {
@@ -306,53 +307,70 @@ export function AppProvider({ children }) {
     const rows = await fetchAllRows('predictions')
     const fromDB = rows.map(dbToPrediction)
     const pending = localCache.getPendingPredictions()
-    setPredictions(pending.length > 0 ? mergePendingPredictions(fromDB, pending) : fromDB)
+    const result = pending.length > 0 ? mergePendingPredictions(fromDB, pending) : fromDB
+    setPredictions(result)
+    return result
   }
 
   async function loadBracketPredictions() {
     const rows = await fetchAllRows('bracket_predictions')
     const fromDB = rows.map(dbToBracketPrediction)
     const pending = localCache.getPendingBracketPredictions()
-    setBracketPredictions(pending.length > 0 ? mergePendingBracket(fromDB, pending) : fromDB)
+    const result = pending.length > 0 ? mergePendingBracket(fromDB, pending) : fromDB
+    setBracketPredictions(result)
+    return result
   }
 
   async function loadGroupStandings() {
     const { data } = await supabase.from('group_standings').select('*')
+    const s = { ...EMPTY_STANDINGS }
     if (data && data.length > 0) {
-      const s = { ...EMPTY_STANDINGS }
       data.forEach(row => { s[row.group] = row.standings })
-      setGroupStandings(s)
     }
+    setGroupStandings(s)
+    return s
   }
 
   async function loadStandingsPredictions() {
     const rows = await fetchAllRows('standings_predictions')
     const fromDB = rows.map(dbToStandingsPrediction)
     const pending = localCache.getPendingStandingsPredictions()
-    setStandingsPredictions(pending.length > 0 ? mergePendingStandings(fromDB, pending) : fromDB)
+    const result = pending.length > 0 ? mergePendingStandings(fromDB, pending) : fromDB
+    setStandingsPredictions(result)
+    return result
   }
 
   async function loadTopScorers() {
     const { data } = await supabase.from('top_scorers').select('*').eq('id', 1).single()
-    if (data) setTopScorers(data.scorers || ['', '', ''])
+    const result = data?.scorers || ['', '', '']
+    setTopScorers(result)
+    return result
   }
 
   async function loadScorerPredictions() {
     const rows = await fetchAllRows('scorer_predictions')
     const fromDB = rows.map(dbToScorerPrediction)
     const pending = localCache.getPendingScorerPredictions()
-    setScorerPredictions(pending.length > 0 ? mergePendingScorers(fromDB, pending) : fromDB)
+    const result = pending.length > 0 ? mergePendingScorers(fromDB, pending) : fromDB
+    setScorerPredictions(result)
+    return result
   }
 
   // ─── Recargar todos los datos desde Supabase ─────────────────────────────────
   const refreshData = useCallback(async () => {
-    await Promise.all([
+    const [
+      allParticipants, predictions, bracketPredictions,
+      groupStandings, standingsPredictions, topScorers, scorerPredictions,
+    ] = await Promise.all([
+      loadAllParticipants(),
       loadPredictions(),
       loadBracketPredictions(),
-      loadStandingsPredictions(),
-      loadScorerPredictions(),
       loadGroupStandings(),
+      loadStandingsPredictions(),
+      loadTopScorers(),
+      loadScorerPredictions(),
     ])
+    return { allParticipants, predictions, bracketPredictions, groupStandings, standingsPredictions, topScorers, scorerPredictions }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ─── Sincronizar cache local pendiente con Supabase ───────────────────────────

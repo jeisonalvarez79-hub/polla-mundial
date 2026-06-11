@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
 import { buildRanking, calcGroupScore, calcBracketScore, calcStandingsScore, calcScorerScore } from '../utils/scoring'
 
@@ -129,10 +129,13 @@ export default function Tabla() {
     bracketMatches, bracketPredictions,
     groupStandings, standingsPredictions,
     topScorers, scorerPredictions,
-    currentParticipant, config,
+    currentParticipant, config, refreshData,
   } = useApp()
 
   const [expanded, setExpanded] = useState(null)
+
+  // Asegura que los puntajes se calculen con los pronósticos más recientes
+  useEffect(() => { refreshData() }, [refreshData])
 
   const ranking = buildRanking(
     participants, matches, predictions,

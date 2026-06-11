@@ -771,11 +771,12 @@ function BloqueosTab() {
     allParticipants, predictions, bracketPredictions,
     standingsPredictions, scorerPredictions, topScorers,
     matches, bracketMatches, groupStandings, pollas,
-    importCSVBackup, syncAllStandingsPredictions,
+    importCSVBackup, syncAllStandingsPredictions, refreshData,
   } = useApp()
   const locks = config.locks || DEFAULT_LOCKS
   const [saving, setSaving]           = useState(null)
   const [backupDone, setBackupDone]   = useState(false)
+  const [backingUp, setBackingUp]     = useState(false)
   const [importing, setImporting]     = useState(false)
   const [importResult, setImportResult] = useState('')
   const [syncing, setSyncing]         = useState(false)
@@ -800,16 +801,18 @@ function BloqueosTab() {
     setSaving(null)
   }
 
-  function downloadBackupCSV() {
+  async function downloadBackupCSV() {
+    setBackingUp(true)
+    const fresh = await refreshData()
     const csv = generateCSV({
       pollas,
-      participants: allParticipants,
-      predictions,
-      bracketPredictions,
-      standingsPredictions,
-      scorerPredictions,
-      topScorers,
-      groupStandings,
+      participants: fresh.allParticipants,
+      predictions: fresh.predictions,
+      bracketPredictions: fresh.bracketPredictions,
+      standingsPredictions: fresh.standingsPredictions,
+      scorerPredictions: fresh.scorerPredictions,
+      topScorers: fresh.topScorers,
+      groupStandings: fresh.groupStandings,
       matches,
       bracketMatches,
     })
@@ -822,6 +825,7 @@ function BloqueosTab() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+    setBackingUp(false)
     setBackupDone(true)
     setTimeout(() => setBackupDone(false), 3000)
   }
@@ -898,13 +902,14 @@ function BloqueosTab() {
         </button>
         <button
           onClick={downloadBackupCSV}
-          className={`flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
+          disabled={backingUp}
+          className={`flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50 ${
             backupDone
               ? 'bg-blue-800 text-blue-200'
               : 'bg-gray-700 hover:bg-gray-600 text-white'
           }`}
         >
-          {backupDone ? '✓ CSV descargado' : '📥 Exportar backup CSV'}
+          {backingUp ? '⏳ Actualizando datos...' : backupDone ? '✓ CSV descargado' : '📥 Exportar backup CSV'}
         </button>
         <div>
           <input
