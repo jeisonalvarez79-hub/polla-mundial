@@ -773,13 +773,18 @@ export function AppProvider({ children }) {
     ])
     setPendingSyncCount(localCache.getPendingCount())
     // 3. Intentar Supabase
-    const { data } = await supabase.from('standings_predictions')
+    const { data, error } = await supabase.from('standings_predictions')
       .upsert({ participant_id: participantId, group, standings }, { onConflict: 'participant_id,group' }).select().single()
+    if (error) {
+      console.error('Error guardando posiciones de grupo:', error.message)
+      return false
+    }
     if (data) {
       localCache.markStandingsPredictionSynced(participantId, group)
       setStandingsPredictions(prev => [...prev.filter(p => !(p.participantId === participantId && p.group === group)), dbToStandingsPrediction(data)])
       setPendingSyncCount(localCache.getPendingCount())
     }
+    return !!data
   }, [])
 
   const getStandingsPrediction = useCallback((participantId, group) =>
@@ -801,13 +806,18 @@ export function AppProvider({ children }) {
     ])
     setPendingSyncCount(localCache.getPendingCount())
     // 3. Intentar Supabase
-    const { data } = await supabase.from('scorer_predictions')
+    const { data, error } = await supabase.from('scorer_predictions')
       .upsert({ participant_id: participantId, scorers }, { onConflict: 'participant_id' }).select().single()
+    if (error) {
+      console.error('Error guardando pronóstico de goleador:', error.message)
+      return false
+    }
     if (data) {
       localCache.markScorerPredictionSynced(participantId)
       setScorerPredictions(prev => [...prev.filter(p => p.participantId !== participantId), dbToScorerPrediction(data)])
       setPendingSyncCount(localCache.getPendingCount())
     }
+    return !!data
   }, [])
 
   const getScorerPrediction = useCallback((participantId) =>
