@@ -112,6 +112,7 @@ export const BRACKET_PTS = {
 
 // Bloqueos por fase: false = abierto, true = bloqueado
 export const DEFAULT_LOCKS = {
+  scorer: false,
   groups: false,
   r32:    false,
   r16:    false,

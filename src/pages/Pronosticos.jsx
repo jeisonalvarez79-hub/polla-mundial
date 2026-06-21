@@ -444,12 +444,13 @@ function GoleadoresTab() {
   const pred = currentParticipant ? getScorerPrediction(currentParticipant.id) : null
   const [local, setLocal] = useState(pred?.scorers?.[0] || '')
   const pts = config?.pts?.goleador ?? 10
+  const scorerLocked = config?.locks?.scorer ?? false
 
   useEffect(() => { setLocal(pred?.scorers?.[0] || '') }, [pred])
 
   function handleSave(e) {
     e.preventDefault()
-    if (!currentParticipant) return
+    if (!currentParticipant || scorerLocked) return
     saveScorerPrediction(currentParticipant.id, [local])
   }
 
@@ -461,6 +462,12 @@ function GoleadoresTab() {
         <strong>¿Cómo funciona?</strong> Predice el máximo goleador del torneo.
         Ganas <strong>{pts} pts</strong> si aciertas el goleador registrado por el administrador.
       </div>
+
+      {scorerLocked && (
+        <div className="bg-red-950/40 border border-red-800 rounded-xl p-4 text-red-300 text-sm">
+          🔒 El administrador ha bloqueado el pronóstico de goleador. Solo lectura.
+        </div>
+      )}
 
       {!currentParticipant && (
         <div className="bg-yellow-900/20 border border-yellow-800 rounded-xl p-4 text-yellow-300 text-sm">
@@ -481,12 +488,12 @@ function GoleadoresTab() {
                 type="text"
                 value={local}
                 onChange={e => setLocal(e.target.value)}
-                disabled={!currentParticipant}
+                disabled={!currentParticipant || scorerLocked}
                 placeholder="Nombre del goleador"
                 className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600 disabled:opacity-50"
               />
             </div>
-            {currentParticipant && (
+            {currentParticipant && !scorerLocked && (
               <button
                 type="submit"
                 disabled={!changed || !local.trim()}

@@ -756,6 +756,7 @@ function GoleadoresTab() {
 // ─── Tab: Bloqueos ────────────────────────────────────────────────────────────
 
 const PHASE_INFO = [
+  { id: 'scorer', label: 'Goleador del Torneo',   desc: 'Pronóstico del máximo goleador · Bloquear antes de iniciar el torneo' },
   { id: 'groups', label: 'Fase de Grupos',        desc: '72 partidos de grupos · Pronósticos de marcadores y tabla' },
   { id: 'r32',    label: 'Dieciseisavos de Final', desc: 'Bracket · 16 llaves' },
   { id: 'r16',    label: 'Octavos de Final',        desc: 'Bracket · 8 llaves' },
