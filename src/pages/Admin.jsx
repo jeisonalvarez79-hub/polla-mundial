@@ -1639,6 +1639,123 @@ const ROUND_LABEL_ADMIN = {
 }
 const ROUND_ORDER_ADMIN = ['r32', 'r16', 'qf', 'sf', 'third', 'final']
 
+function GruposView({ groups, matches, predictions, participantId }) {
+  const allStandings = Object.fromEntries(
+    groups.map(g => [g, calcPredictedGroupStandings(matches, predictions, participantId, g)])
+  )
+
+  const thirds = groups
+    .map(g => allStandings[g]?.[2])
+    .filter(t => t?.name)
+
+  const sortedThirds = [...thirds].sort((a, b) => {
+    if (b.Pts !== a.Pts) return b.Pts - a.Pts
+    if (b.DG  !== a.DG)  return b.DG  - a.DG
+    if (b.GF  !== a.GF)  return b.GF  - a.GF
+    return a.name.localeCompare(b.name)
+  })
+
+  const best8Set = new Set(sortedThirds.slice(0, 8).map(t => t.name))
+
+  const groupOf = name => groups.find(g => allStandings[g]?.[2]?.name === name) ?? '?'
+
+  return (
+    <div className="space-y-5">
+      {/* Leyenda */}
+      <div className="flex flex-wrap gap-4 text-xs text-gray-400">
+        <span className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-green-700 inline-block"></span>
+          Clasificado directo (1° y 2°)
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-amber-700 inline-block"></span>
+          Mejor 3° clasificado (top 8)
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {groups.map(group => {
+          const standings = allStandings[group] || []
+          const hasPreds = standings.some(t => t.J > 0)
+          return (
+            <div key={group} className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+              <div className="bg-gray-800 px-4 py-2 flex items-center justify-between">
+                <span className="text-white font-semibold text-sm">Grupo {group}</span>
+                {!hasPreds && <span className="text-xs text-gray-600">Sin pronósticos</span>}
+              </div>
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-gray-500 border-b border-gray-800">
+                    <th className="text-center px-2 py-1.5 font-medium w-7">#</th>
+                    <th className="text-left px-2 py-1.5 font-medium">Equipo</th>
+                    <th className="text-center px-2 py-1.5 font-medium">Pts</th>
+                    <th className="text-center px-2 py-1.5 font-medium">DG</th>
+                    <th className="text-center px-2 py-1.5 font-medium">GF</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {standings.map((team, i) => {
+                    const isBest3rd = i === 2 && best8Set.has(team.name)
+                    return (
+                      <tr key={team.name || i} className={`border-b border-gray-800/50 last:border-0 ${
+                        i < 2     ? 'bg-green-900/10' :
+                        isBest3rd ? 'bg-amber-900/10' : ''
+                      }`}>
+                        <td className="px-2 py-2 text-center">
+                          <span className={`font-bold text-sm ${
+                            i === 0   ? 'text-yellow-400' :
+                            i === 1   ? 'text-green-400'  :
+                            isBest3rd ? 'text-amber-400'  : 'text-gray-600'
+                          }`}>{i + 1}</span>
+                        </td>
+                        <td className="px-2 py-2 font-medium text-white truncate max-w-[120px]">
+                          {team.name || '—'}
+                          {i < 2     && <span className="ml-1 text-green-500 text-xs">✓</span>}
+                          {isBest3rd && <span className="ml-1 text-amber-500 text-xs">★</span>}
+                        </td>
+                        <td className="px-2 py-2 text-center font-bold text-white">{team.Pts}</td>
+                        <td className={`px-2 py-2 text-center font-medium ${
+                          team.DG > 0 ? 'text-green-400' : team.DG < 0 ? 'text-red-400' : 'text-gray-500'
+                        }`}>
+                          {team.DG > 0 ? '+' : ''}{team.DG}
+                        </td>
+                        <td className="px-2 py-2 text-center text-gray-400">{team.GF}</td>
+                      </tr>
+                    )
+                  })}
+                  {standings.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="px-3 py-4 text-center text-gray-600">Sin equipos</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Resumen mejores 8 terceros */}
+      {best8Set.size > 0 && (
+        <div className="bg-gray-900 border border-amber-800/50 rounded-xl p-4">
+          <h4 className="text-amber-400 font-semibold text-sm mb-3">
+            ★ Mejores terceros clasificados según este participante ({best8Set.size}/8)
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {sortedThirds.slice(0, 8).map((t, i) => (
+              <div key={t.name} className="flex items-center gap-1.5 bg-amber-900/20 border border-amber-800/40 rounded-lg px-3 py-1.5">
+                <span className="text-amber-500 font-bold text-xs">{i + 1}°</span>
+                <span className="text-white text-xs font-medium">{t.name}</span>
+                <span className="text-gray-500 text-xs">Gr.{groupOf(t.name)} · {t.Pts}pts · DG{t.DG > 0 ? '+' : ''}{t.DG}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function VerPronosticosTab() {
   const {
     allParticipants, pollas, currentPollaId,
@@ -1686,27 +1803,6 @@ function VerPronosticosTab() {
     if (!participant) return null
     return calcPredictedBracketTeams(matches, predictions, bracketPredictions, participant.id, bracketMatches)
   }, [matches, predictions, bracketPredictions, participant, bracketMatches])
-
-  const allGroupStandings = useMemo(() => {
-    if (!participant) return {}
-    const grps = [...new Set(matches.filter(m => m.phase === 'groups').map(m => m.group))].sort()
-    return Object.fromEntries(
-      grps.map(g => [g, calcPredictedGroupStandings(matches, predictions, participant.id, g)])
-    )
-  }, [matches, predictions, participant])
-
-  const best8ThirdsSet = useMemo(() => {
-    const thirds = Object.values(allGroupStandings)
-      .map(s => s[2])
-      .filter(t => t?.name)
-    const sorted = [...thirds].sort((a, b) => {
-      if (b.Pts !== a.Pts) return b.Pts - a.Pts
-      if (b.DG  !== a.DG)  return b.DG  - a.DG
-      if (b.GF  !== a.GF)  return b.GF  - a.GF
-      return a.name.localeCompare(b.name)
-    })
-    return new Set(sorted.slice(0, 8).map(t => t.name))
-  }, [allGroupStandings])
 
   const byRound = ROUND_ORDER_ADMIN.reduce((acc, r) => {
     acc[r] = bracketMatches.filter(m => m.round === r)
@@ -1870,107 +1966,7 @@ function VerPronosticosTab() {
 
           {/* ── Tab Tabla de Grupos ── */}
           {viewTab === 'grupos' && (
-            <div className="space-y-5">
-              {/* Leyenda */}
-              <div className="flex flex-wrap gap-4 text-xs text-gray-400">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-green-700 inline-block"></span>
-                  Clasificado directo (1° y 2°)
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-700 inline-block"></span>
-                  Mejor 3° clasificado (top 8)
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {groups.map(group => {
-                  const standings = allGroupStandings[group] || []
-                  const hasPreds = standings.some(t => t.J > 0)
-                  return (
-                    <div key={group} className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-                      <div className="bg-gray-800 px-4 py-2 flex items-center justify-between">
-                        <span className="text-white font-semibold text-sm">Grupo {group}</span>
-                        {!hasPreds && <span className="text-xs text-gray-600">Sin pronósticos</span>}
-                      </div>
-                      <table className="w-full text-xs">
-                        <thead>
-                          <tr className="text-gray-500 border-b border-gray-800">
-                            <th className="text-center px-2 py-1.5 font-medium w-7">#</th>
-                            <th className="text-left px-2 py-1.5 font-medium">Equipo</th>
-                            <th className="text-center px-2 py-1.5 font-medium">Pts</th>
-                            <th className="text-center px-2 py-1.5 font-medium">DG</th>
-                            <th className="text-center px-2 py-1.5 font-medium">GF</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {standings.map((team, i) => {
-                            const isBest3rd = i === 2 && best8ThirdsSet.has(team.name)
-                            return (
-                              <tr key={team.name} className={`border-b border-gray-800/50 last:border-0 ${
-                                i < 2      ? 'bg-green-900/10' :
-                                isBest3rd  ? 'bg-amber-900/10' : ''
-                              }`}>
-                                <td className="px-2 py-2 text-center">
-                                  <span className={`font-bold text-sm ${
-                                    i === 0   ? 'text-yellow-400' :
-                                    i === 1   ? 'text-green-400'  :
-                                    isBest3rd ? 'text-amber-400'  : 'text-gray-600'
-                                  }`}>{i + 1}</span>
-                                </td>
-                                <td className="px-2 py-2 font-medium text-white truncate max-w-[120px]">
-                                  {team.name || '—'}
-                                  {i < 2     && <span className="ml-1 text-green-500 text-xs">✓</span>}
-                                  {isBest3rd && <span className="ml-1 text-amber-500 text-xs">★</span>}
-                                </td>
-                                <td className="px-2 py-2 text-center font-bold text-white">{team.Pts}</td>
-                                <td className={`px-2 py-2 text-center font-medium ${team.DG > 0 ? 'text-green-400' : team.DG < 0 ? 'text-red-400' : 'text-gray-500'}`}>
-                                  {team.DG > 0 ? '+' : ''}{team.DG}
-                                </td>
-                                <td className="px-2 py-2 text-center text-gray-400">{team.GF}</td>
-                              </tr>
-                            )
-                          })}
-                          {standings.length === 0 && (
-                            <tr>
-                              <td colSpan={5} className="px-3 py-4 text-center text-gray-600">Sin equipos</td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  )
-                })}
-              </div>
-
-              {/* Resumen mejores 8 terceros */}
-              {best8ThirdsSet.size > 0 && (
-                <div className="bg-gray-900 border border-amber-800/50 rounded-xl p-4">
-                  <h4 className="text-amber-400 font-semibold text-sm mb-3">
-                    ★ Mejores terceros clasificados según este participante ({best8ThirdsSet.size}/8)
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {Object.entries(allGroupStandings)
-                      .map(([group, s]) => s[2] ? { ...s[2], group } : null)
-                      .filter(t => t && best8ThirdsSet.has(t.name))
-                      .sort((a, b) => {
-                        if (b.Pts !== a.Pts) return b.Pts - a.Pts
-                        if (b.DG  !== a.DG)  return b.DG  - a.DG
-                        if (b.GF  !== a.GF)  return b.GF  - a.GF
-                        return a.name.localeCompare(b.name)
-                      })
-                      .map((t, i) => (
-                        <div key={t.name} className="flex items-center gap-1.5 bg-amber-900/20 border border-amber-800/40 rounded-lg px-3 py-1.5">
-                          <span className="text-amber-500 font-bold text-xs">{i + 1}°</span>
-                          <span className="text-white text-xs font-medium">{t.name}</span>
-                          <span className="text-gray-500 text-xs">Gr.{t.group} · {t.Pts}pts · DG{t.DG > 0 ? '+' : ''}{t.DG}</span>
-                        </div>
-                      ))
-                    }
-                  </div>
-                </div>
-              )}
-            </div>
+            <GruposView groups={groups} matches={matches} predictions={predictions} participantId={participant.id} />
           )}
 
           {/* ── Tab Llaves ── */}
