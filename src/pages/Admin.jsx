@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo } from 'react'
 import { useApp } from '../context/AppContext'
 import { GROUP_LETTERS, R32_BRACKET_MAP, DEFAULT_LOCKS, BRACKET_PTS } from '../data/initialData'
-import { buildRanking, calcGroupScore, calcBracketScore, calcPredictedBracketTeams } from '../utils/scoring'
+import { buildRanking, calcGroupScore, calcBracketScore, calcPredictedBracketTeams, calcPredictedGroupStandings } from '../utils/scoring'
 
 // ─── CSV helpers ──────────────────────────────────────────────────────────────
 
@@ -1747,6 +1747,7 @@ function VerPronosticosTab() {
           <div className="flex gap-1 border-b border-gray-800">
             {[
               { id: 'partidos',  label: '⚽ Partidos de Grupos' },
+              { id: 'grupos',    label: '📊 Tabla de Grupos' },
               { id: 'llaves',    label: '🎯 Llaves' },
               { id: 'goleador',  label: '⭐ Goleador' },
             ].map(t => (
@@ -1843,6 +1844,64 @@ function VerPronosticosTab() {
                   </table>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* ── Tab Tabla de Grupos ── */}
+          {viewTab === 'grupos' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {groups.map(group => {
+                const standings = calcPredictedGroupStandings(matches, predictions, participant.id, group)
+                const hasPreds = standings.some(t => t.J > 0)
+                return (
+                  <div key={group} className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+                    <div className="bg-gray-800 px-4 py-2 flex items-center justify-between">
+                      <span className="text-white font-semibold text-sm">Grupo {group}</span>
+                      {!hasPreds && (
+                        <span className="text-xs text-gray-600">Sin pronósticos</span>
+                      )}
+                    </div>
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="text-gray-500 border-b border-gray-800">
+                          <th className="text-center px-2 py-1.5 font-medium w-7">#</th>
+                          <th className="text-left px-2 py-1.5 font-medium">Equipo</th>
+                          <th className="text-center px-2 py-1.5 font-medium">Pts</th>
+                          <th className="text-center px-2 py-1.5 font-medium">DG</th>
+                          <th className="text-center px-2 py-1.5 font-medium">GF</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {standings.map((team, i) => (
+                          <tr key={team.name} className={`border-b border-gray-800/50 last:border-0 ${i < 2 ? 'bg-green-900/10' : ''}`}>
+                            <td className="px-2 py-2 text-center">
+                              <span className={`font-bold text-sm ${i === 0 ? 'text-yellow-400' : i === 1 ? 'text-green-400' : 'text-gray-600'}`}>
+                                {i + 1}
+                              </span>
+                            </td>
+                            <td className="px-2 py-2 font-medium text-white truncate max-w-[120px]">
+                              {team.name || '—'}
+                              {i < 2 && <span className="ml-1 text-green-600 text-xs">✓</span>}
+                            </td>
+                            <td className="px-2 py-2 text-center font-bold text-white">{team.Pts}</td>
+                            <td className={`px-2 py-2 text-center font-medium ${team.DG > 0 ? 'text-green-400' : team.DG < 0 ? 'text-red-400' : 'text-gray-500'}`}>
+                              {team.DG > 0 ? '+' : ''}{team.DG}
+                            </td>
+                            <td className="px-2 py-2 text-center text-gray-400">{team.GF}</td>
+                          </tr>
+                        ))}
+                        {standings.length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="px-3 py-4 text-center text-gray-600">
+                              Sin equipos en este grupo
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )
+              })}
             </div>
           )}
 
