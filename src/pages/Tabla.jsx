@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
-import { buildRanking, calcGroupScore, calcBracketScore, calcStandingsScore, calcScorerScore } from '../utils/scoring'
+import { buildRanking, calcGroupScore, calcBracketScoreAll, calcStandingsScore, calcScorerScore, calcGroupStandings, calcPredictedGroupStandings } from '../utils/scoring'
+import { GROUP_LETTERS, BRACKET_PAIRING_PTS, BRACKET_TEAM_PTS, BONUS_PTS } from '../data/initialData'
 
 const MEDAL = ['🥇', '🥈', '🥉']
 
@@ -47,53 +48,104 @@ function ParticipantDetail({
       )}
 
       {/* Clasificación de grupos */}
-      {Object.entries(groupStandings || {}).some(([, a]) => a?.some(t => t)) && (
-        <div>
-          <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">Clasificación de grupos</p>
-          {Object.entries(groupStandings).map(([group, actual]) => {
-            if (!actual?.some(t => t)) return null
-            const pred = standingsPredictions.find(p => p.participantId === pid && p.group === group)
-            const score = calcStandingsScore(pred?.standings, actual, config)
-            return (
-              <div key={group} className="flex items-center justify-between py-1 border-b border-gray-700/50 last:border-0">
-                <span className="text-gray-300 text-xs">Grupo {group}</span>
-                <div className="flex items-center gap-2 shrink-0 ml-2">
-                  <span className="text-gray-500 text-xs">
-                    {pred ? pred.standings.filter(Boolean).join(' · ') : '—'}
-                  </span>
-                  <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-purple-400' : 'text-gray-600'}`}>
-                    {score}
-                  </span>
+      {(() => {
+        const completedGroups = GROUP_LETTERS.filter(g => {
+          const gm = matches.filter(m => m.group === g && m.phase === 'groups')
+          return gm.length > 0 && gm.every(m => m.homeScore !== null && m.awayScore !== null)
+        })
+        if (!completedGroups.length) return null
+        return (
+          <div>
+            <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">Clasificación de grupos</p>
+            {completedGroups.map(group => {
+              const actual = calcGroupStandings(matches, group).map(t => t.name)
+              const pred   = calcPredictedGroupStandings(matches, predictions, pid, group).map(t => t.name)
+              const score  = calcStandingsScore(pred, actual, config)
+              return (
+                <div key={group} className="flex items-center justify-between py-1 border-b border-gray-700/50 last:border-0">
+                  <span className="text-gray-300 text-xs">Grupo {group}</span>
+                  <div className="flex items-center gap-2 shrink-0 ml-2">
+                    <span className="text-gray-500 text-xs">{pred.filter(Boolean).join(' · ')}</span>
+                    <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-purple-400' : 'text-gray-600'}`}>
+                      {score}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
+              )
+            })}
+          </div>
+        )
+      })()}
 
       {/* Bracket */}
-      {finishedBracket.length > 0 && (
-        <div>
-          <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">Bracket</p>
-          {finishedBracket.map(bm => {
+      {(() => {
+        const { ptsPairing, ptsTeam, ptsBonus } = calcBracketScoreAll(
+          pid, bracketMatches, bracketPredictions, matches, predictions
+        )
+        const hasBracketData = bracketMatches.some(m => m.homeTeam && m.awayTeam)
+        if (!hasBracketData) return null
+
+        // Helper: ¿coinciden los 2 equipos sin importar orden?
+        function pairsMatch(ph, pa, ah, aa) {
+          if (!ph || !pa || !ah || !aa) return false
+          return (ph === ah && pa === aa) || (ph === aa && pa === ah)
+        }
+        // Equipos reales de una ronda
+        function aTeams(round) {
+          return new Set(bracketMatches.filter(m => m.round === round).flatMap(m => [m.homeTeam, m.awayTeam]).filter(Boolean))
+        }
+        // Equipos predichos para una lista de IDs
+        const predTeamMap = (() => {
+          // Construir mapa simple: para cada llave, equipos predichos
+          const map = {}
+          bracketMatches.forEach(bm => {
+            const p = bracketPredictions.find(p => p.participantId === pid && p.bracketMatchId === bm.id)
+            map[bm.id] = { home: bm.homeTeam, away: bm.awayTeam, predWinner: p?.predictedWinner }
+          })
+          return map
+        })()
+
+        const rows = []
+
+        // R32 pairings
+        const r32actual = bracketMatches.filter(m => m.round === 'r32' && m.homeTeam && m.awayTeam)
+        if (r32actual.length > 0) {
+          let correct = 0
+          r32actual.forEach(bm => {
             const pred = bracketPredictions.find(p => p.participantId === pid && p.bracketMatchId === bm.id)
-            const score = calcBracketScore(pred, bm, config)
-            return (
-              <div key={bm.id} className="flex items-center justify-between py-1 border-b border-gray-700/50 last:border-0">
-                <span className="text-gray-300 text-xs">{bm.label}</span>
-                <div className="flex items-center gap-2 shrink-0 ml-2">
-                  <span className="text-gray-500 text-xs">
-                    {pred ? pred.predictedWinner : '—'} → <span className="text-green-400">{bm.winner}</span>
-                  </span>
-                  <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-green-400' : 'text-gray-600'}`}>
-                    {score}
-                  </span>
-                </div>
+            // Para R32 los equipos predichos vienen de los pronósticos de grupos (no de bracketPredictions directamente)
+            // Solo contamos las que el admin ya llenó
+            if (bm.homeTeam && bm.awayTeam) correct++ // placeholder — el scoring real ya se calculó arriba
+          })
+          rows.push({ label: `16avos — llaves registradas: ${r32actual.length}/16`, pts: ptsPairing > 0 ? '(ver total)' : 0, color: 'text-green-400' })
+        }
+
+        // Resumen por categoría
+        const totalBracket = ptsPairing + ptsTeam + ptsBonus
+        return (
+          <div>
+            <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">Bracket</p>
+            <div className="space-y-1">
+              <div className="flex justify-between py-1 border-b border-gray-700/50">
+                <span className="text-gray-400 text-xs">Llaves acertadas (ambos equipos)</span>
+                <span className={`font-bold text-sm ${ptsPairing > 0 ? 'text-green-400' : 'text-gray-600'}`}>{ptsPairing}</span>
               </div>
-            )
-          })}
-        </div>
-      )}
+              <div className="flex justify-between py-1 border-b border-gray-700/50">
+                <span className="text-gray-400 text-xs">Equipos clasificados por ronda</span>
+                <span className={`font-bold text-sm ${ptsTeam > 0 ? 'text-cyan-400' : 'text-gray-600'}`}>{ptsTeam}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-gray-700/50">
+                <span className="text-gray-400 text-xs">Bonus (campeón / subcampeón / 3ro / 4to)</span>
+                <span className={`font-bold text-sm ${ptsBonus > 0 ? 'text-orange-400' : 'text-gray-600'}`}>{ptsBonus}</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span className="text-gray-300 text-xs font-semibold">Total bracket</span>
+                <span className={`font-bold text-sm ${totalBracket > 0 ? 'text-white' : 'text-gray-600'}`}>{totalBracket}</span>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Goleadores */}
       {topScorers?.some(s => s) && (
@@ -168,21 +220,74 @@ export default function Tabla() {
       </div>
 
       {/* Leyenda de puntos */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-        <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">Sistema de puntos actual</p>
-        <div className="flex flex-wrap gap-4 text-xs">
-          {[
-            { label: 'Marcador exacto',    value: pts?.exacto,      color: 'text-yellow-400' },
-            { label: 'Resultado correcto', value: pts?.resultado,    color: 'text-blue-400' },
-            { label: 'Bracket correcto',   value: pts?.clasificado,  color: 'text-green-400' },
-            { label: 'Posición en grupo',  value: pts?.ordenGrupo,   color: 'text-purple-400' },
-            { label: 'Goleador exacto',    value: pts?.goleador,     color: 'text-orange-400' },
-          ].map(item => (
-            <span key={item.label} className="flex items-center gap-1.5">
-              <span className={`font-bold text-sm ${item.color}`}>{item.value}</span>
-              <span className="text-gray-400">{item.label}</span>
-            </span>
-          ))}
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
+        <p className="text-xs text-gray-500 uppercase tracking-wide">Sistema de puntos</p>
+        <div>
+          <p className="text-xs text-gray-600 mb-1.5">Fase de grupos</p>
+          <div className="flex flex-wrap gap-4 text-xs">
+            {[
+              { label: 'Marcador exacto',        value: pts?.exacto,      color: 'text-yellow-400' },
+              { label: 'Resultado correcto',      value: pts?.resultado,   color: 'text-blue-400' },
+              { label: 'Clasif. top-2 por grupo', value: pts?.clasificado, color: 'text-purple-400' },
+              { label: 'Posición exacta grupo',   value: pts?.ordenGrupo,  color: 'text-purple-300' },
+            ].map(item => (
+              <span key={item.label} className="flex items-center gap-1.5">
+                <span className={`font-bold text-sm ${item.color}`}>{item.value}</span>
+                <span className="text-gray-400">{item.label}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+        <div>
+          <p className="text-xs text-gray-600 mb-1.5">Bracket — llaves acertadas (ambos equipos)</p>
+          <div className="flex flex-wrap gap-4 text-xs">
+            {[
+              { label: '16avos llave',    value: BRACKET_PAIRING_PTS.r32,   color: 'text-green-400' },
+              { label: 'Octavos llave',   value: BRACKET_PAIRING_PTS.r16,   color: 'text-green-400' },
+              { label: 'Cuartos llave',   value: BRACKET_PAIRING_PTS.qf,    color: 'text-green-400' },
+              { label: 'Semis llave',     value: BRACKET_PAIRING_PTS.sf,    color: 'text-green-400' },
+              { label: '3er puesto llave',value: BRACKET_PAIRING_PTS.third, color: 'text-green-400' },
+              { label: 'Final llave',     value: BRACKET_PAIRING_PTS.final, color: 'text-green-400' },
+            ].map(item => (
+              <span key={item.label} className="flex items-center gap-1.5">
+                <span className={`font-bold text-sm ${item.color}`}>{item.value}</span>
+                <span className="text-gray-400">{item.label}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+        <div>
+          <p className="text-xs text-gray-600 mb-1.5">Bracket — equipo clasificado por ronda (acumulativo)</p>
+          <div className="flex flex-wrap gap-4 text-xs">
+            {[
+              { label: 'Equipo en octavos',      value: BRACKET_TEAM_PTS.r16,       color: 'text-cyan-400' },
+              { label: 'Equipo en cuartos',      value: BRACKET_TEAM_PTS.qf,        color: 'text-cyan-400' },
+              { label: 'Equipo en semis',        value: BRACKET_TEAM_PTS.sf,        color: 'text-cyan-400' },
+              { label: 'Equipo final/3er puesto',value: BRACKET_TEAM_PTS.finalFour, color: 'text-cyan-400' },
+            ].map(item => (
+              <span key={item.label} className="flex items-center gap-1.5">
+                <span className={`font-bold text-sm ${item.color}`}>{item.value}</span>
+                <span className="text-gray-400">{item.label}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+        <div>
+          <p className="text-xs text-gray-600 mb-1.5">Bonus final</p>
+          <div className="flex flex-wrap gap-4 text-xs">
+            {[
+              { label: 'Campeón',     value: BONUS_PTS.champion,    color: 'text-orange-400' },
+              { label: 'Subcampeón',  value: BONUS_PTS.runnerUp,    color: 'text-orange-400' },
+              { label: '3er puesto',  value: BONUS_PTS.thirdPlace,  color: 'text-orange-400' },
+              { label: '4to puesto',  value: BONUS_PTS.fourthPlace, color: 'text-orange-400' },
+              { label: 'Goleador',    value: pts?.goleador,         color: 'text-orange-400' },
+            ].map(item => (
+              <span key={item.label} className="flex items-center gap-1.5">
+                <span className={`font-bold text-sm ${item.color}`}>{item.value}</span>
+                <span className="text-gray-400">{item.label}</span>
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
