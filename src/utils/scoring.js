@@ -4,9 +4,10 @@ function pts(config) {
   return { ...DEFAULT_PTS, ...(config?.pts || {}) }
 }
 
-// Ordena una lista de equipos con criterios FIFA: puntos → h2h → DG → GF → alfabético
+// Ordena equipos con criterios FIFA 2026:
+// Pts → DG general → GF general → H2H Pts → H2H DG → H2H GF → alfabético
 function sortGroupTeams(list, finished) {
-  function h2h(names) {
+  function calcH2H(names) {
     const stats = Object.fromEntries(names.map(n => [n, { Pts: 0, DG: 0, GF: 0 }]))
     finished
       .filter(m => names.includes(m.homeTeam) && names.includes(m.awayTeam))
@@ -22,6 +23,29 @@ function sortGroupTeams(list, finished) {
     return stats
   }
 
+  // Para equipos empatados en Pts: DG general → GF general → H2H (solo entre aún empatados)
+  function resolveGroup(group) {
+    if (group.length <= 1) return group
+    group.sort((a, b) => b.DG - a.DG || b.GF - a.GF)
+    const result = []
+    let i = 0
+    while (i < group.length) {
+      let j = i + 1
+      while (j < group.length && group[j].DG === group[i].DG && group[j].GF === group[i].GF) j++
+      const sub = group.slice(i, j)
+      if (sub.length > 1) {
+        const hh = calcH2H(sub.map(t => t.name))
+        sub.sort((a, b) => {
+          const ha = hh[a.name], hb = hh[b.name]
+          return hb.Pts - ha.Pts || hb.DG - ha.DG || hb.GF - ha.GF || a.name.localeCompare(b.name)
+        })
+      }
+      result.push(...sub)
+      i = j
+    }
+    return result
+  }
+
   list.sort((a, b) => b.Pts - a.Pts)
 
   const result = []
@@ -29,20 +53,7 @@ function sortGroupTeams(list, finished) {
   while (i < list.length) {
     let j = i + 1
     while (j < list.length && list[j].Pts === list[i].Pts) j++
-    const tied = list.slice(i, j)
-    if (tied.length > 1) {
-      const hh = h2h(tied.map(t => t.name))
-      tied.sort((a, b) => {
-        const ha = hh[a.name], hb = hh[b.name]
-        if (hb.Pts !== ha.Pts) return hb.Pts - ha.Pts
-        if (hb.DG  !== ha.DG)  return hb.DG  - ha.DG
-        if (hb.GF  !== ha.GF)  return hb.GF  - ha.GF
-        if (b.DG   !== a.DG)   return b.DG   - a.DG
-        if (b.GF   !== a.GF)   return b.GF   - a.GF
-        return a.name.localeCompare(b.name)
-      })
-    }
-    result.push(...tied)
+    result.push(...resolveGroup(list.slice(i, j)))
     i = j
   }
   return result
