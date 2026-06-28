@@ -100,14 +100,40 @@ export const DEFAULT_PTS = {
   goleador:   10,  // Goleador correcto
 }
 
-// Puntos por fase eliminatoria — fijos (no configurables)
+// Alias legacy (usado en Bracket.jsx y Admin.jsx para display)
 export const BRACKET_PTS = {
-  r32:   3,   // 16avos: llave acertada completamente
-  r16:   4,   // Octavos: llave acertada completamente
-  qf:    8,   // Cuartos: llave acertada completamente
-  sf:    8,   // Semis: finalista acertado
-  third: 8,   // Tercer lugar: llave acertada
-  final: 12,  // Final: acertada completamente
+  r32:   3,
+  r16:   4,
+  qf:    8,
+  sf:    8,
+  third: 8,
+  final: 12,
+}
+
+// Puntos por llave acertada (ambos equipos correctos, sin importar orden)
+export const BRACKET_PAIRING_PTS = {
+  r32:   3,   // 16avos
+  r16:   4,   // Octavos
+  qf:    8,   // Cuartos
+  sf:    8,   // Semis
+  third: 8,   // 3er y 4to puesto
+  final: 12,  // Final
+}
+
+// Puntos por equipo correctamente clasificado a cada ronda (acumulativos)
+export const BRACKET_TEAM_PTS = {
+  r16:       2,  // por equipo que llegó a octavos
+  qf:        4,  // por equipo que llegó a cuartos
+  sf:        4,  // por equipo que llegó a semis
+  finalFour: 8,  // por equipo en la final o partido de 3er puesto (los 4 restantes)
+}
+
+// Puntos bonus por posición final (derivados del bracket del participante)
+export const BONUS_PTS = {
+  champion:    15,
+  runnerUp:    10,
+  thirdPlace:  8,
+  fourthPlace: 6,
 }
 
 // Bloqueos por fase: false = abierto, true = bloqueado

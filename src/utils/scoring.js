@@ -1,4 +1,4 @@
-import { DEFAULT_PTS, BRACKET_PTS, GROUP_LETTERS, R32_BRACKET_MAP } from '../data/initialData'
+import { DEFAULT_PTS, BRACKET_PAIRING_PTS, BRACKET_TEAM_PTS, BONUS_PTS, GROUP_LETTERS, R32_BRACKET_MAP } from '../data/initialData'
 
 function pts(config) {
   return { ...DEFAULT_PTS, ...(config?.pts || {}) }
@@ -280,13 +280,163 @@ export function calcGroupScore(prediction, match, config) {
 }
 
 /**
- * Puntaje por llave en fase eliminatoria.
- * Los puntos dependen de la ronda (hardcoded según reglamento).
+ * Compatibilidad con Admin/Bracket — el nuevo sistema no da pts por ganador individual;
+ * el puntaje real está en calcBracketScoreAll (por ronda). Retorna 0 siempre.
  */
-export function calcBracketScore(prediction, bracketMatch, config) {
-  if (!bracketMatch.winner || !prediction) return 0
-  if (prediction.predictedWinner !== bracketMatch.winner) return 0
-  return BRACKET_PTS[bracketMatch.round] ?? 0
+export function calcBracketScore(_prediction, _match, _config) {
+  return 0
+}
+
+/**
+ * Calcula todos los puntos de bracket para un participante.
+ *
+ * R32  → 3 pts por llave acertada (ambos equipos, sin importar orden)
+ * R16  → 2 pts/equipo clasificado + 4 pts/llave acertada
+ * QF   → 4 pts/equipo clasificado + 8 pts/llave acertada
+ * SF   → 4 pts/equipo clasificado + 8 pts/llave acertada
+ * Final four (4 equipos: 2 finalistas + 2 de 3er puesto):
+ *        8 pts/equipo + 8 pts llave 3er puesto + 12 pts llave final
+ * Bonus → campeón 15, subcampeón 10, 3ro 8, 4to 6
+ *
+ * Los equipos son acumulativos: si un equipo avanza varias rondas
+ * da puntos en cada ronda que el participante acertó.
+ */
+export function calcBracketScoreAll(participantId, bracketMatches, bracketPredictions, matches, predictions) {
+  let ptsPairing = 0
+  let ptsTeam    = 0
+  let ptsBonus   = 0
+
+  const predTeamMap = calcPredictedBracketTeams(
+    matches, predictions, bracketPredictions, participantId, bracketMatches
+  )
+
+  // ¿Los 2 equipos de una llave coinciden sin importar orden?
+  function pairsMatch(ph, pa, ah, aa) {
+    if (!ph || !pa || !ah || !aa) return false
+    return (ph === ah && pa === aa) || (ph === aa && pa === ah)
+  }
+
+  // Todos los equipos registrados en una ronda real (flat set)
+  function actualTeamsSet(round) {
+    return new Set(
+      bracketMatches
+        .filter(m => m.round === round)
+        .flatMap(m => [m.homeTeam, m.awayTeam])
+        .filter(Boolean)
+    )
+  }
+
+  // Todos los equipos predichos para una lista de IDs de llave
+  function predTeamsSet(ids) {
+    return new Set(
+      ids.flatMap(id => [predTeamMap[id]?.homeTeam, predTeamMap[id]?.awayTeam])
+         .filter(Boolean)
+    )
+  }
+
+  // ── R32: solo llave acertada (3 pts) ───────────────────────────────────────
+  for (let i = 1; i <= 16; i++) {
+    const bm = bracketMatches.find(m => m.id === `r32_${i}`)
+    const pm = predTeamMap[`r32_${i}`]
+    if (!bm?.homeTeam || !bm?.awayTeam || !pm?.homeTeam || !pm?.awayTeam) continue
+    if (pairsMatch(pm.homeTeam, pm.awayTeam, bm.homeTeam, bm.awayTeam)) ptsPairing += BRACKET_PAIRING_PTS.r32
+  }
+
+  // ── R16: 2 pts/equipo + 4 pts/llave ───────────────────────────────────────
+  const aR16 = actualTeamsSet('r16')
+  if (aR16.size > 0) {
+    const pR16 = predTeamsSet(Array.from({ length: 8 }, (_, i) => `r16_${i + 1}`))
+    for (const t of pR16) if (aR16.has(t)) ptsTeam += BRACKET_TEAM_PTS.r16
+    for (let i = 1; i <= 8; i++) {
+      const bm = bracketMatches.find(m => m.id === `r16_${i}`)
+      const pm = predTeamMap[`r16_${i}`]
+      if (!bm?.homeTeam || !bm?.awayTeam || !pm?.homeTeam || !pm?.awayTeam) continue
+      if (pairsMatch(pm.homeTeam, pm.awayTeam, bm.homeTeam, bm.awayTeam)) ptsPairing += BRACKET_PAIRING_PTS.r16
+    }
+  }
+
+  // ── QF: 4 pts/equipo + 8 pts/llave ────────────────────────────────────────
+  const aQF = actualTeamsSet('qf')
+  if (aQF.size > 0) {
+    const pQF = predTeamsSet(['qf_1', 'qf_2', 'qf_3', 'qf_4'])
+    for (const t of pQF) if (aQF.has(t)) ptsTeam += BRACKET_TEAM_PTS.qf
+    for (let i = 1; i <= 4; i++) {
+      const bm = bracketMatches.find(m => m.id === `qf_${i}`)
+      const pm = predTeamMap[`qf_${i}`]
+      if (!bm?.homeTeam || !bm?.awayTeam || !pm?.homeTeam || !pm?.awayTeam) continue
+      if (pairsMatch(pm.homeTeam, pm.awayTeam, bm.homeTeam, bm.awayTeam)) ptsPairing += BRACKET_PAIRING_PTS.qf
+    }
+  }
+
+  // ── SF: 4 pts/equipo + 8 pts/llave ────────────────────────────────────────
+  const aSF = actualTeamsSet('sf')
+  if (aSF.size > 0) {
+    const pSF = predTeamsSet(['sf_1', 'sf_2'])
+    for (const t of pSF) if (aSF.has(t)) ptsTeam += BRACKET_TEAM_PTS.sf
+    for (let i = 1; i <= 2; i++) {
+      const bm = bracketMatches.find(m => m.id === `sf_${i}`)
+      const pm = predTeamMap[`sf_${i}`]
+      if (!bm?.homeTeam || !bm?.awayTeam || !pm?.homeTeam || !pm?.awayTeam) continue
+      if (pairsMatch(pm.homeTeam, pm.awayTeam, bm.homeTeam, bm.awayTeam)) ptsPairing += BRACKET_PAIRING_PTS.sf
+    }
+  }
+
+  // ── Final four: 8 pts/equipo (2 finalistas + 2 de 3er puesto) ─────────────
+  const bmFinal = bracketMatches.find(m => m.id === 'final_1')
+  const bmThird = bracketMatches.find(m => m.id === 'third_1')
+  const aFF = new Set([
+    bmFinal?.homeTeam, bmFinal?.awayTeam,
+    bmThird?.homeTeam, bmThird?.awayTeam,
+  ].filter(Boolean))
+
+  if (aFF.size > 0) {
+    const pmFinal = predTeamMap['final_1']
+    const pmThird = predTeamMap['third_1']
+    const pFF = new Set([
+      pmFinal?.homeTeam, pmFinal?.awayTeam,
+      pmThird?.homeTeam, pmThird?.awayTeam,
+    ].filter(Boolean))
+    for (const t of pFF) if (aFF.has(t)) ptsTeam += BRACKET_TEAM_PTS.finalFour
+
+    // Llave 3er puesto (8 pts)
+    if (bmThird?.homeTeam && bmThird?.awayTeam && pmThird?.homeTeam && pmThird?.awayTeam)
+      if (pairsMatch(pmThird.homeTeam, pmThird.awayTeam, bmThird.homeTeam, bmThird.awayTeam))
+        ptsPairing += BRACKET_PAIRING_PTS.third
+
+    // Llave final (12 pts)
+    if (bmFinal?.homeTeam && bmFinal?.awayTeam && pmFinal?.homeTeam && pmFinal?.awayTeam)
+      if (pairsMatch(pmFinal.homeTeam, pmFinal.awayTeam, bmFinal.homeTeam, bmFinal.awayTeam))
+        ptsPairing += BRACKET_PAIRING_PTS.final
+  }
+
+  // ── Bonus: campeón (15), subcampeón (10), 3ro (8), 4to (6) ────────────────
+  if (bmFinal?.winner) {
+    const predWinner = bracketPredictions.find(
+      p => p.participantId === participantId && p.bracketMatchId === 'final_1'
+    )?.predictedWinner
+    const pmFinal = predTeamMap['final_1']
+
+    if (predWinner && predWinner === bmFinal.winner) ptsBonus += BONUS_PTS.champion
+
+    const actualRU = bmFinal.homeTeam === bmFinal.winner ? bmFinal.awayTeam : bmFinal.homeTeam
+    const predRU   = pmFinal?.homeTeam === predWinner    ? pmFinal?.awayTeam : pmFinal?.homeTeam
+    if (predRU && actualRU && predRU === actualRU) ptsBonus += BONUS_PTS.runnerUp
+  }
+
+  if (bmThird?.winner) {
+    const predWinner = bracketPredictions.find(
+      p => p.participantId === participantId && p.bracketMatchId === 'third_1'
+    )?.predictedWinner
+    const pmThird = predTeamMap['third_1']
+
+    if (predWinner && predWinner === bmThird.winner) ptsBonus += BONUS_PTS.thirdPlace
+
+    const actualFourth = bmThird.homeTeam === bmThird.winner ? bmThird.awayTeam : bmThird.homeTeam
+    const predFourth   = pmThird?.homeTeam === predWinner    ? pmThird?.awayTeam : pmThird?.homeTeam
+    if (predFourth && actualFourth && predFourth === actualFourth) ptsBonus += BONUS_PTS.fourthPlace
+  }
+
+  return { ptsPairing, ptsTeam, ptsBonus, total: ptsPairing + ptsTeam + ptsBonus }
 }
 
 /**
@@ -355,29 +505,23 @@ export function calcParticipantStats(
     else if (score > 0)     ptsResultado += score
   }
 
-  // --- Clasificación de grupos (1 pt por posición exacta, solo cuando el grupo está completo) ---
+  // --- Clasificación de grupos ---
   for (const group of GROUP_LETTERS) {
     const groupMatches = matches.filter(m => m.group === group && m.phase === 'groups')
     if (!groupMatches.length) continue
     const allFinished = groupMatches.every(m => m.homeScore !== null && m.awayScore !== null)
     if (!allFinished) continue
-    const actual    = calcGroupStandings(matches, group)
-    const predicted = calcPredictedGroupStandings(matches, predictions, participantId, group)
-    for (let i = 0; i < 4; i++) {
-      if (predicted[i]?.name && actual[i]?.name && predicted[i].name === actual[i].name) {
-        ptsStandings += 1
-      }
-    }
+    const actual    = calcGroupStandings(matches, group).map(t => t.name)
+    const predicted = calcPredictedGroupStandings(matches, predictions, participantId, group).map(t => t.name)
+    if (!actual.length || !predicted.length) continue
+    ptsStandings += calcStandingsScore(predicted, actual, config)
   }
 
   // --- Bracket ---
-  const finishedBracket = bracketMatches.filter(m => m.winner)
-  for (const bm of finishedBracket) {
-    const pred = bracketPredictions.find(
-      pr => pr.participantId === participantId && pr.bracketMatchId === bm.id
-    )
-    ptsBracket += calcBracketScore(pred, bm, config)
-  }
+  const { total: bracketTotal } = calcBracketScoreAll(
+    participantId, bracketMatches, bracketPredictions, matches, predictions
+  )
+  ptsBracket = bracketTotal
 
   // --- Goleadores ---
   if (topScorers && topScorers.some(s => s)) {

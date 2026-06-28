@@ -169,10 +169,10 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
         <div className="flex items-center gap-1.5">
           {saving && <span className="text-xs text-gray-500">guardando…</span>}
           {saved && !saving && <span className="text-xs text-green-500">✓</span>}
-          {realScore !== null && (
-            <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${
-              realScore > 0 ? 'bg-green-800 text-green-300' : 'bg-gray-800 text-gray-500'
-            }`}>{realScore} pts</span>
+          {realScore !== null && realScore > 0 && (
+            <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-green-800 text-green-300">
+              {realScore} pts
+            </span>
           )}
         </div>
       </div>

@@ -2002,8 +2002,8 @@ function VerPronosticosTab() {
                           <div key={match.id} className={`bg-gray-900 border rounded-xl p-3 min-w-[200px] ${round === 'final' ? 'border-yellow-700' : 'border-gray-800'}`}>
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-xs text-gray-500">{match.label}</span>
-                              {score !== null && (
-                                <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${score > 0 ? 'bg-green-800 text-green-300' : 'bg-gray-800 text-gray-500'}`}>
+                              {score !== null && score > 0 && (
+                                <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-green-800 text-green-300">
                                   {score} pts
                                 </span>
                               )}
