@@ -183,6 +183,32 @@ export function AppProvider({ children }) {
     return () => subscription.unsubscribe()
   }, [])
 
+  // Suscripción real-time: cualquier cambio en bracket_matches o matches se refleja
+  // en todos los navegadores sin necesidad de recargar la página.
+  useEffect(() => {
+    const channel = supabase
+      .channel('db-realtime')
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'bracket_matches' },
+        (payload) => {
+          setBracketMatches(prev => prev.map(m =>
+            m.id === payload.new.id ? dbToBracket(payload.new) : m
+          ))
+        }
+      )
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'matches' },
+        (payload) => {
+          setMatches(prev => prev.map(m =>
+            m.id === payload.new.id ? dbToMatch(payload.new) : m
+          ))
+        }
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [])
+
   useEffect(() => { loadAll() }, [])
 
   // Participants filtered by current polla (falls back to all if no polla system yet)
@@ -370,6 +396,10 @@ export function AppProvider({ children }) {
       loadTopScorers(),
       loadScorerPredictions(),
     ])
+    // Refrescar también resultados de partidos y bracket para que los puntajes
+    // reflejen los últimos datos del admin sin necesidad de recargar la página.
+    await loadMatches()
+    await loadBracketMatches()
     return { allParticipants, predictions, bracketPredictions, groupStandings, standingsPredictions, topScorers, scorerPredictions }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -969,6 +999,9 @@ export function AppProvider({ children }) {
     await Promise.all(updates.map(u =>
       supabase.from('bracket_matches').update({ home_team: u.homeTeam, away_team: u.awayTeam }).eq('id', u.id)
     ))
+    // Limpiar entradas pendientes del localCache para estos partidos, para que
+    // al recargar la página no sobreescriban los equipos recién propagados.
+    updates.forEach(u => localCache.markBracketMatchUpdateSynced(u.id))
     setBracketMatches(prev => prev.map(m => {
       const upd = updates.find(u => u.id === m.id)
       return upd ? { ...m, homeTeam: upd.homeTeam, awayTeam: upd.awayTeam } : m
