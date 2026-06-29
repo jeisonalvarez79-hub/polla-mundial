@@ -300,7 +300,9 @@ export function AppProvider({ children }) {
         pending.forEach(item => {
           const existing = map.get(item.bracketMatchId)
           if (existing) {
-            const { bracketMatchId, synced, ts, ...delta } = item
+            // homeTeam/awayTeam siempre vienen de Supabase (propagación del admin).
+            // Solo scores/winner/status usan cache para resiliencia offline.
+            const { bracketMatchId, synced, ts, homeTeam: _ht, awayTeam: _at, ...delta } = item
             map.set(bracketMatchId, { ...existing, ...delta })
           }
         })
