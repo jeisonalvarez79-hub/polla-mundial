@@ -91,6 +91,20 @@ export const R32_BRACKET_MAP = [
   { pos: 16, home: '2D', away: '2G' },  // M88
 ]
 
+// Mapeo oficial FIFA 2026: qué partidos de R32 forman cada llave de octavos (R16).
+// [homeId, awayId] = los IDs de bracket_matches del R32 que se enfrentan.
+// Orden según el fixture oficial: llaves 1-2 → octavos 1, llaves 3-4 → octavos 2, etc.
+export const R16_FROM_R32 = [
+  ['r32_1',  'r32_3'],  // Octavos 1: llaves 1 y 2  (Sudáfrica-Canadá  vs  Países Bajos-Marruecos)
+  ['r32_2',  'r32_5'],  // Octavos 2: llaves 3 y 4  (Alemania-Paraguay  vs  Francia-Suecia)
+  ['r32_10', 'r32_9'],  // Octavos 3: llaves 5 y 6  (Bélgica-Senegal  vs  EEUU-Bosnia)
+  ['r32_12', 'r32_11'], // Octavos 4: llaves 7 y 8  (España-Austria  vs  Portugal-Croacia)
+  ['r32_4',  'r32_6'],  // Octavos 5: llaves 9 y 10 (Brasil-Japón  vs  Costa Marfil-Noruega)
+  ['r32_7',  'r32_8'],  // Octavos 6: llaves 11 y 12 (México-Ecuador  vs  Inglaterra-RD Congo)
+  ['r32_13', 'r32_15'], // Octavos 7: llaves 13 y 14 (Suiza-Argelia  vs  Colombia-Ghana)
+  ['r32_16', 'r32_14'], // Octavos 8: llaves 15 y 16 (Australia-Egipto  vs  Argentina-Cabo Verde)
+]
+
 // Puntos por defecto — fase de grupos (modificables desde Admin > Configuración)
 export const DEFAULT_PTS = {
   exacto:      3,  // Marcador exacto

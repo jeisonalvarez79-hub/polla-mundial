@@ -1,4 +1,4 @@
-import { DEFAULT_PTS, BRACKET_PAIRING_PTS, BRACKET_TEAM_PTS, BONUS_PTS, GROUP_LETTERS, R32_BRACKET_MAP } from '../data/initialData'
+import { DEFAULT_PTS, BRACKET_PAIRING_PTS, BRACKET_TEAM_PTS, BONUS_PTS, GROUP_LETTERS, R32_BRACKET_MAP, R16_FROM_R32 } from '../data/initialData'
 
 function pts(config) {
   return { ...DEFAULT_PTS, ...(config?.pts || {}) }
@@ -202,13 +202,13 @@ export function calcPredictedBracketTeams(matches, predictions, bracketPredictio
     return teams.homeTeam === winner ? teams.awayTeam : teams.homeTeam
   }
 
-  // R16: ganador de r32_(2n-1) vs ganador de r32_(2n)
-  for (let pos = 1; pos <= 8; pos++) {
-    teamMap[`r16_${pos}`] = {
-      homeTeam: getPredWinner(`r32_${pos * 2 - 1}`),
-      awayTeam: getPredWinner(`r32_${pos * 2}`),
+  // R16: según mapeo oficial FIFA (R16_FROM_R32)
+  R16_FROM_R32.forEach(([id1, id2], i) => {
+    teamMap[`r16_${i + 1}`] = {
+      homeTeam: getPredWinner(id1),
+      awayTeam: getPredWinner(id2),
     }
-  }
+  })
 
   // Cuartos de Final
   for (let pos = 1; pos <= 4; pos++) {
