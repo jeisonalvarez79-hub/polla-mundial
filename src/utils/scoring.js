@@ -355,35 +355,15 @@ export function calcBracketScoreAll(participantId, bracketMatches, bracketPredic
 
   // ── R16: 2 pts/equipo + 4 pts/llave ───────────────────────────────────────
   const aR16 = actualTeamsSet('r16')
-  // DEBUG TEMPORAL — borrar después de confirmar
-  if (participantId === 'p_1779177557802') {
-    const r16bm = bracketMatches.filter(m => m.round === 'r16')
-    const r32_1bm = bracketMatches.find(m => m.id === 'r32_1')
-    const r32_4bm = bracketMatches.find(m => m.id === 'r32_4')
-    console.log('[DEBUG R16] aR16:', [...aR16], '| r16 en bracketMatches:', r16bm.map(m => `${m.id}:${m.homeTeam}/${m.awayTeam}`))
-    console.log('[DEBUG R32] r32_1:', r32_1bm?.homeTeam, r32_1bm?.awayTeam, 'winner:', r32_1bm?.winner)
-    console.log('[DEBUG R32] r32_4:', r32_4bm?.homeTeam, r32_4bm?.awayTeam, 'winner:', r32_4bm?.winner)
-    console.log('[DEBUG predR16_1]', predTeamMap['r16_1'])
-    console.log('[DEBUG predR16_2]', predTeamMap['r16_2'])
-  }
   if (aR16.size > 0) {
     const pR16 = predTeamsSet(Array.from({ length: 8 }, (_, i) => `r16_${i + 1}`))
-    if (participantId === 'p_1779177557802') {
-      console.log('[DEBUG pR16]', [...pR16])
-    }
     for (const t of pR16) if (aR16.has(t)) ptsTeam += BRACKET_TEAM_PTS.r16
-    if (participantId === 'p_1779177557802') {
-      console.log('[DEBUG ptsTeam después R16]', ptsTeam, '| ptsTeam/equipo:', BRACKET_TEAM_PTS.r16)
-    }
     for (let i = 1; i <= 8; i++) {
       const bm = bracketMatches.find(m => m.id === `r16_${i}`)
       const pm = predTeamMap[`r16_${i}`]
       if (!bm?.homeTeam || !bm?.awayTeam || !pm?.homeTeam || !pm?.awayTeam) continue
       if (pairsMatch(pm.homeTeam, pm.awayTeam, bm.homeTeam, bm.awayTeam)) ptsPairing += BRACKET_PAIRING_PTS.r16
     }
-  }
-  if (participantId === 'p_1779177557802') {
-    console.log('[DEBUG FINAL] ptsPairing:', ptsPairing, '| ptsTeam:', ptsTeam, '| ptsBonus:', ptsBonus, '| total:', ptsPairing + ptsTeam + ptsBonus)
   }
 
   // ── QF: 4 pts/equipo + 8 pts/llave ────────────────────────────────────────
