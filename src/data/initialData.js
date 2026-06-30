@@ -40,21 +40,21 @@ export function generateGroupMatches(groups = DEFAULT_GROUPS) {
 
 export function generateBracketMatches() {
   const rounds = [
-    { round: 'r32',   label: 'Dieciseisavos de Final', count: 16 },
-    { round: 'r16',   label: 'Octavos de Final',        count: 8 },
-    { round: 'qf',    label: 'Cuartos de Final',         count: 4 },
-    { round: 'sf',    label: 'Semifinal',                count: 2 },
-    { round: 'third', label: 'Tercer Lugar',             count: 1 },
-    { round: 'final', label: 'Final',                   count: 1 },
+    { round: 'r32',   count: 16, matchStart: 73  },
+    { round: 'r16',   count: 8,  matchStart: 89  },
+    { round: 'qf',    count: 4,  matchStart: 97  },
+    { round: 'sf',    count: 2,  matchStart: 101 },
+    { round: 'third', count: 1,  matchStart: 103 },
+    { round: 'final', count: 1,  matchStart: 104 },
   ]
   const matches = []
-  rounds.forEach(({ round, label, count }) => {
+  rounds.forEach(({ round, count, matchStart }) => {
     for (let i = 1; i <= count; i++) {
       matches.push({
         id: `${round}_${i}`,
         round,
         position: i,
-        label: count > 1 ? `${label} ${i}` : label,
+        label: `Match ${matchStart + i - 1}`,
         homeTeam: '',
         awayTeam: '',
         homeScore: null,
