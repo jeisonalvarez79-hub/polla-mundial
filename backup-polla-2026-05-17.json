@@ -1,0 +1,1396 @@
+{
+  "exportedAt": "2026-05-17T02:55:21.308Z",
+  "version": "1.0",
+  "config": {
+    "name": "Polla Mundial",
+    "tournamentName": "Mundial 2026",
+    "year": "2026"
+  },
+  "participants": [
+    {
+      "id": "p_1778935514199",
+      "name": "Jeison Alvarez",
+      "created_at": "2026-05-16T12:45:15.050265+00:00"
+    },
+    {
+      "id": "p_1778938384116",
+      "name": "Andres Alzate",
+      "created_at": "2026-05-16T13:33:04.551066+00:00"
+    }
+  ],
+  "predictions": [
+    {
+      "id": 2,
+      "participantId": "p_1778938384116",
+      "matchId": "g2",
+      "homeScore": 1,
+      "awayScore": 1
+    },
+    {
+      "id": 3,
+      "participantId": "p_1778938384116",
+      "matchId": "g3",
+      "homeScore": 2,
+      "awayScore": 0
+    },
+    {
+      "id": 4,
+      "participantId": "p_1778938384116",
+      "matchId": "g4",
+      "homeScore": 0,
+      "awayScore": 1
+    },
+    {
+      "id": 5,
+      "participantId": "p_1778938384116",
+      "matchId": "g5",
+      "homeScore": 1,
+      "awayScore": 1
+    },
+    {
+      "id": 6,
+      "participantId": "p_1778938384116",
+      "matchId": "g6",
+      "homeScore": 1,
+      "awayScore": 2
+    },
+    {
+      "id": 127,
+      "participantId": "p_1778935514199",
+      "matchId": "g25",
+      "homeScore": 4,
+      "awayScore": 1
+    },
+    {
+      "id": 128,
+      "participantId": "p_1778935514199",
+      "matchId": "g26",
+      "homeScore": 2,
+      "awayScore": 3
+    },
+    {
+      "id": 10,
+      "participantId": "p_1778938384116",
+      "matchId": "g11",
+      "homeScore": 2,
+      "awayScore": 1
+    },
+    {
+      "id": 11,
+      "participantId": "p_1778938384116",
+      "matchId": "g12",
+      "homeScore": 2,
+      "awayScore": 0
+    },
+    {
+      "id": 12,
+      "participantId": "p_1778938384116",
+      "matchId": "g7",
+      "homeScore": 0,
+      "awayScore": 1
+    },
+    {
+      "id": 13,
+      "participantId": "p_1778938384116",
+      "matchId": "g8",
+      "homeScore": 0,
+      "awayScore": 3
+    },
+    {
+      "id": 8,
+      "participantId": "p_1778938384116",
+      "matchId": "g10",
+      "homeScore": 2,
+      "awayScore": 1
+    },
+    {
+      "id": 16,
+      "participantId": "p_1778938384116",
+      "matchId": "g9",
+      "homeScore": 2,
+      "awayScore": 0
+    },
+    {
+      "id": 17,
+      "participantId": "p_1778938384116",
+      "matchId": "g13",
+      "homeScore": 2,
+      "awayScore": 1
+    },
+    {
+      "id": 18,
+      "participantId": "p_1778938384116",
+      "matchId": "g14",
+      "homeScore": 0,
+      "awayScore": 3
+    },
+    {
+      "id": 19,
+      "participantId": "p_1778938384116",
+      "matchId": "g15",
+      "homeScore": 0,
+      "awayScore": 0
+    },
+    {
+      "id": 129,
+      "participantId": "p_1778935514199",
+      "matchId": "g27",
+      "homeScore": 3,
+      "awayScore": 0
+    },
+    {
+      "id": 20,
+      "participantId": "p_1778938384116",
+      "matchId": "g16",
+      "homeScore": 5,
+      "awayScore": 0
+    },
+    {
+      "id": 23,
+      "participantId": "p_1778938384116",
+      "matchId": "g17",
+      "homeScore": 1,
+      "awayScore": 3
+    },
+    {
+      "id": 24,
+      "participantId": "p_1778938384116",
+      "matchId": "g18",
+      "homeScore": 3,
+      "awayScore": 0
+    },
+    {
+      "id": 26,
+      "participantId": "p_1778938384116",
+      "matchId": "g19",
+      "homeScore": 1,
+      "awayScore": 0
+    },
+    {
+      "id": 27,
+      "participantId": "p_1778938384116",
+      "matchId": "g20",
+      "homeScore": 1,
+      "awayScore": 1
+    },
+    {
+      "id": 28,
+      "participantId": "p_1778938384116",
+      "matchId": "g21",
+      "homeScore": 2,
+      "awayScore": 1
+    },
+    {
+      "id": 29,
+      "participantId": "p_1778938384116",
+      "matchId": "g22",
+      "homeScore": 1,
+      "awayScore": 1
+    },
+    {
+      "id": 30,
+      "participantId": "p_1778938384116",
+      "matchId": "g23",
+      "homeScore": 1,
+      "awayScore": 1
+    },
+    {
+      "id": 31,
+      "participantId": "p_1778938384116",
+      "matchId": "g24",
+      "homeScore": 2,
+      "awayScore": 0
+    },
+    {
+      "id": 32,
+      "participantId": "p_1778938384116",
+      "matchId": "g25",
+      "homeScore": 6,
+      "awayScore": 0
+    },
+    {
+      "id": 33,
+      "participantId": "p_1778938384116",
+      "matchId": "g26",
+      "homeScore": 1,
+      "awayScore": 2
+    },
+    {
+      "id": 34,
+      "participantId": "p_1778938384116",
+      "matchId": "g27",
+      "homeScore": 2,
+      "awayScore": 1
+    },
+    {
+      "id": 35,
+      "participantId": "p_1778938384116",
+      "matchId": "g28",
+      "homeScore": 4,
+      "awayScore": 0
+    },
+    {
+      "id": 36,
+      "participantId": "p_1778938384116",
+      "matchId": "g29",
+      "homeScore": 0,
+      "awayScore": 3
+    },
+    {
+      "id": 37,
+      "participantId": "p_1778938384116",
+      "matchId": "g30",
+      "homeScore": 1,
+      "awayScore": 2
+    },
+    {
+      "id": 38,
+      "participantId": "p_1778935514199",
+      "matchId": "g4",
+      "homeScore": 1,
+      "awayScore": 1
+    },
+    {
+      "id": 39,
+      "participantId": "p_1778938384116",
+      "matchId": "g31",
+      "homeScore": 2,
+      "awayScore": 0
+    },
+    {
+      "id": 40,
+      "participantId": "p_1778938384116",
+      "matchId": "g32",
+      "homeScore": 2,
+      "awayScore": 0
+    },
+    {
+      "id": 41,
+      "participantId": "p_1778938384116",
+      "matchId": "g33",
+      "homeScore": 2,
+      "awayScore": 2
+    },
+    {
+      "id": 42,
+      "participantId": "p_1778938384116",
+      "matchId": "g34",
+      "homeScore": 1,
+      "awayScore": 2
+    },
+    {
+      "id": 43,
+      "participantId": "p_1778935514199",
+      "matchId": "g5",
+      "homeScore": 1,
+      "awayScore": 2
+    },
+    {
+      "id": 44,
+      "participantId": "p_1778938384116",
+      "matchId": "g35",
+      "homeScore": 1,
+      "awayScore": 1
+    },
+    {
+      "id": 45,
+      "participantId": "p_1778938384116",
+      "matchId": "g36",
+      "homeScore": 0,
+      "awayScore": 3
+    },
+    {
+      "id": 46,
+      "participantId": "p_1778938384116",
+      "matchId": "g37",
+      "homeScore": 2,
+      "awayScore": 1
+    },
+    {
+      "id": 47,
+      "participantId": "p_1778938384116",
+      "matchId": "g38",
+      "homeScore": 2,
+      "awayScore": 0
+    },
+    {
+      "id": 48,
+      "participantId": "p_1778938384116",
+      "matchId": "g39",
+      "homeScore": 3,
+      "awayScore": 0
+    },
+    {
+      "id": 49,
+      "participantId": "p_1778938384116",
+      "matchId": "g40",
+      "homeScore": 0,
+      "awayScore": 4
+    },
+    {
+      "id": 50,
+      "participantId": "p_1778938384116",
+      "matchId": "g41",
+      "homeScore": 1,
+      "awayScore": 0
+    },
+    {
+      "id": 51,
+      "participantId": "p_1778938384116",
+      "matchId": "g42",
+      "homeScore": 0,
+      "awayScore": 5
+    },
+    {
+      "id": 52,
+      "participantId": "p_1778938384116",
+      "matchId": "g43",
+      "homeScore": 7,
+      "awayScore": 0
+    },
+    {
+      "id": 130,
+      "participantId": "p_1778935514199",
+      "matchId": "g28",
+      "homeScore": 3,
+      "awayScore": 1
+    },
+    {
+      "id": 53,
+      "participantId": "p_1778938384116",
+      "matchId": "g44",
+      "homeScore": 1,
+      "awayScore": 3
+    },
+    {
+      "id": 56,
+      "participantId": "p_1778938384116",
+      "matchId": "g45",
+      "homeScore": 2,
+      "awayScore": 0
+    },
+    {
+      "id": 57,
+      "participantId": "p_1778938384116",
+      "matchId": "g46",
+      "homeScore": 3,
+      "awayScore": 0
+    },
+    {
+      "id": 58,
+      "participantId": "p_1778938384116",
+      "matchId": "g47",
+      "homeScore": 0,
+      "awayScore": 2
+    },
+    {
+      "id": 59,
+      "participantId": "p_1778938384116",
+      "matchId": "g48",
+      "homeScore": 1,
+      "awayScore": 3
+    },
+    {
+      "id": 60,
+      "participantId": "p_1778938384116",
+      "matchId": "g49",
+      "homeScore": 3,
+      "awayScore": 0
+    },
+    {
+      "id": 61,
+      "participantId": "p_1778938384116",
+      "matchId": "g50",
+      "homeScore": 0,
+      "awayScore": 2
+    },
+    {
+      "id": 62,
+      "participantId": "p_1778938384116",
+      "matchId": "g51",
+      "homeScore": 4,
+      "awayScore": 0
+    },
+    {
+      "id": 63,
+      "participantId": "p_1778938384116",
+      "matchId": "g52",
+      "homeScore": 1,
+      "awayScore": 1
+    },
+    {
+      "id": 64,
+      "participantId": "p_1778938384116",
+      "matchId": "g53",
+      "homeScore": 1,
+      "awayScore": 2
+    },
+    {
+      "id": 65,
+      "participantId": "p_1778938384116",
+      "matchId": "g54",
+      "homeScore": 4,
+      "awayScore": 0
+    },
+    {
+      "id": 66,
+      "participantId": "p_1778938384116",
+      "matchId": "g55",
+      "homeScore": 2,
+      "awayScore": 0
+    },
+    {
+      "id": 67,
+      "participantId": "p_1778938384116",
+      "matchId": "g56",
+      "homeScore": 3,
+      "awayScore": 0
+    },
+    {
+      "id": 68,
+      "participantId": "p_1778938384116",
+      "matchId": "g57",
+      "homeScore": 2,
+      "awayScore": 1
+    },
+    {
+      "id": 69,
+      "participantId": "p_1778938384116",
+      "matchId": "g58",
+      "homeScore": 0,
+      "awayScore": 3
+    },
+    {
+      "id": 70,
+      "participantId": "p_1778938384116",
+      "matchId": "g59",
+      "homeScore": 0,
+      "awayScore": 1
+    },
+    {
+      "id": 72,
+      "participantId": "p_1778938384116",
+      "matchId": "g60",
+      "homeScore": 0,
+      "awayScore": 6
+    },
+    {
+      "id": 73,
+      "participantId": "p_1778938384116",
+      "matchId": "g61",
+      "homeScore": 2,
+      "awayScore": 0
+    },
+    {
+      "id": 74,
+      "participantId": "p_1778938384116",
+      "matchId": "g62",
+      "homeScore": 0,
+      "awayScore": 3
+    },
+    {
+      "id": 75,
+      "participantId": "p_1778938384116",
+      "matchId": "g63",
+      "homeScore": 4,
+      "awayScore": 1
+    },
+    {
+      "id": 76,
+      "participantId": "p_1778938384116",
+      "matchId": "g64",
+      "homeScore": 1,
+      "awayScore": 1
+    },
+    {
+      "id": 77,
+      "participantId": "p_1778938384116",
+      "matchId": "g65",
+      "homeScore": 0,
+      "awayScore": 1
+    },
+    {
+      "id": 78,
+      "participantId": "p_1778938384116",
+      "matchId": "g66",
+      "homeScore": 1,
+      "awayScore": 1
+    },
+    {
+      "id": 79,
+      "participantId": "p_1778938384116",
+      "matchId": "g67",
+      "homeScore": 1,
+      "awayScore": 1
+    },
+    {
+      "id": 80,
+      "participantId": "p_1778938384116",
+      "matchId": "g68",
+      "homeScore": 2,
+      "awayScore": 0
+    },
+    {
+      "id": 81,
+      "participantId": "p_1778938384116",
+      "matchId": "g69",
+      "homeScore": 1,
+      "awayScore": 0
+    },
+    {
+      "id": 82,
+      "participantId": "p_1778938384116",
+      "matchId": "g70",
+      "homeScore": 0,
+      "awayScore": 2
+    },
+    {
+      "id": 83,
+      "participantId": "p_1778938384116",
+      "matchId": "g71",
+      "homeScore": 0,
+      "awayScore": 3
+    },
+    {
+      "id": 84,
+      "participantId": "p_1778938384116",
+      "matchId": "g72",
+      "homeScore": 1,
+      "awayScore": 0
+    },
+    {
+      "id": 131,
+      "participantId": "p_1778935514199",
+      "matchId": "g29",
+      "homeScore": 1,
+      "awayScore": 2
+    },
+    {
+      "id": 1,
+      "participantId": "p_1778938384116",
+      "matchId": "g1",
+      "homeScore": 1,
+      "awayScore": 0
+    },
+    {
+      "id": 132,
+      "participantId": "p_1778935514199",
+      "matchId": "g30",
+      "homeScore": 2,
+      "awayScore": 4
+    },
+    {
+      "id": 133,
+      "participantId": "p_1778935514199",
+      "matchId": "g31",
+      "homeScore": 2,
+      "awayScore": 2
+    },
+    {
+      "id": 134,
+      "participantId": "p_1778935514199",
+      "matchId": "g32",
+      "homeScore": 1,
+      "awayScore": 1
+    },
+    {
+      "id": 25,
+      "participantId": "p_1778935514199",
+      "matchId": "g1",
+      "homeScore": 2,
+      "awayScore": 0
+    },
+    {
+      "id": 94,
+      "participantId": "p_1778935514199",
+      "matchId": "g10",
+      "homeScore": 2,
+      "awayScore": 1
+    },
+    {
+      "id": 135,
+      "participantId": "p_1778935514199",
+      "matchId": "g33",
+      "homeScore": 4,
+      "awayScore": 3
+    },
+    {
+      "id": 136,
+      "participantId": "p_1778935514199",
+      "matchId": "g34",
+      "homeScore": 2,
+      "awayScore": 2
+    },
+    {
+      "id": 89,
+      "participantId": "p_1778935514199",
+      "matchId": "g6",
+      "homeScore": 0,
+      "awayScore": 1
+    },
+    {
+      "id": 87,
+      "participantId": "p_1778935514199",
+      "matchId": "g3",
+      "homeScore": 1,
+      "awayScore": 1
+    },
+    {
+      "id": 88,
+      "participantId": "p_1778935514199",
+      "matchId": "g2",
+      "homeScore": 1,
+      "awayScore": 2
+    },
+    {
+      "id": 97,
+      "participantId": "p_1778935514199",
+      "matchId": "g7",
+      "homeScore": 2,
+      "awayScore": 0
+    },
+    {
+      "id": 95,
+      "participantId": "p_1778935514199",
+      "matchId": "g11",
+      "homeScore": 1,
+      "awayScore": 1
+    },
+    {
+      "id": 137,
+      "participantId": "p_1778935514199",
+      "matchId": "g35",
+      "homeScore": 2,
+      "awayScore": 1
+    },
+    {
+      "id": 99,
+      "participantId": "p_1778935514199",
+      "matchId": "g9",
+      "homeScore": 1,
+      "awayScore": 1
+    },
+    {
+      "id": 138,
+      "participantId": "p_1778935514199",
+      "matchId": "g36",
+      "homeScore": 1,
+      "awayScore": 3
+    },
+    {
+      "id": 96,
+      "participantId": "p_1778935514199",
+      "matchId": "g12",
+      "homeScore": 2,
+      "awayScore": 0
+    },
+    {
+      "id": 139,
+      "participantId": "p_1778935514199",
+      "matchId": "g37",
+      "homeScore": 3,
+      "awayScore": 0
+    },
+    {
+      "id": 98,
+      "participantId": "p_1778935514199",
+      "matchId": "g8",
+      "homeScore": 1,
+      "awayScore": 2
+    },
+    {
+      "id": 113,
+      "participantId": "p_1778935514199",
+      "matchId": "g13",
+      "homeScore": 2,
+      "awayScore": 0
+    },
+    {
+      "id": 114,
+      "participantId": "p_1778935514199",
+      "matchId": "g16",
+      "homeScore": 5,
+      "awayScore": 0
+    },
+    {
+      "id": 116,
+      "participantId": "p_1778935514199",
+      "matchId": "g14",
+      "homeScore": 1,
+      "awayScore": 3
+    },
+    {
+      "id": 115,
+      "participantId": "p_1778935514199",
+      "matchId": "g17",
+      "homeScore": 1,
+      "awayScore": 4
+    },
+    {
+      "id": 119,
+      "participantId": "p_1778935514199",
+      "matchId": "g15",
+      "homeScore": 1,
+      "awayScore": 3
+    },
+    {
+      "id": 120,
+      "participantId": "p_1778935514199",
+      "matchId": "g18",
+      "homeScore": 3,
+      "awayScore": 0
+    },
+    {
+      "id": 121,
+      "participantId": "p_1778935514199",
+      "matchId": "g19",
+      "homeScore": 2,
+      "awayScore": 1
+    },
+    {
+      "id": 122,
+      "participantId": "p_1778935514199",
+      "matchId": "g21",
+      "homeScore": 1,
+      "awayScore": 1
+    },
+    {
+      "id": 123,
+      "participantId": "p_1778935514199",
+      "matchId": "g23",
+      "homeScore": 1,
+      "awayScore": 3
+    },
+    {
+      "id": 124,
+      "participantId": "p_1778935514199",
+      "matchId": "g20",
+      "homeScore": 2,
+      "awayScore": 2
+    },
+    {
+      "id": 125,
+      "participantId": "p_1778935514199",
+      "matchId": "g24",
+      "homeScore": 2,
+      "awayScore": 1
+    },
+    {
+      "id": 126,
+      "participantId": "p_1778935514199",
+      "matchId": "g22",
+      "homeScore": 1,
+      "awayScore": 2
+    },
+    {
+      "id": 140,
+      "participantId": "p_1778935514199",
+      "matchId": "g38",
+      "homeScore": 2,
+      "awayScore": 3
+    },
+    {
+      "id": 141,
+      "participantId": "p_1778935514199",
+      "matchId": "g39",
+      "homeScore": 2,
+      "awayScore": 1
+    },
+    {
+      "id": 142,
+      "participantId": "p_1778935514199",
+      "matchId": "g40",
+      "homeScore": 4,
+      "awayScore": 3
+    },
+    {
+      "id": 143,
+      "participantId": "p_1778935514199",
+      "matchId": "g41",
+      "homeScore": 2,
+      "awayScore": 2
+    },
+    {
+      "id": 144,
+      "participantId": "p_1778935514199",
+      "matchId": "g42",
+      "homeScore": 2,
+      "awayScore": 4
+    },
+    {
+      "id": 145,
+      "participantId": "p_1778935514199",
+      "matchId": "g43",
+      "homeScore": 4,
+      "awayScore": 1
+    },
+    {
+      "id": 146,
+      "participantId": "p_1778935514199",
+      "matchId": "g44",
+      "homeScore": 2,
+      "awayScore": 4
+    },
+    {
+      "id": 147,
+      "participantId": "p_1778935514199",
+      "matchId": "g45",
+      "homeScore": 5,
+      "awayScore": 2
+    },
+    {
+      "id": 148,
+      "participantId": "p_1778935514199",
+      "matchId": "g46",
+      "homeScore": 2,
+      "awayScore": 0
+    },
+    {
+      "id": 149,
+      "participantId": "p_1778935514199",
+      "matchId": "g47",
+      "homeScore": 3,
+      "awayScore": 3
+    },
+    {
+      "id": 150,
+      "participantId": "p_1778935514199",
+      "matchId": "g48",
+      "homeScore": 2,
+      "awayScore": 4
+    },
+    {
+      "id": 151,
+      "participantId": "p_1778935514199",
+      "matchId": "g49",
+      "homeScore": 5,
+      "awayScore": 1
+    },
+    {
+      "id": 152,
+      "participantId": "p_1778935514199",
+      "matchId": "g50",
+      "homeScore": 2,
+      "awayScore": 2
+    },
+    {
+      "id": 153,
+      "participantId": "p_1778935514199",
+      "matchId": "g51",
+      "homeScore": 4,
+      "awayScore": 1
+    },
+    {
+      "id": 155,
+      "participantId": "p_1778935514199",
+      "matchId": "g52",
+      "homeScore": 2,
+      "awayScore": 1
+    },
+    {
+      "id": 156,
+      "participantId": "p_1778935514199",
+      "matchId": "g53",
+      "homeScore": 2,
+      "awayScore": 3
+    },
+    {
+      "id": 157,
+      "participantId": "p_1778935514199",
+      "matchId": "g54",
+      "homeScore": 1,
+      "awayScore": 1
+    },
+    {
+      "id": 158,
+      "participantId": "p_1778935514199",
+      "matchId": "g55",
+      "homeScore": 4,
+      "awayScore": 1
+    },
+    {
+      "id": 159,
+      "participantId": "p_1778935514199",
+      "matchId": "g56",
+      "homeScore": 2,
+      "awayScore": 2
+    },
+    {
+      "id": 160,
+      "participantId": "p_1778935514199",
+      "matchId": "g57",
+      "homeScore": 5,
+      "awayScore": 1
+    },
+    {
+      "id": 161,
+      "participantId": "p_1778935514199",
+      "matchId": "g58",
+      "homeScore": 3,
+      "awayScore": 3
+    },
+    {
+      "id": 162,
+      "participantId": "p_1778935514199",
+      "matchId": "g59",
+      "homeScore": 3,
+      "awayScore": 0
+    },
+    {
+      "id": 163,
+      "participantId": "p_1778935514199",
+      "matchId": "g60",
+      "homeScore": 0,
+      "awayScore": 3
+    },
+    {
+      "id": 164,
+      "participantId": "p_1778935514199",
+      "matchId": "g61",
+      "homeScore": 4,
+      "awayScore": 1
+    },
+    {
+      "id": 165,
+      "participantId": "p_1778935514199",
+      "matchId": "g62",
+      "homeScore": 0,
+      "awayScore": 3
+    },
+    {
+      "id": 166,
+      "participantId": "p_1778935514199",
+      "matchId": "g63",
+      "homeScore": 5,
+      "awayScore": 1
+    },
+    {
+      "id": 167,
+      "participantId": "p_1778935514199",
+      "matchId": "g64",
+      "homeScore": 3,
+      "awayScore": 0
+    },
+    {
+      "id": 168,
+      "participantId": "p_1778935514199",
+      "matchId": "g65",
+      "homeScore": 3,
+      "awayScore": 3
+    },
+    {
+      "id": 169,
+      "participantId": "p_1778935514199",
+      "matchId": "g66",
+      "homeScore": 2,
+      "awayScore": 2
+    },
+    {
+      "id": 170,
+      "participantId": "p_1778935514199",
+      "matchId": "g67",
+      "homeScore": 1,
+      "awayScore": 2
+    },
+    {
+      "id": 171,
+      "participantId": "p_1778935514199",
+      "matchId": "g68",
+      "homeScore": 2,
+      "awayScore": 2
+    },
+    {
+      "id": 172,
+      "participantId": "p_1778935514199",
+      "matchId": "g69",
+      "homeScore": 4,
+      "awayScore": 0
+    },
+    {
+      "id": 173,
+      "participantId": "p_1778935514199",
+      "matchId": "g70",
+      "homeScore": 1,
+      "awayScore": 4
+    },
+    {
+      "id": 174,
+      "participantId": "p_1778935514199",
+      "matchId": "g71",
+      "homeScore": 2,
+      "awayScore": 3
+    },
+    {
+      "id": 175,
+      "participantId": "p_1778935514199",
+      "matchId": "g72",
+      "homeScore": 3,
+      "awayScore": 0
+    }
+  ],
+  "bracketPredictions": [
+    {
+      "id": 1,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r32_1",
+      "predictedWinner": "República Checa",
+      "predictedHomeScore": 2,
+      "predictedAwayScore": 1
+    },
+    {
+      "id": 6,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r32_10",
+      "predictedWinner": "Bélgica",
+      "predictedHomeScore": 2,
+      "predictedAwayScore": 2
+    },
+    {
+      "id": 7,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r32_11",
+      "predictedWinner": "Colombia",
+      "predictedHomeScore": 3,
+      "predictedAwayScore": 3
+    },
+    {
+      "id": 12,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r32_12",
+      "predictedWinner": "España",
+      "predictedHomeScore": 4,
+      "predictedAwayScore": 1
+    },
+    {
+      "id": 13,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r32_13",
+      "predictedWinner": "Canadá",
+      "predictedHomeScore": 1,
+      "predictedAwayScore": 1
+    },
+    {
+      "id": 14,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r32_14",
+      "predictedWinner": "Uruguay",
+      "predictedHomeScore": 3,
+      "predictedAwayScore": 3
+    },
+    {
+      "id": 15,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r32_15",
+      "predictedWinner": "Portugal",
+      "predictedHomeScore": 3,
+      "predictedAwayScore": 1
+    },
+    {
+      "id": 16,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r32_16",
+      "predictedWinner": "Paraguay",
+      "predictedHomeScore": 2,
+      "predictedAwayScore": 1
+    },
+    {
+      "id": 8,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r32_2",
+      "predictedWinner": "Alemania",
+      "predictedHomeScore": 4,
+      "predictedAwayScore": 2
+    },
+    {
+      "id": 9,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r32_3",
+      "predictedWinner": "Países Bajos",
+      "predictedHomeScore": 1,
+      "predictedAwayScore": 1
+    },
+    {
+      "id": 10,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r32_4",
+      "predictedWinner": "Brasil",
+      "predictedHomeScore": 4,
+      "predictedAwayScore": 2
+    },
+    {
+      "id": 11,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r32_5",
+      "predictedWinner": "Francia",
+      "predictedHomeScore": 4,
+      "predictedAwayScore": 1
+    },
+    {
+      "id": 17,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r32_6",
+      "predictedWinner": "Ecuador",
+      "predictedHomeScore": 3,
+      "predictedAwayScore": 2
+    },
+    {
+      "id": 18,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r32_7",
+      "predictedWinner": "México",
+      "predictedHomeScore": 2,
+      "predictedAwayScore": 1
+    },
+    {
+      "id": 19,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r32_8",
+      "predictedWinner": "Croacia",
+      "predictedHomeScore": 2,
+      "predictedAwayScore": 2
+    },
+    {
+      "id": 20,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r32_9",
+      "predictedWinner": "Estados Unidos",
+      "predictedHomeScore": 2,
+      "predictedAwayScore": 1
+    },
+    {
+      "id": 21,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r16_1",
+      "predictedWinner": "Alemania",
+      "predictedHomeScore": 1,
+      "predictedAwayScore": 3
+    },
+    {
+      "id": 22,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r16_2",
+      "predictedWinner": "Brasil",
+      "predictedHomeScore": 1,
+      "predictedAwayScore": 4
+    },
+    {
+      "id": 23,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r16_3",
+      "predictedWinner": "Francia",
+      "predictedHomeScore": 2,
+      "predictedAwayScore": 0
+    },
+    {
+      "id": 24,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r16_4",
+      "predictedWinner": "México",
+      "predictedHomeScore": 3,
+      "predictedAwayScore": 2
+    },
+    {
+      "id": 25,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r16_5",
+      "predictedWinner": "Estados Unidos",
+      "predictedHomeScore": 1,
+      "predictedAwayScore": 1
+    },
+    {
+      "id": 26,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r16_6",
+      "predictedWinner": "España",
+      "predictedHomeScore": 3,
+      "predictedAwayScore": 3
+    },
+    {
+      "id": 27,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r16_7",
+      "predictedWinner": "Uruguay",
+      "predictedHomeScore": 2,
+      "predictedAwayScore": 4
+    },
+    {
+      "id": 28,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "r16_8",
+      "predictedWinner": "Portugal",
+      "predictedHomeScore": 3,
+      "predictedAwayScore": 2
+    },
+    {
+      "id": 29,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "qf_1",
+      "predictedWinner": "Brasil",
+      "predictedHomeScore": 3,
+      "predictedAwayScore": 4
+    },
+    {
+      "id": 30,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "qf_2",
+      "predictedWinner": "Francia",
+      "predictedHomeScore": 4,
+      "predictedAwayScore": 2
+    },
+    {
+      "id": 31,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "qf_3",
+      "predictedWinner": "España",
+      "predictedHomeScore": 1,
+      "predictedAwayScore": 3
+    },
+    {
+      "id": 32,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "qf_4",
+      "predictedWinner": "Uruguay",
+      "predictedHomeScore": 2,
+      "predictedAwayScore": 2
+    },
+    {
+      "id": 33,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "sf_1",
+      "predictedWinner": "Francia",
+      "predictedHomeScore": 2,
+      "predictedAwayScore": 3
+    },
+    {
+      "id": 34,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "sf_2",
+      "predictedWinner": "España",
+      "predictedHomeScore": 3,
+      "predictedAwayScore": 1
+    },
+    {
+      "id": 35,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "third_1",
+      "predictedWinner": "Brasil",
+      "predictedHomeScore": 2,
+      "predictedAwayScore": 1
+    },
+    {
+      "id": 36,
+      "participantId": "p_1778935514199",
+      "bracketMatchId": "final_1",
+      "predictedWinner": "Francia",
+      "predictedHomeScore": 3,
+      "predictedAwayScore": 2
+    }
+  ],
+  "standingsPredictions": [
+    {
+      "id": 1,
+      "participantId": "p_1778935514199",
+      "group": "A",
+      "standings": [
+        "México",
+        "Sudáfrica",
+        "Corea del Sur",
+        "República Checa"
+      ]
+    }
+  ],
+  "scorerPredictions": [
+    {
+      "id": 1,
+      "participantId": "p_1778938384116",
+      "scorers": [
+        "Dembele",
+        "Mbappe",
+        "Vinici"
+      ]
+    }
+  ],
+  "topScorers": [
+    "",
+    "",
+    ""
+  ],
+  "groupStandings": {
+    "A": [
+      "",
+      "",
+      "",
+      ""
+    ],
+    "B": [
+      "",
+      "",
+      "",
+      ""
+    ],
+    "C": [
+      "",
+      "",
+      "",
+      ""
+    ],
+    "D": [
+      "",
+      "",
+      "",
+      ""
+    ],
+    "E": [
+      "",
+      "",
+      "",
+      ""
+    ],
+    "F": [
+      "",
+      "",
+      "",
+      ""
+    ],
+    "G": [
+      "",
+      "",
+      "",
+      ""
+    ],
+    "H": [
+      "",
+      "",
+      "",
+      ""
+    ],
+    "I": [
+      "",
+      "",
+      "",
+      ""
+    ],
+    "J": [
+      "",
+      "",
+      "",
+      ""
+    ],
+    "K": [
+      "",
+      "",
+      "",
+      ""
+    ],
+    "L": [
+      "",
+      "",
+      "",
+      ""
+    ]
+  },
+  "matchCount": {
+    "groups": 72,
+    "bracket": 32
+  }
+}
