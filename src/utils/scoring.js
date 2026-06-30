@@ -192,6 +192,16 @@ export function calcPredictedBracketTeams(matches, predictions, bracketPredictio
     ) {
       return pred.predictedWinner
     }
+    // R32: si el ganador no coincide con los equipos predichos actuales (predicción stale por
+    // cambio en el ranking de terceros), infiere el ganador por dirección del marcador.
+    // Ej: predijo "Marruecos gana 0-1 (visitante)" → ahora el visitante es Paraguay → Paraguay avanza.
+    if (matchId.startsWith('r32_')) {
+      const h = pred.predictedHomeScore, a = pred.predictedAwayScore
+      if (h !== null && a !== null && h !== a) {
+        if (h > a && teams.homeTeam) return teams.homeTeam
+        if (a > h && teams.awayTeam) return teams.awayTeam
+      }
+    }
     return ''
   }
 
