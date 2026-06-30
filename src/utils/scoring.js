@@ -368,13 +368,22 @@ export function calcBracketScoreAll(participantId, bracketMatches, bracketPredic
   }
   if (aR16.size > 0) {
     const pR16 = predTeamsSet(Array.from({ length: 8 }, (_, i) => `r16_${i + 1}`))
+    if (participantId === 'p_1779177557802') {
+      console.log('[DEBUG pR16]', [...pR16])
+    }
     for (const t of pR16) if (aR16.has(t)) ptsTeam += BRACKET_TEAM_PTS.r16
+    if (participantId === 'p_1779177557802') {
+      console.log('[DEBUG ptsTeam después R16]', ptsTeam, '| ptsTeam/equipo:', BRACKET_TEAM_PTS.r16)
+    }
     for (let i = 1; i <= 8; i++) {
       const bm = bracketMatches.find(m => m.id === `r16_${i}`)
       const pm = predTeamMap[`r16_${i}`]
       if (!bm?.homeTeam || !bm?.awayTeam || !pm?.homeTeam || !pm?.awayTeam) continue
       if (pairsMatch(pm.homeTeam, pm.awayTeam, bm.homeTeam, bm.awayTeam)) ptsPairing += BRACKET_PAIRING_PTS.r16
     }
+  }
+  if (participantId === 'p_1779177557802') {
+    console.log('[DEBUG FINAL] ptsPairing:', ptsPairing, '| ptsTeam:', ptsTeam, '| ptsBonus:', ptsBonus, '| total:', ptsPairing + ptsTeam + ptsBonus)
   }
 
   // ── QF: 4 pts/equipo + 8 pts/llave ────────────────────────────────────────
