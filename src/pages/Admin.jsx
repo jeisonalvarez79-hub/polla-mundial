@@ -1478,7 +1478,7 @@ function ConfigTab() {
   const PT_FIELDS = [
     { key: 'exacto',      label: 'Marcador exacto',                                  color: 'text-yellow-400' },
     { key: 'resultado',   label: 'Ganador o empate correcto',                        color: 'text-blue-400' },
-    { key: 'clasificado', label: 'Clasificado a 2da ronda (top-2, sin importar posición)', color: 'text-green-400' },
+    { key: 'clasificado', label: 'Clasificado a dieciseisavos (top-2 o mejor 3°)',   color: 'text-green-400' },
     { key: 'ordenGrupo',  label: 'Posición exacta en tabla de grupo',                color: 'text-purple-400' },
     { key: 'goleador',    label: 'Goleador en posición exacta',                      color: 'text-orange-400' },
   ]

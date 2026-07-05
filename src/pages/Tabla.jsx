@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
-import { buildRanking, calcGroupScore, calcBracketScoreAll, calcStandingsScore, calcScorerScore, calcGroupStandings, calcPredictedGroupStandings } from '../utils/scoring'
+import { buildRanking, calcGroupScore, calcBracketScoreAll, calcStandingsScore, calcClasificadoScore, calcScorerScore, calcGroupStandings, calcPredictedGroupStandings, calcR32Qualifiers, calcPredictedR32Qualifiers } from '../utils/scoring'
 import { GROUP_LETTERS, BRACKET_PAIRING_PTS, BRACKET_TEAM_PTS, BONUS_PTS } from '../data/initialData'
 
 const MEDAL = ['🥇', '🥈', '🥉']
@@ -47,7 +47,7 @@ function ParticipantDetail({
         </div>
       )}
 
-      {/* Clasificación de grupos */}
+      {/* Clasificación de grupos: posición exacta */}
       {(() => {
         const completedGroups = GROUP_LETTERS.filter(g => {
           const gm = matches.filter(m => m.group === g && m.phase === 'groups')
@@ -56,7 +56,7 @@ function ParticipantDetail({
         if (!completedGroups.length) return null
         return (
           <div>
-            <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">Clasificación de grupos</p>
+            <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">Posición exacta por grupo</p>
             {completedGroups.map(group => {
               const actual = calcGroupStandings(matches, group).map(t => t.name)
               const pred   = calcPredictedGroupStandings(matches, predictions, pid, group).map(t => t.name)
@@ -66,13 +66,37 @@ function ParticipantDetail({
                   <span className="text-gray-300 text-xs">Grupo {group}</span>
                   <div className="flex items-center gap-2 shrink-0 ml-2">
                     <span className="text-gray-500 text-xs">{pred.filter(Boolean).join(' · ')}</span>
-                    <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-purple-400' : 'text-gray-600'}`}>
+                    <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-purple-300' : 'text-gray-600'}`}>
                       {score}
                     </span>
                   </div>
                 </div>
               )
             })}
+          </div>
+        )
+      })()}
+
+      {/* Clasificados a dieciseisavos: conjunto completo de 32 (top-2 + mejores terceros) */}
+      {(() => {
+        const groupMatches = matches.filter(m => m.phase === 'groups')
+        const allFinished = groupMatches.length > 0 && groupMatches.every(m => m.homeScore !== null && m.awayScore !== null)
+        if (!allFinished) return null
+
+        const score = calcClasificadoScore(matches, predictions, pid, config)
+        const actualSet = new Set(Object.values(calcR32Qualifiers(matches)).filter(Boolean))
+        const predictedQualifiers = calcPredictedR32Qualifiers(matches, predictions, pid)
+        const aciertos = Object.values(predictedQualifiers).filter(t => t && actualSet.has(t))
+
+        return (
+          <div>
+            <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">Clasificados a dieciseisavos (32)</p>
+            <div className="flex items-center justify-between py-1">
+              <span className="text-gray-500 text-xs">{aciertos.length}/32 equipos acertados</span>
+              <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-purple-400' : 'text-gray-600'}`}>
+                {score}
+              </span>
+            </div>
           </div>
         )
       })()}
@@ -228,7 +252,7 @@ export default function Tabla() {
             {[
               { label: 'Marcador exacto',        value: pts?.exacto,      color: 'text-yellow-400' },
               { label: 'Resultado correcto',      value: pts?.resultado,   color: 'text-blue-400' },
-              { label: 'Clasif. top-2 por grupo', value: pts?.clasificado, color: 'text-purple-400' },
+              { label: 'Clasificado a dieciseisavos', value: pts?.clasificado, color: 'text-purple-400' },
               { label: 'Posición exacta grupo',   value: pts?.ordenGrupo,  color: 'text-purple-300' },
             ].map(item => (
               <span key={item.label} className="flex items-center gap-1.5">

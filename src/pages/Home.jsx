@@ -214,7 +214,7 @@ export default function Home() {
           {[
             { pts: pts?.exacto,      label: 'Marcador exacto',                    color: 'text-yellow-400' },
             { pts: pts?.resultado,   label: 'Equipo ganador / empate correcto',   color: 'text-blue-400' },
-            { pts: pts?.clasificado, label: 'Clasificado correcto en bracket',    color: 'text-green-400' },
+            { pts: pts?.clasificado, label: 'Clasificado a dieciseisavos',        color: 'text-green-400' },
             { pts: pts?.ordenGrupo,  label: 'Posición exacta en tabla de grupo',  color: 'text-purple-400' },
             { pts: pts?.goleador,    label: 'Goleador del torneo acertado',       color: 'text-orange-400' },
           ].map(item => (

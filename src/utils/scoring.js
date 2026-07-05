@@ -482,29 +482,49 @@ export function calcBracketScoreAll(participantId, bracketMatches, bracketPredic
 }
 
 /**
- * Puntaje por clasificación de grupo.
- * - 2 pts por cada equipo del top-2 pronosticado que realmente clasificó (independiente de posición).
- * - 1 pt adicional por cada posición exacta en el grupo.
+ * Puntaje por posición exacta en la tabla de un grupo (1 pt por cada posición
+ * 1°-4° pronosticada que coincida con la real). El puntaje de "clasificado"
+ * (llegar a dieciseisavos) NO se calcula acá — ver calcClasificadoScore, porque
+ * los "mejores terceros" se comparan entre los 12 grupos, no dentro de uno solo.
  */
 export function calcStandingsScore(predStandings, actualStandings, config) {
   if (!predStandings || !actualStandings) return 0
   const p = pts(config)
   let score = 0
 
-  // 2 pts por clasificado a 2da ronda (top 2), independiente de posición
-  const actualTop2 = actualStandings.slice(0, 2).filter(Boolean)
-  const predTop2   = predStandings.slice(0, 2).filter(Boolean)
-  for (const team of predTop2) {
-    if (actualTop2.includes(team)) score += p.clasificado
-  }
-
-  // 1 pt por posición exacta en el grupo
   for (let i = 0; i < 4; i++) {
     if (predStandings[i] && actualStandings[i] && predStandings[i] === actualStandings[i]) {
       score += p.ordenGrupo
     }
   }
 
+  return score
+}
+
+/**
+ * Puntaje por equipos clasificados a dieciseisavos (2 pts por equipo), comparando
+ * el conjunto completo de 32 clasificados reales vs los 32 predichos por el
+ * participante — sin importar si quedó 1°, 2°, 3° o 4° de su grupo. Un equipo
+ * pronosticado como 3° que en la realidad clasificó como "mejor tercero" (o
+ * viceversa) también cuenta, porque sí llegó a dieciseisavos en ambos casos.
+ * Solo puede calcularse con certeza cuando toda la fase de grupos terminó,
+ * porque los "mejores terceros" se rankean entre los 12 grupos.
+ */
+export function calcClasificadoScore(matches, predictions, participantId, config) {
+  const groupMatches = matches.filter(m => m.phase === 'groups')
+  if (!groupMatches.length) return 0
+  const allFinished = groupMatches.every(m => m.homeScore !== null && m.awayScore !== null)
+  if (!allFinished) return 0
+
+  const p = pts(config)
+  const actualQualifiers    = calcR32Qualifiers(matches)
+  const predictedQualifiers = calcPredictedR32Qualifiers(matches, predictions, participantId)
+  const actualSet = new Set(Object.values(actualQualifiers).filter(Boolean))
+
+  let score = 0
+  for (const team of Object.values(predictedQualifiers)) {
+    if (team && actualSet.has(team)) score += p.clasificado
+  }
   return score
 }
 
@@ -547,7 +567,7 @@ export function calcParticipantStats(
     else if (score > 0)     ptsResultado += score
   }
 
-  // --- Clasificación de grupos ---
+  // --- Clasificación de grupos: posición exacta (por grupo) ---
   for (const group of GROUP_LETTERS) {
     const groupMatches = matches.filter(m => m.group === group && m.phase === 'groups')
     if (!groupMatches.length) continue
@@ -558,6 +578,9 @@ export function calcParticipantStats(
     if (!actual.length || !predicted.length) continue
     ptsStandings += calcStandingsScore(predicted, actual, config)
   }
+
+  // --- Clasificación de grupos: equipos clasificados a dieciseisavos (conjunto de 32) ---
+  ptsStandings += calcClasificadoScore(matches, predictions, participantId, config)
 
   // --- Bracket ---
   const { total: bracketTotal } = calcBracketScoreAll(
