@@ -1,4 +1,4 @@
-import { DEFAULT_PTS, BRACKET_PAIRING_PTS, BRACKET_TEAM_PTS, BONUS_PTS, GROUP_LETTERS, R32_BRACKET_MAP } from '../data/initialData'
+import { DEFAULT_PTS, BRACKET_PAIRING_PTS, BRACKET_TEAM_PTS, BONUS_PTS, GROUP_LETTERS, R32_BRACKET_MAP } from '../data/initialData.js'
 
 function pts(config) {
   return { ...DEFAULT_PTS, ...(config?.pts || {}) }
