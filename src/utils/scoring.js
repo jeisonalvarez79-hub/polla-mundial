@@ -346,50 +346,80 @@ export function calcBracketScoreAll(participantId, bracketMatches, bracketPredic
     )
   }
 
-  // ── R32: solo llave acertada (3 pts) ───────────────────────────────────────
-  for (let i = 1; i <= 16; i++) {
-    const bm = bracketMatches.find(m => m.id === `r32_${i}`)
-    const pm = predTeamMap[`r32_${i}`]
-    if (!bm?.homeTeam || !bm?.awayTeam || !pm?.homeTeam || !pm?.awayTeam) continue
-    if (pairsMatch(pm.homeTeam, pm.awayTeam, bm.homeTeam, bm.awayTeam)) ptsPairing += BRACKET_PAIRING_PTS.r32
+  // Construye un Set de llaves reales de una ronda para comparación sin importar slot.
+  // Cada llave se representa como "equipoA|equipoB" con los equipos ordenados alfabéticamente.
+  function actualPairingsSet(round) {
+    const s = new Set()
+    bracketMatches
+      .filter(m => m.round === round && m.homeTeam && m.awayTeam)
+      .forEach(m => s.add([m.homeTeam, m.awayTeam].sort().join('|')))
+    return s
   }
 
-  // ── R16: 2 pts/equipo + 4 pts/llave ───────────────────────────────────────
+  // ── R32: llave acertada (3 pts) — comparación por conjunto, no por slot ────
+  const r32ActualPairings = actualPairingsSet('r32')
+  const r32UsedPairings   = new Set()
+  for (let i = 1; i <= 16; i++) {
+    const pm = predTeamMap[`r32_${i}`]
+    if (!pm?.homeTeam || !pm?.awayTeam) continue
+    const key = [pm.homeTeam, pm.awayTeam].sort().join('|')
+    if (r32ActualPairings.has(key) && !r32UsedPairings.has(key)) {
+      ptsPairing += BRACKET_PAIRING_PTS.r32
+      r32UsedPairings.add(key)
+    }
+  }
+
+  // ── R16: 2 pts/equipo + 4 pts/llave — comparación por conjunto, no por slot
   const aR16 = actualTeamsSet('r16')
   if (aR16.size > 0) {
     const pR16 = predTeamsSet(Array.from({ length: 8 }, (_, i) => `r16_${i + 1}`))
     for (const t of pR16) if (aR16.has(t)) ptsTeam += BRACKET_TEAM_PTS.r16
+    const r16ActualPairings = actualPairingsSet('r16')
+    const r16UsedPairings   = new Set()
     for (let i = 1; i <= 8; i++) {
-      const bm = bracketMatches.find(m => m.id === `r16_${i}`)
       const pm = predTeamMap[`r16_${i}`]
-      if (!bm?.homeTeam || !bm?.awayTeam || !pm?.homeTeam || !pm?.awayTeam) continue
-      if (pairsMatch(pm.homeTeam, pm.awayTeam, bm.homeTeam, bm.awayTeam)) ptsPairing += BRACKET_PAIRING_PTS.r16
+      if (!pm?.homeTeam || !pm?.awayTeam) continue
+      const key = [pm.homeTeam, pm.awayTeam].sort().join('|')
+      if (r16ActualPairings.has(key) && !r16UsedPairings.has(key)) {
+        ptsPairing += BRACKET_PAIRING_PTS.r16
+        r16UsedPairings.add(key)
+      }
     }
   }
 
-  // ── QF: 4 pts/equipo + 8 pts/llave ────────────────────────────────────────
+  // ── QF: 4 pts/equipo + 8 pts/llave — comparación por conjunto, no por slot ─
   const aQF = actualTeamsSet('qf')
   if (aQF.size > 0) {
     const pQF = predTeamsSet(['qf_1', 'qf_2', 'qf_3', 'qf_4'])
     for (const t of pQF) if (aQF.has(t)) ptsTeam += BRACKET_TEAM_PTS.qf
+    const qfActualPairings = actualPairingsSet('qf')
+    const qfUsedPairings   = new Set()
     for (let i = 1; i <= 4; i++) {
-      const bm = bracketMatches.find(m => m.id === `qf_${i}`)
       const pm = predTeamMap[`qf_${i}`]
-      if (!bm?.homeTeam || !bm?.awayTeam || !pm?.homeTeam || !pm?.awayTeam) continue
-      if (pairsMatch(pm.homeTeam, pm.awayTeam, bm.homeTeam, bm.awayTeam)) ptsPairing += BRACKET_PAIRING_PTS.qf
+      if (!pm?.homeTeam || !pm?.awayTeam) continue
+      const key = [pm.homeTeam, pm.awayTeam].sort().join('|')
+      if (qfActualPairings.has(key) && !qfUsedPairings.has(key)) {
+        ptsPairing += BRACKET_PAIRING_PTS.qf
+        qfUsedPairings.add(key)
+      }
     }
   }
 
-  // ── SF: 4 pts/equipo + 8 pts/llave ────────────────────────────────────────
+  // ── SF: 4 pts/equipo + 8 pts/llave — comparación por conjunto, no por slot ─
   const aSF = actualTeamsSet('sf')
   if (aSF.size > 0) {
     const pSF = predTeamsSet(['sf_1', 'sf_2'])
     for (const t of pSF) if (aSF.has(t)) ptsTeam += BRACKET_TEAM_PTS.sf
+    const sfActualPairings = actualPairingsSet('sf')
+    const sfUsedPairings   = new Set()
     for (let i = 1; i <= 2; i++) {
-      const bm = bracketMatches.find(m => m.id === `sf_${i}`)
       const pm = predTeamMap[`sf_${i}`]
-      if (!bm?.homeTeam || !bm?.awayTeam || !pm?.homeTeam || !pm?.awayTeam) continue
-      if (pairsMatch(pm.homeTeam, pm.awayTeam, bm.homeTeam, bm.awayTeam)) ptsPairing += BRACKET_PAIRING_PTS.sf
+      if (!pm?.homeTeam || !pm?.awayTeam) continue
+      const key = [pm.homeTeam, pm.awayTeam].sort().join('|')
+      if (sfActualPairings.has(key) && !sfUsedPairings.has(key)) {
+        ptsPairing += BRACKET_PAIRING_PTS.sf
+        sfUsedPairings.add(key)
+      }
     }
   }
 
