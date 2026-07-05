@@ -15,10 +15,35 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 const POLLA_ID = 'polla_1779169822666' // Polla Familia Alzate
 const N_TRIALS = 8000
 
+// Si se define, el reporte de arriba/probabilidades usa esta lista de nombres
+// exactos en vez del top 10 calculado. Útil para contrastar con lo que el
+// usuario ve en la app.
+const TARGET_NAMES = [
+  'Meli Juanda', 'Toña', 'Ana Gómez', 'Mage', 'Mafe Alzate',
+  'Daniel', 'Salvador', 'Jeison Alvarez', 'Piedad', 'Alejo Cadena',
+]
+
 function decodeBracketPred(raw) {
   if (!raw) return { predictedWinner: null }
   const parts = raw.split('|')
   return { predictedWinner: parts[0] || null }
+}
+
+// Supabase/PostgREST capa las respuestas en 1000 filas por defecto — con 71
+// participantes x 72 partidos (~5100 filas) una sola llamada se queda corta.
+// Este helper pagina con .range() hasta traer todo.
+async function fetchAll(table, build) {
+  const PAGE = 1000
+  let from = 0
+  let rows = []
+  while (true) {
+    const { data, error } = await build(supabase.from(table).select('*')).range(from, from + PAGE - 1)
+    if (error) throw error
+    rows = rows.concat(data)
+    if (data.length < PAGE) break
+    from += PAGE
+  }
+  return rows
 }
 
 async function main() {
@@ -49,17 +74,13 @@ async function main() {
     winner: r.winner, status: r.status,
   }))
 
-  const { data: predRows, error: e5 } = await supabase
-    .from('predictions').select('*').in('participant_id', participantIds)
-  if (e5) throw e5
+  const predRows = await fetchAll('predictions', q => q.in('participant_id', participantIds))
   const predictions = predRows.map(r => ({
     participantId: r.participant_id, matchId: r.match_id,
     homeScore: r.home_score, awayScore: r.away_score,
   }))
 
-  const { data: bpRows, error: e6 } = await supabase
-    .from('bracket_predictions').select('*').in('participant_id', participantIds)
-  if (e6) throw e6
+  const bpRows = await fetchAll('bracket_predictions', q => q.in('participant_id', participantIds))
   const bracketPredictions = bpRows.map(r => ({
     participantId: r.participant_id, bracketMatchId: r.bracket_match_id,
     ...decodeBracketPred(r.predicted_winner),
@@ -68,25 +89,42 @@ async function main() {
   const topScorers = []
   const scorerPredictions = []
 
+  console.log(`(fetch check: ${participants.length} participantes, ${predictions.length} predicciones de grupo, ${bracketPredictions.length} predicciones de bracket)`)
+
   // ── Ranking actual ──────────────────────────────────────────────────────
   const ranking = buildRanking(
     participants, matches, predictions, bracketMatches, bracketPredictions,
     [], [], topScorers, scorerPredictions, config
   )
-  const top10 = ranking.slice(0, 10)
+  const top10 = TARGET_NAMES.length
+    ? TARGET_NAMES.map(name => {
+        const entry = ranking.find(r => r.participant.name === name)
+        if (!entry) console.error(`⚠ No encontré un participante llamado "${name}" en la Polla Familia Alzate`)
+        return entry
+      }).filter(Boolean)
+    : ranking.slice(0, 10)
 
-  console.log('=== RANKING ACTUAL — Polla Familia Alzate (top 10) ===')
+  console.log(`=== RANKING ACTUAL — Polla Familia Alzate ${TARGET_NAMES.length ? '(lista solicitada)' : '(top 10)'} ===`)
   top10.forEach(r => console.log(
     `${String(r.position).padStart(2)}. ${r.participant.name.padEnd(28)} ${r.stats.total} pts` +
     ` (exacto ${r.stats.ptsExacto} / resultado ${r.stats.ptsResultado} / grupos ${r.stats.ptsStandings} / bracket ${r.stats.ptsBracket})`
   ))
+
+  // Índices por participante — evita escanear los ~5100/2300 registros
+  // completos en cada llamada dentro del Monte Carlo (8000 x 71 participantes).
+  const predictionsByParticipant = new Map()
+  const bracketPredictionsByParticipant = new Map()
+  participants.forEach(p => {
+    predictionsByParticipant.set(p.id, predictions.filter(pr => pr.participantId === p.id))
+    bracketPredictionsByParticipant.set(p.id, bracketPredictions.filter(bp => bp.participantId === p.id))
+  })
 
   // Parte fija (no cambia con el resto del torneo): grupos + posiciones + goleador.
   const fixedScore = {}
   const statsById = {}
   participants.forEach(p => {
     const s = calcParticipantStats(
-      p.id, matches, predictions, bracketMatches, bracketPredictions,
+      p.id, matches, predictionsByParticipant.get(p.id), bracketMatches, bracketPredictionsByParticipant.get(p.id),
       [], [], topScorers, scorerPredictions, config
     )
     statsById[p.id] = s
@@ -97,7 +135,7 @@ async function main() {
   const r16Ids = Array.from({ length: 8 }, (_, i) => `r16_${i + 1}`)
 
   function predWinnerFor(pid, matchId) {
-    return bracketPredictions.find(bp => bp.participantId === pid && bp.bracketMatchId === matchId)?.predictedWinner || null
+    return bracketPredictionsByParticipant.get(pid)?.find(bp => bp.bracketMatchId === matchId)?.predictedWinner || null
   }
 
   // Construye una versión hipotética de bracketMatches resolviendo las llaves
@@ -152,7 +190,7 @@ async function main() {
       if (pred === home || pred === away) return pred
       return home // si no coincide, da igual para este participante
     })
-    const bracketTotal = calcBracketScoreAll(pid, sim, bracketPredictions, matches, predictions).total
+    const bracketTotal = calcBracketScoreAll(pid, sim, bracketPredictionsByParticipant.get(pid), matches, predictionsByParticipant.get(pid)).total
     const bestTotal = fixedScore[pid] + bracketTotal
     bestCaseById[pid] = bestTotal
     console.log(
@@ -170,7 +208,9 @@ async function main() {
     const sim = simulateBracket((_matchId, home, away) => (Math.random() < 0.5 ? home : away))
     const totals = participants.map(p => ({
       id: p.id,
-      total: fixedScore[p.id] + calcBracketScoreAll(p.id, sim, bracketPredictions, matches, predictions).total,
+      total: fixedScore[p.id] + calcBracketScoreAll(
+        p.id, sim, bracketPredictionsByParticipant.get(p.id), matches, predictionsByParticipant.get(p.id)
+      ).total,
     }))
     totals.sort((a, b) => b.total - a.total)
     totals.forEach((r, idx) => {
