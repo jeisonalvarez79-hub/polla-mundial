@@ -11,6 +11,7 @@ import {
   R32_BRACKET_MAP,
   R16_FROM_R32,
   QF_FROM_R16,
+  SF_FROM_QF,
 } from '../data/initialData'
 import { calcR32Qualifiers, calcPredictedGroupStandings } from '../utils/scoring'
 
@@ -986,11 +987,11 @@ export function AppProvider({ children }) {
         updates.push({ id: `qf_${i + 1}`, homeTeam: m1?.winner || '', awayTeam: m2?.winner || '' })
       })
     } else if (toRound === 'sf') {
-      for (let pos = 1; pos <= 2; pos++) {
-        const m1 = bracketMatches.find(m => m.id === `qf_${pos * 2 - 1}`)
-        const m2 = bracketMatches.find(m => m.id === `qf_${pos * 2}`)
-        updates.push({ id: `sf_${pos}`, homeTeam: m1?.winner || '', awayTeam: m2?.winner || '' })
-      }
+      SF_FROM_QF.forEach(([id1, id2], i) => {
+        const m1 = bracketMatches.find(m => m.id === id1)
+        const m2 = bracketMatches.find(m => m.id === id2)
+        updates.push({ id: `sf_${i + 1}`, homeTeam: m1?.winner || '', awayTeam: m2?.winner || '' })
+      })
     } else if (toRound === 'final') {
       const sf1 = bracketMatches.find(m => m.id === 'sf_1')
       const sf2 = bracketMatches.find(m => m.id === 'sf_2')

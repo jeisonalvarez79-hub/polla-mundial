@@ -112,6 +112,15 @@ export const QF_FROM_R16 = [
   ['r16_7', 'r16_8'],  // qf_4 (M100): Ganador M95 vs Ganador M96
 ]
 
+// Mapeo oficial FIFA 2026: qué cuartos forman cada semifinal (SF, M101-M102).
+// qf_1 y qf_3 vienen de la misma mitad del cuadro (r16_1-4); qf_2 y qf_4 de la
+// otra mitad (r16_5-8). Por eso se enfrentan qf_1 con qf_3, y qf_2 con qf_4
+// (no qf_1 con qf_2), para no mezclar mitades del cuadro.
+export const SF_FROM_QF = [
+  ['qf_1', 'qf_3'],  // sf_1 (M101): Ganador M97 vs Ganador M99
+  ['qf_2', 'qf_4'],  // sf_2 (M102): Ganador M98 vs Ganador M100
+]
+
 // Puntos por defecto — fase de grupos (modificables desde Admin > Configuración)
 export const DEFAULT_PTS = {
   exacto:      3,  // Marcador exacto
