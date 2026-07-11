@@ -2009,25 +2009,36 @@ function VerPronosticosTab() {
                               )}
                             </div>
                             {[
-                              { team: homeTeam, predScore: pred?.predictedHomeScore, realScore: match.homeScore },
-                              { team: awayTeam, predScore: pred?.predictedAwayScore, realScore: match.awayScore },
-                            ].map(({ team, predScore, realScore }) => (
-                              <div key={team} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border mb-1 ${
-                                match.winner === team   ? 'bg-green-800/30 border-green-700' :
-                                pred?.predictedWinner === team ? 'bg-blue-900/30 border-blue-700' :
-                                'bg-gray-800/50 border-gray-700'
-                              }`}>
-                                <span className="flex-1 text-xs font-medium text-white truncate">{team}</span>
-                                {predScore !== null && predScore !== undefined && (
-                                  <span className="text-xs font-bold text-blue-300 shrink-0">{predScore}</span>
-                                )}
-                                {realScore !== null && realScore !== undefined && (
-                                  <span className="text-xs text-yellow-400 shrink-0">({realScore})</span>
-                                )}
-                                {match.winner === team && <span className="text-xs shrink-0">✅</span>}
-                                {pred?.predictedWinner === team && !match.winner && <span className="text-blue-400 text-xs shrink-0">★</span>}
-                              </div>
-                            ))}
+                              { team: homeTeam, predScore: pred?.predictedHomeScore },
+                              { team: awayTeam, predScore: pred?.predictedAwayScore },
+                            ].map(({ team, predScore }) => {
+                              // Busca el partido REAL donde este equipo jugó dentro de la ronda —
+                              // no asume que sea `match` (el slot de este pronóstico), porque el
+                              // cruce predicho por el participante puede caer en una posición
+                              // distinta a la del bracket real (igual que en el cálculo de puntos).
+                              const realMatch = roundMatches.find(m => m.homeTeam === team || m.awayTeam === team)
+                              const realScore = realMatch
+                                ? (realMatch.homeTeam === team ? realMatch.homeScore : realMatch.awayScore)
+                                : null
+                              const wonReal = !!realMatch?.winner && realMatch.winner === team
+                              return (
+                                <div key={team} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border mb-1 ${
+                                  wonReal ? 'bg-green-800/30 border-green-700' :
+                                  pred?.predictedWinner === team ? 'bg-blue-900/30 border-blue-700' :
+                                  'bg-gray-800/50 border-gray-700'
+                                }`}>
+                                  <span className="flex-1 text-xs font-medium text-white truncate">{team}</span>
+                                  {predScore !== null && predScore !== undefined && (
+                                    <span className="text-xs font-bold text-blue-300 shrink-0">{predScore}</span>
+                                  )}
+                                  {realScore !== null && realScore !== undefined && (
+                                    <span className="text-xs text-yellow-400 shrink-0">({realScore})</span>
+                                  )}
+                                  {wonReal && <span className="text-xs shrink-0">✅</span>}
+                                  {pred?.predictedWinner === team && !wonReal && <span className="text-blue-400 text-xs shrink-0">★</span>}
+                                </div>
+                              )
+                            })}
                             {!pred && (
                               <p className="text-xs text-gray-700 text-center mt-1">Sin pronóstico</p>
                             )}
