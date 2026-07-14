@@ -423,22 +423,22 @@ export function calcBracketScoreAll(participantId, bracketMatches, bracketPredic
     }
   }
 
-  // ── Final four: 8 pts/equipo (2 finalistas + 2 de 3er puesto) ─────────────
+  // ── Final four: 8 pts/equipo, pero el equipo debe estar en el partido
+  // correcto (Final o 3er puesto) — llegar a la Final (ganar la semi) y
+  // jugar el 3er puesto (perder la semi) son logros distintos, no intercambiables.
   const bmFinal = bracketMatches.find(m => m.id === 'final_1')
   const bmThird = bracketMatches.find(m => m.id === 'third_1')
-  const aFF = new Set([
-    bmFinal?.homeTeam, bmFinal?.awayTeam,
-    bmThird?.homeTeam, bmThird?.awayTeam,
-  ].filter(Boolean))
+  const aFinalTeams = new Set([bmFinal?.homeTeam, bmFinal?.awayTeam].filter(Boolean))
+  const aThirdTeams = new Set([bmThird?.homeTeam, bmThird?.awayTeam].filter(Boolean))
 
-  if (aFF.size > 0) {
+  if (aFinalTeams.size > 0 || aThirdTeams.size > 0) {
     const pmFinal = predTeamMap['final_1']
     const pmThird = predTeamMap['third_1']
-    const pFF = new Set([
-      pmFinal?.homeTeam, pmFinal?.awayTeam,
-      pmThird?.homeTeam, pmThird?.awayTeam,
-    ].filter(Boolean))
-    for (const t of pFF) if (aFF.has(t)) ptsTeam += BRACKET_TEAM_PTS.finalFour
+    const pFinalTeams = new Set([pmFinal?.homeTeam, pmFinal?.awayTeam].filter(Boolean))
+    const pThirdTeams = new Set([pmThird?.homeTeam, pmThird?.awayTeam].filter(Boolean))
+
+    for (const t of pFinalTeams) if (aFinalTeams.has(t)) ptsTeam += BRACKET_TEAM_PTS.finalFour
+    for (const t of pThirdTeams) if (aThirdTeams.has(t)) ptsTeam += BRACKET_TEAM_PTS.finalFour
 
     // Llave 3er puesto (8 pts)
     if (bmThird?.homeTeam && bmThird?.awayTeam && pmThird?.homeTeam && pmThird?.awayTeam)
