@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { calcGroupScore, calcGroupStandings, calcPredictedGroupStandings } from '../utils/scoring'
+import { isLockedByKickoff, LOCK_MINUTES_BEFORE_KICKOFF } from '../utils/matchTiming'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -80,6 +81,14 @@ function PartidosTab() {
   const [activeGroup, setActiveGroup] = useState('A')
   const [localScores, setLocalScores] = useState({})
   const [savingIds, setSavingIds] = useState(new Set())
+
+  // Recalcula el bloqueo por horario (kickoff - 10 min) cada 30s, para que
+  // un partido se bloquee solo en pantalla sin necesidad de recargar.
+  const [, forceTick] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => forceTick(t => t + 1), 30000)
+    return () => clearInterval(id)
+  }, [])
 
   // Refs para evitar closures obsoletos en los timers de auto-guardado
   const timerRef = useRef({})
@@ -276,7 +285,8 @@ function PartidosTab() {
                 {groupMatches.map((match, idx) => {
                   const pred      = getPred(match.id)
                   const hasResult = match.homeScore !== null && match.awayScore !== null
-                  const locked    = match.status !== 'pending' || groupsLocked
+                  const lockedByTime = isLockedByKickoff(match)
+                  const locked    = match.status !== 'pending' || groupsLocked || lockedByTime
                   const homeVal   = getLocal(match.id, 'home', pred)
                   const awayVal   = getLocal(match.id, 'away', pred)
                   const changed   = homeVal !== (pred?.homeScore ?? null) || awayVal !== (pred?.awayScore ?? null)
@@ -296,6 +306,9 @@ function PartidosTab() {
                       {/* Hora */}
                       <td className="px-2 py-2 whitespace-nowrap text-gray-600 text-xs">
                         {match.hora || '—'}
+                        {lockedByTime && match.status === 'pending' && (
+                          <span title={`Pronósticos cerrados: faltan ${LOCK_MINUTES_BEFORE_KICKOFF} min o menos para el inicio`} className="ml-1">🔒</span>
+                        )}
                       </td>
                       {/* Jornada */}
                       <td className="px-2 py-2">

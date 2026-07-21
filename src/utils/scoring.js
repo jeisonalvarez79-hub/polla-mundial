@@ -1,4 +1,5 @@
 import { DEFAULT_PTS, BRACKET_PAIRING_PTS, BRACKET_TEAM_PTS, BONUS_PTS, GROUP_LETTERS, BRACKET_ROUNDS, QUALIFIER_RULES } from '../data/initialData.js'
+import { isLockedByKickoff } from './matchTiming.js'
 
 function pts(config) {
   return { ...DEFAULT_PTS, ...(config?.pts || {}) }
@@ -265,14 +266,25 @@ export function calcR32Qualifiers(matches) {
 /**
  * Puntaje por partido de grupo.
  * 3 pts marcador exacto / 1 pt ganador o empate correcto.
+ *
+ * Si el participante no guardó pronóstico y el partido ya está bloqueado por
+ * horario (kickoff - 10 min ya pasó — ver matchTiming.js), se asume 0-0 como
+ * su pronóstico en vez de darle 0 puntos automáticamente. Si el partido no
+ * tiene fecha/hora válida cargada, se mantiene el comportamiento anterior
+ * (sin pronóstico = 0 puntos).
  */
 export function calcGroupScore(prediction, match, config) {
   if (match.homeScore === null || match.awayScore === null) return 0
-  if (!prediction || prediction.homeScore === null || prediction.awayScore === null) return 0
+
+  let pH = prediction?.homeScore, pA = prediction?.awayScore
+  if (pH === null || pH === undefined || pA === null || pA === undefined) {
+    if (!isLockedByKickoff(match)) return 0
+    pH = 0
+    pA = 0
+  }
 
   const p = pts(config)
   const rH = match.homeScore, rA = match.awayScore
-  const pH = prediction.homeScore, pA = prediction.awayScore
 
   if (pH === rH && pA === rA) return p.exacto
 
