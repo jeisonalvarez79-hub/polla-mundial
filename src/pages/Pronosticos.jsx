@@ -23,7 +23,7 @@ function ScoreInput({ value, onChange, onBlur, disabled }) {
       onChange={e => onChange(e.target.value === '' ? null : parseInt(e.target.value))}
       onBlur={onBlur}
       disabled={disabled}
-      className="w-10 text-center bg-gray-100 border border-gray-300 text-black rounded py-1 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:border-green-500"
+      className="w-10 text-center bg-gray-100 border border-gray-300 text-black rounded py-1 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:border-green-800"
     />
   )
 }
@@ -60,7 +60,7 @@ function StandingsTable({ standings }) {
                 }`}>{i + 1}</span>
               </td>
               <td className="py-1.5 font-medium truncate max-w-[90px]">{t.name}</td>
-              <td className="py-1.5 text-center px-1 font-bold text-green-600">{t.Pts}</td>
+              <td className="py-1.5 text-center px-1 font-bold text-green-800">{t.Pts}</td>
               <td className="py-1.5 text-center px-1">{t.J}</td>
               <td className="py-1.5 text-center px-1">{t.G}</td>
               <td className="py-1.5 text-center px-1">{t.E}</td>
@@ -232,11 +232,11 @@ function PartidosTab() {
     <div className="space-y-4">
       {/* Banner de fase bloqueada */}
       {groupsLocked && (
-        <div className="bg-white border-2 border-red-600 rounded-xl px-4 py-3 flex items-center gap-3 text-sm text-red-800">
+        <div className="bg-white border-2 border-red-800 rounded-xl px-4 py-3 flex items-center gap-3 text-sm text-red-800">
           <span className="text-xl">🔒</span>
           <div>
             <p className="font-semibold">Carga de pronósticos cerrada</p>
-            <p className="text-xs text-red-600 mt-0.5">El administrador ha bloqueado los pronósticos de grupos. Solo lectura.</p>
+            <p className="text-xs text-red-800 mt-0.5">El administrador ha bloqueado los pronósticos de grupos. Solo lectura.</p>
           </div>
         </div>
       )}
@@ -245,7 +245,7 @@ function PartidosTab() {
         <div className="bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm inline-flex items-center gap-3">
           <span className="text-gray-600">Jugando como:</span>
           <span className="font-semibold text-black">{currentParticipant.name}</span>
-          <span className="text-green-600">{myPredCount}/{matches.length} pronosticados</span>
+          <span className="text-green-800">{myPredCount}/{matches.length} pronosticados</span>
         </div>
       )}
 
@@ -275,8 +275,8 @@ function PartidosTab() {
                   <th className="text-left px-2 py-2 font-semibold whitespace-nowrap">Hora</th>
                   <th className="text-left px-2 py-2 font-semibold">Jor.</th>
                   <th className="text-right px-3 py-2 font-semibold">Local</th>
-                  <th className="text-center px-1 py-2 font-semibold text-blue-600">Pred.</th>
-                  <th className="text-center px-1 py-2 font-semibold text-blue-600">Pred.</th>
+                  <th className="text-center px-1 py-2 font-semibold text-blue-800">Pred.</th>
+                  <th className="text-center px-1 py-2 font-semibold text-blue-800">Pred.</th>
                   <th className="text-left px-3 py-2 font-semibold">Visitante</th>
                   <th className="px-2 py-2"></th>
                 </tr>
@@ -320,7 +320,7 @@ function PartidosTab() {
                       <td className="px-3 py-2 text-right">
                         <span className="font-medium text-black text-xs whitespace-nowrap">{match.homeTeam || '—'}</span>
                         {match.homeScore !== null && (
-                          <span className="ml-1 font-bold text-yellow-600 text-xs">({match.homeScore})</span>
+                          <span className="ml-1 font-bold text-yellow-800 text-xs">({match.homeScore})</span>
                         )}
                       </td>
                       {/* Pred. local */}
@@ -345,7 +345,7 @@ function PartidosTab() {
                       <td className="px-3 py-2">
                         <span className="font-medium text-black text-xs whitespace-nowrap">{match.awayTeam || '—'}</span>
                         {match.awayScore !== null && (
-                          <span className="ml-1 font-bold text-yellow-600 text-xs">({match.awayScore})</span>
+                          <span className="ml-1 font-bold text-yellow-800 text-xs">({match.awayScore})</span>
                         )}
                       </td>
                       {/* Estado / puntos / guardar */}
@@ -391,7 +391,7 @@ function PartidosTab() {
               <h3 className="text-black font-semibold text-sm mb-1">
                 Mi pronóstico · Grupo {activeGroup}
               </h3>
-              <p className="text-xs text-blue-600 mb-3">
+              <p className="text-xs text-blue-800 mb-3">
                 Calculada con tus marcadores pronosticados. Top 2 pasan al bracket.
               </p>
               {predictedStandings.length > 0 ? (
@@ -399,7 +399,7 @@ function PartidosTab() {
                   <StandingsTable standings={predictedStandings} />
                   <p className="text-xs text-gray-500 mt-2">* Top 2 clasifican a fase eliminatoria</p>
                   {predictedStandings.every(t => t.J === 0) && (
-                    <p className="text-xs text-yellow-700 mt-2">
+                    <p className="text-xs text-yellow-800 mt-2">
                       Aún no has pronosticado partidos de este grupo.
                     </p>
                   )}
@@ -416,7 +416,7 @@ function PartidosTab() {
               Tabla real · Grupo {activeGroup}
             </h3>
             <p className="text-xs text-gray-500 mb-3">
-              Basada en resultados reales <span className="text-yellow-600">(amarillo)</span> ingresados por el administrador.
+              Basada en resultados reales <span className="text-yellow-800">(amarillo)</span> ingresados por el administrador.
             </p>
             <StandingsTable standings={standings} />
             {standings.length > 0 && (
@@ -425,7 +425,7 @@ function PartidosTab() {
               </p>
             )}
             {standings.every(t => t.J === 0) && standings.length > 0 && (
-              <p className="text-xs text-yellow-700 mt-2">
+              <p className="text-xs text-yellow-800 mt-2">
                 El administrador aún no ha ingresado resultados reales para este grupo.
               </p>
             )}
@@ -471,19 +471,19 @@ function GoleadoresTab() {
 
   return (
     <div className="space-y-5 max-w-2xl">
-      <div className="bg-white border-2 border-blue-600 rounded-xl p-4 text-sm text-blue-800">
+      <div className="bg-white border-2 border-blue-800 rounded-xl p-4 text-sm text-blue-800">
         <strong>¿Cómo funciona?</strong> Predice el máximo goleador del torneo.
         Ganas <strong>{pts} pts</strong> si aciertas el goleador registrado por el administrador.
       </div>
 
       {scorerLocked && (
-        <div className="bg-white border-2 border-red-600 rounded-xl p-4 text-red-800 text-sm">
+        <div className="bg-white border-2 border-red-800 rounded-xl p-4 text-red-800 text-sm">
           🔒 El administrador ha bloqueado el pronóstico de goleador. Solo lectura.
         </div>
       )}
 
       {!currentParticipant && (
-        <div className="bg-white border-2 border-yellow-600 rounded-xl p-4 text-yellow-800 text-sm">
+        <div className="bg-white border-2 border-yellow-800 rounded-xl p-4 text-yellow-800 text-sm">
           ⚠️ Selecciona o{' '}
           <Link to="/registro" className="underline hover:text-yellow-900">registra un participante</Link>
           {' '}para guardar pronósticos.
@@ -503,7 +503,7 @@ function GoleadoresTab() {
                 onChange={e => setLocal(e.target.value)}
                 disabled={!currentParticipant || scorerLocked}
                 placeholder="Nombre del goleador"
-                className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-600 disabled:opacity-50"
+                className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-800 disabled:opacity-50"
               />
             </div>
             {currentParticipant && !scorerLocked && (
@@ -524,13 +524,13 @@ function GoleadoresTab() {
           {topScorers[0] ? (
             <div className={`flex items-center gap-3 rounded-lg px-3 py-2 border ${
               pred?.scorers?.[0] === topScorers[0]
-                ? 'bg-white border-2 border-green-600'
+                ? 'bg-white border-2 border-green-800'
                 : 'bg-gray-100 border-gray-300'
             }`}>
               <span className="text-lg">🥇</span>
               <span className="text-black font-medium flex-1">{topScorers[0]}</span>
               {pred?.scorers?.[0] === topScorers[0] && (
-                <span className="text-green-600 text-xs font-bold">+{pts}pt</span>
+                <span className="text-green-800 text-xs font-bold">+{pts}pt</span>
               )}
             </div>
           ) : (
@@ -573,7 +573,7 @@ export default function Pronosticos() {
       </div>
 
       {!currentParticipant && (
-        <div className="bg-white border-2 border-yellow-600 rounded-xl p-4 text-yellow-800 text-sm">
+        <div className="bg-white border-2 border-yellow-800 rounded-xl p-4 text-yellow-800 text-sm">
           ⚠️ Selecciona o{' '}
           <Link to="/registro" className="underline hover:text-yellow-900">registra un participante</Link>
           {' '}para poder guardar pronósticos.
@@ -586,7 +586,7 @@ export default function Pronosticos() {
           <button key={t.id} onClick={() => setTab(t.id)}
             className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 -mb-px transition-colors ${
               tab === t.id
-                ? 'border-green-500 text-green-600'
+                ? 'border-green-800 text-green-800'
                 : 'border-transparent text-gray-600 hover:text-black'
             }`}
           >

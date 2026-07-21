@@ -28,12 +28,12 @@ export default function Registro() {
       </div>
 
       {currentParticipant && (
-        <div className="bg-white border-2 border-green-600 rounded-xl px-5 py-3 flex items-center gap-2">
-          <span className="text-green-600 text-sm font-medium">
+        <div className="bg-white border-2 border-green-800 rounded-xl px-5 py-3 flex items-center gap-2">
+          <span className="text-green-800 text-sm font-medium">
             Participando como: <strong>{currentParticipant.name}</strong>
           </span>
           {currentPolla && (
-            <span className="ml-auto text-xs text-green-600">{currentPolla.name}</span>
+            <span className="ml-auto text-xs text-green-800">{currentPolla.name}</span>
           )}
         </div>
       )}
@@ -57,14 +57,14 @@ export default function Registro() {
               return (
                 <div
                   key={participant.id}
-                  className={`flex items-center gap-3 px-5 py-3 ${isMe ? 'border-l-4 border-green-600' : ''}`}
+                  className={`flex items-center gap-3 px-5 py-3 ${isMe ? 'border-l-4 border-green-800' : ''}`}
                 >
                   <span className="text-gray-500 text-sm w-5 text-center shrink-0">{position}</span>
-                  <span className={`font-medium flex-1 ${isMe ? 'text-green-600' : 'text-black'}`}>
+                  <span className={`font-medium flex-1 ${isMe ? 'text-green-800' : 'text-black'}`}>
                     {participant.name}
                     {isMe && <span className="ml-2 text-xs bg-green-700 text-green-200 px-2 py-0.5 rounded-full">Tú</span>}
                   </span>
-                  <span className="text-green-600 font-bold text-sm shrink-0">{stats.total} pts</span>
+                  <span className="text-green-800 font-bold text-sm shrink-0">{stats.total} pts</span>
                 </div>
               )
             })}

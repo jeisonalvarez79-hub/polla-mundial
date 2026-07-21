@@ -42,7 +42,7 @@ export default function Home() {
   return (
     <div className="space-y-8">
       {/* Hero */}
-      <div className="text-center py-10 bg-white border-2 border-green-600 rounded-2xl">
+      <div className="text-center py-10 bg-white border-2 border-green-800 rounded-2xl">
         <div className="text-6xl mb-3">⚽</div>
         <h1 className="text-4xl font-bold text-black mb-2">{config.name}</h1>
         <p className="text-green-800 text-lg font-semibold">{config.tournamentName}</p>
@@ -66,8 +66,8 @@ export default function Home() {
 
       {/* Premio de la polla */}
       {currentPolla && (
-        <div className="bg-white border border-yellow-800/50 rounded-xl overflow-hidden">
-          <div className="bg-white px-5 py-3 border-b-2 border-yellow-600 flex items-center gap-2">
+        <div className="bg-white border border-yellow-800 rounded-xl overflow-hidden">
+          <div className="bg-white px-5 py-3 border-b-2 border-yellow-800 flex items-center gap-2">
             <span className="text-xl">💰</span>
             <h2 className="text-black font-bold">Premio — {currentPolla.name}</h2>
           </div>
@@ -77,7 +77,7 @@ export default function Home() {
               <div>
                 <p className="text-xs text-gray-600 mb-1">Valor inscripción</p>
                 {valorPolla > 0 ? (
-                  <p className="text-xl font-bold text-green-600">${fmt(valorPolla)}</p>
+                  <p className="text-xl font-bold text-green-800">${fmt(valorPolla)}</p>
                 ) : (
                   <p className="text-sm text-gray-500 italic">Por definir</p>
                 )}
@@ -89,7 +89,7 @@ export default function Home() {
               <div>
                 <p className="text-xs text-gray-600 mb-1">Total recaudado</p>
                 {totalRecaudado > 0 ? (
-                  <p className="text-xl font-bold text-yellow-600">${fmt(totalRecaudado)}</p>
+                  <p className="text-xl font-bold text-yellow-800">${fmt(totalRecaudado)}</p>
                 ) : (
                   <p className="text-sm text-gray-500 italic">—</p>
                 )}
@@ -98,16 +98,16 @@ export default function Home() {
 
             {/* Distribución de premios */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white border-2 border-yellow-600 rounded-xl p-4 text-center">
-                <p className="text-yellow-600 font-bold text-sm mb-1">🥇 1er Puesto</p>
-                <p className="text-xs text-yellow-600 mb-2">70% del total</p>
+              <div className="bg-white border-2 border-yellow-800 rounded-xl p-4 text-center">
+                <p className="text-yellow-800 font-bold text-sm mb-1">🥇 1er Puesto</p>
+                <p className="text-xs text-yellow-800 mb-2">70% del total</p>
                 {totalRecaudado > 0 ? (
-                  <p className="text-2xl font-bold text-yellow-700">${fmt(premio1)}</p>
+                  <p className="text-2xl font-bold text-yellow-800">${fmt(premio1)}</p>
                 ) : (
                   <p className="text-gray-500 text-sm italic">—</p>
                 )}
                 {ranking[0] && (
-                  <p className="text-xs text-yellow-600 mt-2 truncate">
+                  <p className="text-xs text-yellow-800 mt-2 truncate">
                     Líder: {ranking[0].participant.name}
                   </p>
                 )}
@@ -175,14 +175,14 @@ export default function Home() {
                     </span>
                   )}
                   <div className="text-right">
-                    <span className="text-2xl font-bold text-green-600">{entry.stats.total}</span>
+                    <span className="text-2xl font-bold text-green-800">{entry.stats.total}</span>
                     <span className="text-gray-500 text-sm ml-1">pts</span>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-          <Link to="/tabla" className="block mt-3 text-center text-sm text-green-600 hover:text-green-700">
+          <Link to="/tabla" className="block mt-3 text-center text-sm text-green-800 hover:text-green-800">
             Ver tabla completa →
           </Link>
         </div>
@@ -198,10 +198,10 @@ export default function Home() {
             { to: '/tabla',       icon: '📊', label: 'Tabla',        desc: 'Clasificación general' },
           ].map(card => (
             <Link key={card.to} to={card.to}
-              className="bg-white border border-gray-200 hover:border-green-700 rounded-xl p-5 text-center transition-colors group"
+              className="bg-white border border-gray-200 hover:border-green-800 rounded-xl p-5 text-center transition-colors group"
             >
               <div className="text-3xl mb-2">{card.icon}</div>
-              <div className="font-semibold text-black group-hover:text-green-600 transition-colors">{card.label}</div>
+              <div className="font-semibold text-black group-hover:text-green-800 transition-colors">{card.label}</div>
               <div className="text-xs text-gray-500 mt-1">{card.desc}</div>
             </Link>
           ))}
@@ -213,11 +213,11 @@ export default function Home() {
         <h2 className="text-lg font-bold text-black mb-3">📋 Sistema de puntos</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
           {[
-            { pts: pts?.exacto,      label: 'Marcador exacto',                    color: 'text-yellow-600' },
-            { pts: pts?.resultado,   label: 'Equipo ganador / empate correcto',   color: 'text-blue-600' },
-            { pts: pts?.clasificado, label: `Clasificado a ${BRACKET_ROUNDS[0].label}`, color: 'text-green-600' },
-            { pts: pts?.ordenGrupo,  label: 'Posición exacta en tabla de grupo',  color: 'text-purple-600' },
-            { pts: pts?.goleador,    label: 'Goleador del torneo acertado',       color: 'text-orange-600' },
+            { pts: pts?.exacto,      label: 'Marcador exacto',                    color: 'text-yellow-800' },
+            { pts: pts?.resultado,   label: 'Equipo ganador / empate correcto',   color: 'text-blue-800' },
+            { pts: pts?.clasificado, label: `Clasificado a ${BRACKET_ROUNDS[0].label}`, color: 'text-green-800' },
+            { pts: pts?.ordenGrupo,  label: 'Posición exacta en tabla de grupo',  color: 'text-purple-800' },
+            { pts: pts?.goleador,    label: 'Goleador del torneo acertado',       color: 'text-orange-800' },
           ].map(item => (
             <div key={item.label} className="flex items-center gap-3">
               <span className={`text-2xl font-bold w-8 shrink-0 ${item.color}`}>{item.pts}</span>

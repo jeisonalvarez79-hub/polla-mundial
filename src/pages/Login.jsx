@@ -49,7 +49,7 @@ export default function Login() {
         <div className="text-center">
           <div className="text-7xl mb-4">⚽</div>
           <h1 className="text-3xl font-bold text-black">{config?.name || 'Polla Mundial'}</h1>
-          <p className="text-green-700 mt-1 text-sm">
+          <p className="text-green-800 mt-1 text-sm">
             {config?.tournamentName} {config?.year}
           </p>
         </div>
@@ -63,7 +63,7 @@ export default function Login() {
               onClick={() => { setTab('participante'); setLoginError('') }}
               className={`flex-1 py-3.5 text-sm font-semibold transition-colors ${
                 tab === 'participante'
-                  ? 'bg-gray-100 text-green-600 border-b-2 border-green-500'
+                  ? 'bg-gray-100 text-green-800 border-b-2 border-green-800'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -73,7 +73,7 @@ export default function Login() {
               onClick={() => { setTab('admin'); setAdminError('') }}
               className={`flex-1 py-3.5 text-sm font-semibold transition-colors ${
                 tab === 'admin'
-                  ? 'bg-gray-100 text-green-600 border-b-2 border-green-500'
+                  ? 'bg-gray-100 text-green-800 border-b-2 border-green-800'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -97,7 +97,7 @@ export default function Login() {
                     setPin('')
                     setLoginError('')
                   }}
-                  className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-600"
+                  className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-800"
                 >
                   <option value="">— Seleccionar polla —</option>
                   {pollas.map(p => (
@@ -115,7 +115,7 @@ export default function Login() {
                   value={participantId}
                   onChange={e => { setParticipantId(e.target.value); setPin(''); setLoginError('') }}
                   disabled={!pollaId}
-                  className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-600 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-800 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <option value="">— Seleccionar nombre —</option>
                   {pollaParticipants.map(p => (
@@ -123,7 +123,7 @@ export default function Login() {
                   ))}
                 </select>
                 {pollaId && pollaParticipants.length === 0 && (
-                  <p className="text-yellow-600 text-xs mt-1">
+                  <p className="text-yellow-800 text-xs mt-1">
                     No hay participantes en esta polla aún.
                   </p>
                 )}
@@ -146,12 +146,12 @@ export default function Login() {
                   inputMode="numeric"
                   maxLength={4}
                   autoComplete="off"
-                  className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-3 text-center text-3xl tracking-[1em] font-bold focus:outline-none focus:border-green-600 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-3 text-center text-3xl tracking-[1em] font-bold focus:outline-none focus:border-green-800 disabled:opacity-40 disabled:cursor-not-allowed"
                 />
               </div>
 
               {loginError && (
-                <div className="bg-white border-2 border-red-600 rounded-lg px-4 py-2.5 text-red-800 text-sm text-center">
+                <div className="bg-white border-2 border-red-800 rounded-lg px-4 py-2.5 text-red-800 text-sm text-center">
                   {loginError}
                 </div>
               )}
@@ -179,7 +179,7 @@ export default function Login() {
                   onChange={e => { setEmail(e.target.value); setAdminError('') }}
                   placeholder="admin@ejemplo.com"
                   autoComplete="email"
-                  className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-600"
+                  className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-800"
                 />
               </div>
               <div>
@@ -192,12 +192,12 @@ export default function Login() {
                   onChange={e => { setPassword(e.target.value); setAdminError('') }}
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-600"
+                  className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-800"
                 />
               </div>
 
               {adminError && (
-                <div className="bg-white border-2 border-red-600 rounded-lg px-4 py-2.5 text-red-800 text-sm text-center">
+                <div className="bg-white border-2 border-red-800 rounded-lg px-4 py-2.5 text-red-800 text-sm text-center">
                   {adminError}
                 </div>
               )}
