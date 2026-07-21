@@ -130,8 +130,8 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
 
   // ── helpers de estilo ──
   const rowBg = (team) =>
-    match.winner === team   ? 'bg-green-800/40 border-green-700' :
-    displayWinner === team  ? 'bg-blue-900/40 border-blue-700'   : 'bg-gray-100 border-gray-300'
+    match.winner === team   ? 'bg-green-100 border-green-300' :
+    displayWinner === team  ? 'bg-blue-100 border-blue-300'   : 'bg-gray-100 border-gray-300'
 
   const nameColor = (team) =>
     match.winner === team   ? 'text-green-700' :
@@ -360,7 +360,7 @@ export default function Bracket() {
 
       {/* Instrucciones */}
       {currentParticipant && (
-        <div className="bg-blue-950/30 border border-blue-900 rounded-xl p-4 text-sm text-blue-300">
+        <div className="bg-blue-50 border border-blue-300 rounded-xl p-4 text-sm text-blue-700">
           <p className="font-semibold mb-1">¿Cómo funciona?</p>
           <ol className="list-decimal list-inside space-y-0.5 text-blue-600 ml-2 text-xs">
             <li>Los equipos de la primera ronda eliminatoria vienen de tus <Link to="/pronosticos" className="underline">pronósticos de grupos</Link> (o del sorteo real si aún no los llenaste).</li>
@@ -377,7 +377,7 @@ export default function Bracket() {
       )}
 
       {!currentParticipant && (
-        <div className="bg-yellow-900/20 border border-yellow-800 rounded-xl p-4 text-yellow-300 text-sm">
+        <div className="bg-yellow-50 border border-yellow-300 rounded-xl p-4 text-yellow-700 text-sm">
           ⚠️ Selecciona o{' '}
           <Link to="/registro" className="underline hover:text-yellow-700">registra un participante</Link>
           {' '}para pronosticar el bracket.
@@ -387,7 +387,7 @@ export default function Bracket() {
       {/* Leyenda */}
       <div className="flex flex-wrap gap-4 text-xs text-gray-500">
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-blue-900/40 border border-blue-700 inline-block" />
+          <span className="w-3 h-3 rounded bg-blue-100 border border-blue-300 inline-block" />
           Pronóstico ganador (★)
         </span>
         <span className="flex items-center gap-1.5">
@@ -414,7 +414,7 @@ export default function Bracket() {
                 {ROUND_LABEL[round]}
               </h2>
               {roundLocked && (
-                <span className="text-xs bg-red-900/40 border border-red-700 text-red-400 px-2 py-0.5 rounded-full font-medium">
+                <span className="text-xs bg-red-100 border border-red-300 text-red-700 px-2 py-0.5 rounded-full font-medium">
                   🔒 Bloqueado por admin
                 </span>
               )}
@@ -443,7 +443,7 @@ export default function Bracket() {
 
       {/* Campeón pronosticado */}
       {currentParticipant && champion && (
-        <div className="bg-yellow-900/20 border-2 border-yellow-600 rounded-2xl p-8 text-center">
+        <div className="bg-yellow-50 border-2 border-yellow-400 rounded-2xl p-8 text-center">
           <p className="text-yellow-600 text-xs uppercase tracking-widest font-bold mb-3">
             Tu Campeón Pronosticado
           </p>

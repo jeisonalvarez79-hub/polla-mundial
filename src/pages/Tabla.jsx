@@ -297,9 +297,9 @@ export default function Tabla() {
               <div key={entry.participant.id} className={`text-center ${height}`}>
                 <div className="text-2xl mb-1">{posLabel}</div>
                 <div className={`rounded-xl p-3 ${
-                  realPos === 0 ? 'bg-yellow-900/30 border border-yellow-700' :
+                  realPos === 0 ? 'bg-yellow-50 border border-yellow-300' :
                   realPos === 1 ? 'bg-gray-200 border border-gray-300' :
-                  'bg-orange-900/20 border border-orange-900'
+                  'bg-orange-50 border border-orange-300'
                 }`}>
                   <p className="font-bold text-black text-sm truncate">{entry.participant.name}</p>
                   <p className={`text-xl font-bold mt-1 ${realPos === 0 ? 'text-yellow-600' : 'text-gray-700'}`}>
@@ -335,7 +335,7 @@ export default function Tabla() {
               <button
                 onClick={() => setExpanded(prev => prev === participant.id ? null : participant.id)}
                 className={`w-full grid grid-cols-[2rem_1fr_3.5rem_3.5rem_3.5rem_3.5rem_3.5rem_4.5rem] gap-1 px-4 py-3 border-t border-gray-200 text-left transition-colors ${
-                  isMe ? 'bg-green-900/20 hover:bg-green-900/30' : 'hover:bg-gray-100'
+                  isMe ? 'bg-green-50 hover:bg-green-100' : 'hover:bg-gray-100'
                 }`}
               >
                 <span className="text-gray-500 text-sm self-center">{MEDAL[position - 1] ?? position}</span>

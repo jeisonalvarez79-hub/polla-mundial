@@ -573,7 +573,7 @@ function BracketTab() {
       </div>
 
       {genResult && (
-        <div className="bg-green-950/40 border border-green-800 rounded-xl p-4 text-sm text-green-300">
+        <div className="bg-green-50 border border-green-300 rounded-xl p-4 text-sm text-green-700">
           ✓ Llaves de {SEED_ROUND.label} generadas. Se encontraron {Object.keys(genResult).length} clasificados.
           Revisa el bracket a continuación.
         </div>
@@ -617,7 +617,7 @@ function BracketTab() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-xs text-gray-500 font-medium">{bm.label}</p>
                     {slots && (
-                      <span className="text-xs text-blue-400 bg-blue-900/30 px-2 py-0.5 rounded-full">
+                      <span className="text-xs text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
                         {SLOT_LABEL[slots.home]} vs {SLOT_LABEL[slots.away]}
                       </span>
                     )}
@@ -938,14 +938,14 @@ function BloqueosTab() {
       </div>
 
       {syncResult && (
-        <div className="bg-green-900/40 border border-green-700 text-green-300 rounded-xl px-4 py-3 text-sm font-medium">
+        <div className="bg-green-50 border border-green-300 text-green-700 rounded-xl px-4 py-3 text-sm font-medium">
           {syncResult}
         </div>
       )}
 
       {importResult && (
         <div className={`rounded-xl px-4 py-3 text-sm font-medium ${
-          importResult.startsWith('✓') ? 'bg-green-900/40 border border-green-700 text-green-300' : 'bg-red-900/40 border border-red-700 text-red-300'
+          importResult.startsWith('✓') ? 'bg-green-50 border border-green-300 text-green-700' : 'bg-red-50 border border-red-300 text-red-700'
         }`}>
           {importResult}
         </div>
@@ -971,8 +971,8 @@ function BloqueosTab() {
                     <span className="text-sm font-medium text-black">{phase.label}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
                       isLocked
-                        ? 'bg-red-900/50 text-red-400'
-                        : 'bg-green-900/50 text-green-400'
+                        ? 'bg-red-100 text-red-700'
+                        : 'bg-green-100 text-green-700'
                     }`}>
                       {isLocked ? '🔒 Bloqueado' : '🔓 Abierto'}
                     </span>
@@ -984,8 +984,8 @@ function BloqueosTab() {
                   disabled={isSaving}
                   className={`shrink-0 text-xs font-semibold px-4 py-2 rounded-lg border transition-colors disabled:opacity-50 ${
                     isLocked
-                      ? 'bg-green-900/30 border-green-700 text-green-400 hover:bg-green-800'
-                      : 'bg-red-900/30 border-red-700 text-red-400 hover:bg-red-800'
+                      ? 'bg-green-100 border-green-300 text-green-700 hover:bg-green-200'
+                      : 'bg-red-100 border-red-300 text-red-700 hover:bg-red-200'
                   }`}
                 >
                   {isSaving ? '...' : isLocked ? 'Abrir' : 'Bloquear'}
@@ -997,7 +997,7 @@ function BloqueosTab() {
       </div>
 
       {/* Info del backup */}
-      <div className="bg-blue-950/30 border border-blue-900 rounded-xl p-4 text-sm text-blue-300">
+      <div className="bg-blue-50 border border-blue-300 rounded-xl p-4 text-sm text-blue-700">
         <p className="font-semibold mb-1">📥 Sobre el backup CSV</p>
         <p className="text-xs text-blue-600">
           El backup exporta en formato CSV todas las pollas, participantes y pronósticos (grupos, bracket, tabla, goleadores).
@@ -1049,7 +1049,7 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
   }
 
   return (
-    <div className={`flex items-center gap-2 px-4 py-3 flex-wrap text-sm ${isOrphan ? 'bg-red-950/20' : ''}`}>
+    <div className={`flex items-center gap-2 px-4 py-3 flex-wrap text-sm ${isOrphan ? 'bg-red-50' : ''}`}>
       <span className="text-gray-500 w-5 shrink-0 text-center">{index + 1}</span>
 
       {/* Nombre editable */}
@@ -1091,11 +1091,11 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
 
       {/* Polla badge */}
       {pollaName ? (
-        <span className="text-xs bg-green-900/30 border border-green-800 text-green-400 px-2 py-0.5 rounded-full shrink-0">
+        <span className="text-xs bg-green-100 border border-green-300 text-green-700 px-2 py-0.5 rounded-full shrink-0">
           {pollaName}
         </span>
       ) : (
-        <span className="text-xs bg-red-900/30 border border-red-800 text-red-400 px-2 py-0.5 rounded-full shrink-0">
+        <span className="text-xs bg-red-100 border border-red-300 text-red-700 px-2 py-0.5 rounded-full shrink-0">
           ⚠ Sin polla
         </span>
       )}
@@ -1252,7 +1252,7 @@ function ParticipantesTab() {
   return (
     <div className="space-y-6 max-w-3xl">
       {pollas.length === 0 && (
-        <div className="bg-yellow-950/30 border border-yellow-800 rounded-xl p-4 text-yellow-300 text-sm">
+        <div className="bg-yellow-50 border border-yellow-300 rounded-xl p-4 text-yellow-700 text-sm">
           Primero crea al menos una polla desde el panel superior de Administración.
         </div>
       )}
@@ -1355,7 +1355,7 @@ function ParticipantesTab() {
 
         {/* Alerta de orphans */}
         {orphans.length > 0 && filterPolla !== '__orphan__' && (
-          <div className="bg-red-950/30 border-b border-red-900 px-4 py-2 flex items-center gap-2">
+          <div className="bg-red-50 border-b border-red-300 px-4 py-2 flex items-center gap-2">
             <span className="text-red-600 text-xs">
               ⚠ {orphans.length} participante{orphans.length > 1 ? 's' : ''} sin polla asignada.
             </span>
@@ -1415,7 +1415,7 @@ function PollaRow({ polla, isActive, participantCount, onUpdate, onDelete, onSel
   const fmt = v => Number(v || 0).toLocaleString('es-CO')
 
   return (
-    <div className={`rounded-lg border p-3 space-y-2 ${isActive ? 'bg-green-900/20 border-green-700' : 'bg-gray-100 border-gray-300'}`}>
+    <div className={`rounded-lg border p-3 space-y-2 ${isActive ? 'bg-green-50 border-green-300' : 'bg-gray-100 border-gray-300'}`}>
       {editing ? (
         <div className="space-y-2">
           <div className="flex items-center gap-2">
@@ -1640,7 +1640,7 @@ function ConfigTab() {
       </div>
 
       {/* Zona peligrosa */}
-      <div className="bg-red-950/30 border border-red-900 rounded-xl p-5">
+      <div className="bg-red-50 border border-red-300 rounded-xl p-5">
         <h3 className="text-red-600 font-semibold mb-2">Zona peligrosa</h3>
         <p className="text-gray-600 text-sm mb-4">
           Reinicia el torneo: partidos, resultados y pronósticos (participantes y pollas se conservan).
@@ -1721,8 +1721,8 @@ function GruposView({ groups, matches, predictions, participantId }) {
                     const isBest3rd = i === 2 && bestThirdsSet.has(team.name)
                     return (
                       <tr key={team.name || i} className={`border-b border-gray-200 last:border-0 ${
-                        i < 2     ? 'bg-green-900/10' :
-                        isBest3rd ? 'bg-amber-900/10' : ''
+                        i < 2     ? 'bg-green-50' :
+                        isBest3rd ? 'bg-amber-50' : ''
                       }`}>
                         <td className="px-2 py-2 text-center">
                           <span className={`font-bold text-sm ${
@@ -1766,7 +1766,7 @@ function GruposView({ groups, matches, predictions, participantId }) {
           </h4>
           <div className="flex flex-wrap gap-2">
             {sortedThirds.slice(0, QUALIFIER_RULES.bestThirds).map((t, i) => (
-              <div key={t.name} className="flex items-center gap-1.5 bg-amber-900/20 border border-amber-800/40 rounded-lg px-3 py-1.5">
+              <div key={t.name} className="flex items-center gap-1.5 bg-amber-50 border border-amber-300 rounded-lg px-3 py-1.5">
                 <span className="text-amber-600 font-bold text-xs">{i + 1}°</span>
                 <span className="text-black text-xs font-medium">{t.name}</span>
                 <span className="text-gray-500 text-xs">Gr.{groupOf(t.name)} · {t.Pts}pts · DG{t.DG > 0 ? '+' : ''}{t.DG}</span>
@@ -1939,7 +1939,7 @@ function VerPronosticosTab() {
                         return (
                           <tr key={match.id} className={`border-b border-gray-200 last:border-0 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                             <td className="px-3 py-2">
-                              <span className="text-xs font-semibold text-blue-400 bg-blue-900/30 px-1.5 py-0.5 rounded">
+                              <span className="text-xs font-semibold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">
                                 {match.jornada || '—'}
                               </span>
                             </td>
@@ -2046,8 +2046,8 @@ function VerPronosticosTab() {
                               const wonReal = !!realMatch?.winner && realMatch.winner === team
                               return (
                                 <div key={team} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border mb-1 ${
-                                  wonReal ? 'bg-green-800/30 border-green-700' :
-                                  pred?.predictedWinner === team ? 'bg-blue-900/30 border-blue-700' :
+                                  wonReal ? 'bg-green-100 border-green-300' :
+                                  pred?.predictedWinner === team ? 'bg-blue-100 border-blue-300' :
                                   'bg-gray-100 border-gray-300'
                                 }`}>
                                   <span className="flex-1 text-xs font-medium text-black truncate">{team}</span>
@@ -2084,7 +2084,7 @@ function VerPronosticosTab() {
                 {scorerPred?.scorers?.[0] ? (
                   <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${
                     scorerPred.scorers[0] === topScorers?.[0]
-                      ? 'bg-green-900/30 border-green-700'
+                      ? 'bg-green-100 border-green-300'
                       : 'bg-gray-100 border-gray-300'
                   }`}>
                     <span className="text-black font-medium flex-1">{scorerPred.scorers[0]}</span>
@@ -2099,7 +2099,7 @@ function VerPronosticosTab() {
               {topScorers?.[0] && (
                 <div>
                   <p className="text-xs text-gray-500 mb-1">Goleador oficial</p>
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-yellow-900/20 border-yellow-700">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-yellow-50 border-yellow-300">
                     <span className="text-lg">🥇</span>
                     <span className="text-black font-medium">{topScorers[0]}</span>
                   </div>
@@ -2194,7 +2194,7 @@ export default function Admin() {
               })}
             </select>
           ) : (
-            <span className="text-yellow-400 text-xs bg-yellow-900/20 border border-yellow-800 px-3 py-1.5 rounded-lg">
+            <span className="text-yellow-700 text-xs bg-yellow-50 border border-yellow-300 px-3 py-1.5 rounded-lg">
               Sin pollas — crea la primera a continuación
             </span>
           )}
@@ -2219,7 +2219,7 @@ export default function Admin() {
         </div>
 
         {pollaError && (
-          <div className="bg-red-950/40 border border-red-800 rounded-lg px-3 py-2 text-xs text-red-300">
+          <div className="bg-red-50 border border-red-300 rounded-lg px-3 py-2 text-xs text-red-700">
             {pollaError}
           </div>
         )}

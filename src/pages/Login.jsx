@@ -151,7 +151,7 @@ export default function Login() {
               </div>
 
               {loginError && (
-                <div className="bg-red-950/40 border border-red-800 rounded-lg px-4 py-2.5 text-red-300 text-sm text-center">
+                <div className="bg-red-50 border border-red-300 rounded-lg px-4 py-2.5 text-red-700 text-sm text-center">
                   {loginError}
                 </div>
               )}
@@ -197,7 +197,7 @@ export default function Login() {
               </div>
 
               {adminError && (
-                <div className="bg-red-950/40 border border-red-800 rounded-lg px-4 py-2.5 text-red-300 text-sm text-center">
+                <div className="bg-red-50 border border-red-300 rounded-lg px-4 py-2.5 text-red-700 text-sm text-center">
                   {adminError}
                 </div>
               )}

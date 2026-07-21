@@ -232,7 +232,7 @@ function PartidosTab() {
     <div className="space-y-4">
       {/* Banner de fase bloqueada */}
       {groupsLocked && (
-        <div className="bg-red-950/40 border border-red-800 rounded-xl px-4 py-3 flex items-center gap-3 text-sm text-red-300">
+        <div className="bg-red-50 border border-red-300 rounded-xl px-4 py-3 flex items-center gap-3 text-sm text-red-700">
           <span className="text-xl">🔒</span>
           <div>
             <p className="font-semibold">Carga de pronósticos cerrada</p>
@@ -312,7 +312,7 @@ function PartidosTab() {
                       </td>
                       {/* Jornada */}
                       <td className="px-2 py-2">
-                        <span className="text-xs font-semibold text-blue-400 bg-blue-900/30 px-1.5 py-0.5 rounded">
+                        <span className="text-xs font-semibold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">
                           {match.jornada || '—'}
                         </span>
                       </td>
@@ -471,21 +471,21 @@ function GoleadoresTab() {
 
   return (
     <div className="space-y-5 max-w-2xl">
-      <div className="bg-blue-950/30 border border-blue-900 rounded-xl p-4 text-sm text-blue-300">
+      <div className="bg-blue-50 border border-blue-300 rounded-xl p-4 text-sm text-blue-700">
         <strong>¿Cómo funciona?</strong> Predice el máximo goleador del torneo.
         Ganas <strong>{pts} pts</strong> si aciertas el goleador registrado por el administrador.
       </div>
 
       {scorerLocked && (
-        <div className="bg-red-950/40 border border-red-800 rounded-xl p-4 text-red-300 text-sm">
+        <div className="bg-red-50 border border-red-300 rounded-xl p-4 text-red-700 text-sm">
           🔒 El administrador ha bloqueado el pronóstico de goleador. Solo lectura.
         </div>
       )}
 
       {!currentParticipant && (
-        <div className="bg-yellow-900/20 border border-yellow-800 rounded-xl p-4 text-yellow-300 text-sm">
+        <div className="bg-yellow-50 border border-yellow-300 rounded-xl p-4 text-yellow-700 text-sm">
           ⚠️ Selecciona o{' '}
-          <Link to="/registro" className="underline hover:text-yellow-700">registra un participante</Link>
+          <Link to="/registro" className="underline hover:text-yellow-900">registra un participante</Link>
           {' '}para guardar pronósticos.
         </div>
       )}
@@ -524,7 +524,7 @@ function GoleadoresTab() {
           {topScorers[0] ? (
             <div className={`flex items-center gap-3 rounded-lg px-3 py-2 border ${
               pred?.scorers?.[0] === topScorers[0]
-                ? 'bg-green-900/30 border-green-700'
+                ? 'bg-green-100 border-green-300'
                 : 'bg-gray-100 border-gray-300'
             }`}>
               <span className="text-lg">🥇</span>
@@ -573,9 +573,9 @@ export default function Pronosticos() {
       </div>
 
       {!currentParticipant && (
-        <div className="bg-yellow-900/20 border border-yellow-800 rounded-xl p-4 text-yellow-300 text-sm">
+        <div className="bg-yellow-50 border border-yellow-300 rounded-xl p-4 text-yellow-700 text-sm">
           ⚠️ Selecciona o{' '}
-          <Link to="/registro" className="underline hover:text-yellow-700">registra un participante</Link>
+          <Link to="/registro" className="underline hover:text-yellow-900">registra un participante</Link>
           {' '}para poder guardar pronósticos.
         </div>
       )}
