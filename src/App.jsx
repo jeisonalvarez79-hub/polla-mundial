@@ -27,11 +27,11 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="text-7xl mb-4 animate-bounce">⚽</div>
-          <p className="text-white text-2xl font-bold">Polla Mundial</p>
-          <p className="text-gray-400 mt-3">Cargando datos...</p>
+          <p className="text-black text-2xl font-bold">Polla Mundial</p>
+          <p className="text-gray-600 mt-3">Cargando datos...</p>
           <div className="mt-4 flex justify-center gap-1">
             {[0,1,2].map(i => (
               <div key={i}

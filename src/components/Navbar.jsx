@@ -29,7 +29,7 @@ export default function Navbar() {
   const currentPolla = pollas.find(p => p.id === currentPollaId)
 
   return (
-    <header className="bg-green-900 border-b border-green-800 sticky top-0 z-50">
+    <header className="bg-blue-900 border-b border-blue-800 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
 
         {/* Top bar */}
@@ -47,17 +47,17 @@ export default function Navbar() {
             {/* Polla */}
             {isAdmin && pollas.length > 1 ? (
               <div className="flex items-center gap-1.5">
-                <span className="text-green-400 text-xs hidden sm:inline font-semibold">Polla:</span>
+                <span className="text-blue-300 text-xs hidden sm:inline font-semibold">Polla:</span>
                 <select
                   value={currentPollaId || ''}
                   onChange={e => setCurrentPolla(e.target.value)}
-                  className="bg-green-800 border border-green-600 text-white text-xs rounded px-2 py-1 max-w-[130px] font-medium focus:outline-none"
+                  className="bg-blue-800 border border-blue-600 text-white text-xs rounded px-2 py-1 max-w-[130px] font-medium focus:outline-none"
                 >
                   {pollas.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
               </div>
             ) : currentPolla ? (
-              <span className="text-xs bg-green-800 border border-green-700 text-green-200 px-2 py-1 rounded font-medium max-w-[120px] truncate">
+              <span className="text-xs bg-blue-800 border border-blue-700 text-blue-200 px-2 py-1 rounded font-medium max-w-[120px] truncate">
                 {currentPolla.name}
               </span>
             ) : null}
@@ -68,7 +68,7 @@ export default function Navbar() {
                 🔒 Admin
               </span>
             ) : currentParticipant ? (
-              <span className="flex items-center gap-1 bg-green-800/60 border border-green-700 text-green-200 text-xs font-semibold px-2.5 py-1 rounded-full max-w-[140px] truncate">
+              <span className="flex items-center gap-1 bg-blue-800/60 border border-blue-700 text-blue-200 text-xs font-semibold px-2.5 py-1 rounded-full max-w-[140px] truncate">
                 👤 {currentParticipant.name}
               </span>
             ) : null}
@@ -91,7 +91,7 @@ export default function Navbar() {
               onClick={handleRefresh}
               disabled={refreshing}
               title="Recargar datos desde la nube"
-              className="text-xs text-green-300 hover:text-white border border-green-700 hover:border-green-500 px-2.5 py-1 rounded transition-colors disabled:opacity-50"
+              className="text-xs text-blue-300 hover:text-white border border-blue-700 hover:border-blue-500 px-2.5 py-1 rounded transition-colors disabled:opacity-50"
             >
               {refreshing ? '...' : '↻'}
             </button>
@@ -99,7 +99,7 @@ export default function Navbar() {
             {/* Salir */}
             <button
               onClick={logout}
-              className="text-xs text-green-300 hover:text-white border border-green-700 hover:border-green-500 px-2.5 py-1 rounded transition-colors"
+              className="text-xs text-blue-300 hover:text-white border border-blue-700 hover:border-blue-500 px-2.5 py-1 rounded transition-colors"
             >
               Salir
             </button>
@@ -114,8 +114,8 @@ export default function Navbar() {
               to={to}
               className={`px-3 py-1.5 rounded-t text-sm font-medium whitespace-nowrap transition-colors ${
                 pathname === to
-                  ? 'bg-gray-950 text-green-400'
-                  : 'text-green-200 hover:text-white hover:bg-green-800'
+                  ? 'bg-white text-blue-800'
+                  : 'text-blue-200 hover:text-white hover:bg-blue-800'
               }`}
             >
               {label}

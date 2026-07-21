@@ -23,8 +23,8 @@ export default function Registro() {
   return (
     <div className="max-w-xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-1">Participantes</h1>
-        {currentPolla && <p className="text-gray-400 text-sm">{currentPolla.name}</p>}
+        <h1 className="text-2xl font-bold text-black mb-1">Participantes</h1>
+        {currentPolla && <p className="text-gray-600 text-sm">{currentPolla.name}</p>}
       </div>
 
       {currentParticipant && (
@@ -39,15 +39,15 @@ export default function Registro() {
       )}
 
       {participants.length === 0 ? (
-        <div className="text-center py-16 text-gray-600">
+        <div className="text-center py-16 text-gray-500">
           <div className="text-5xl mb-4">👥</div>
           <p className="text-lg">No hay participantes en esta polla.</p>
-          <p className="text-xs mt-2 text-gray-700">El administrador debe agregarlos desde el Panel Admin.</p>
+          <p className="text-xs mt-2 text-gray-300">El administrador debe agregarlos desde el Panel Admin.</p>
         </div>
       ) : (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-          <div className="bg-gray-800 px-5 py-3">
-            <p className="text-white font-semibold text-sm">
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div className="bg-gray-100 px-5 py-3">
+            <p className="text-black font-semibold text-sm">
               Clasificación · {participants.length} participante{participants.length !== 1 ? 's' : ''}
             </p>
           </div>
@@ -60,7 +60,7 @@ export default function Registro() {
                   className={`flex items-center gap-3 px-5 py-3 ${isMe ? 'bg-green-900/20' : ''}`}
                 >
                   <span className="text-gray-500 text-sm w-5 text-center shrink-0">{position}</span>
-                  <span className={`font-medium flex-1 ${isMe ? 'text-green-400' : 'text-white'}`}>
+                  <span className={`font-medium flex-1 ${isMe ? 'text-green-400' : 'text-black'}`}>
                     {participant.name}
                     {isMe && <span className="ml-2 text-xs bg-green-700 text-green-200 px-2 py-0.5 rounded-full">Tú</span>}
                   </span>

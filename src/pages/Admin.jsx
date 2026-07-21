@@ -134,7 +134,7 @@ function StatusBadge({ value, active, onClick }) {
       className={`text-xs px-3 py-1 rounded-full border transition-colors ${
         active
           ? 'bg-green-700 border-green-600 text-white'
-          : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'
+          : 'bg-gray-100 border-gray-300 text-gray-600 hover:border-gray-400'
       }`}
     >
       {STATUS_OPTIONS.find(s => s.value === value)?.label ?? value}
@@ -151,7 +151,7 @@ function Input({ value, onChange, placeholder, className = '', type = 'text', mi
       max={max}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
-      className={`bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-green-600 ${className}`}
+      className={`bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-green-600 ${className}`}
     />
   )
 }
@@ -244,7 +244,7 @@ function EquiposTab() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <p className="text-gray-400 text-sm">
+        <p className="text-gray-600 text-sm">
           Configura los equipos de cada grupo y registra los resultados de los partidos.
         </p>
         {totalDirty > 0 && (
@@ -264,7 +264,7 @@ function EquiposTab() {
           <button key={g}
             onClick={() => setActiveGroup(g)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              activeGroup === g ? 'bg-green-700 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'
+              activeGroup === g ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-600 hover:text-black'
             }`}
           >
             Grupo {g}
@@ -273,8 +273,8 @@ function EquiposTab() {
       </div>
 
       {/* Equipos del grupo */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <h3 className="text-white font-semibold mb-3">Equipos del Grupo {activeGroup}</h3>
+      <div className="bg-white border border-gray-200 rounded-xl p-5">
+        <h3 className="text-black font-semibold mb-3">Equipos del Grupo {activeGroup}</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
           {[0,1,2,3].map(i => (
             <div key={i}>
@@ -308,7 +308,7 @@ function EquiposTab() {
 
           const hr = getME(match.id, 'hora', match.hora)
           return (
-            <div key={match.id} className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
+            <div key={match.id} className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
               {/* Jornada */}
               <p className="text-xs text-blue-400 font-semibold">
                 {match.jornada || '—'} &nbsp;·&nbsp; {match.homeTeam || '—'} vs {match.awayTeam || '—'}
@@ -326,25 +326,25 @@ function EquiposTab() {
 
               {/* Equipos + marcador */}
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="flex-1 min-w-[80px] text-sm font-medium text-white truncate">
+                <span className="flex-1 min-w-[80px] text-sm font-medium text-black truncate">
                   {match.homeTeam || '—'}
                 </span>
                 <div className="flex items-center gap-1 shrink-0">
                   <input type="number" min="0" max="99"
                     value={hS ?? ''}
                     onChange={e => setME(match.id, 'homeScore', e.target.value === '' ? null : parseInt(e.target.value))}
-                    className="w-12 text-center bg-gray-800 border border-gray-700 text-white rounded py-1 text-lg font-bold focus:outline-none focus:border-green-600"
+                    className="w-12 text-center bg-gray-100 border border-gray-300 text-black rounded py-1 text-lg font-bold focus:outline-none focus:border-green-600"
                     placeholder="-"
                   />
-                  <span className="text-gray-600">-</span>
+                  <span className="text-gray-500">-</span>
                   <input type="number" min="0" max="99"
                     value={aS ?? ''}
                     onChange={e => setME(match.id, 'awayScore', e.target.value === '' ? null : parseInt(e.target.value))}
-                    className="w-12 text-center bg-gray-800 border border-gray-700 text-white rounded py-1 text-lg font-bold focus:outline-none focus:border-green-600"
+                    className="w-12 text-center bg-gray-100 border border-gray-300 text-black rounded py-1 text-lg font-bold focus:outline-none focus:border-green-600"
                     placeholder="-"
                   />
                 </div>
-                <span className="flex-1 min-w-[80px] text-sm font-medium text-white truncate text-right">
+                <span className="flex-1 min-w-[80px] text-sm font-medium text-black truncate text-right">
                   {match.awayTeam || '—'}
                 </span>
               </div>
@@ -366,7 +366,7 @@ function EquiposTab() {
               {dirty && (
                 <div className="flex gap-2 justify-end">
                   <button onClick={() => setMatchEdits(prev => { const c={...prev}; delete c[match.id]; return c })}
-                    className="text-sm text-gray-500 hover:text-gray-300 px-3 py-1">
+                    className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1">
                     Cancelar
                   </button>
                   <button onClick={() => saveME(match)}
@@ -415,7 +415,7 @@ function ClasificacionTab() {
 
   return (
     <div className="space-y-5">
-      <p className="text-gray-400 text-sm">
+      <p className="text-gray-600 text-sm">
         Ingresa la clasificación final de cada grupo (1°, 2°, 3°, 4°).
         Esto se usa para calcular puntos de pronósticos de tabla.
         Usa el desplegable si los equipos ya están cargados, o escribe directamente.
@@ -426,8 +426,8 @@ function ClasificacionTab() {
           const teams = getGroupTeams(group)
           const isDirty = !!edits[group] && Object.keys(edits[group]).length > 0
           return (
-            <div key={group} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-              <h3 className="text-white font-semibold mb-3">Grupo {group}</h3>
+            <div key={group} className="bg-white border border-gray-200 rounded-xl p-4">
+              <h3 className="text-black font-semibold mb-3">Grupo {group}</h3>
               <div className="space-y-2">
                 {[0,1,2,3].map(i => (
                   <div key={i} className="flex items-center gap-2">
@@ -436,7 +436,7 @@ function ClasificacionTab() {
                       <select
                         value={getVal(group, i)}
                         onChange={e => setVal(group, i, e.target.value)}
-                        className="flex-1 bg-gray-800 border border-gray-700 text-white rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-green-600"
+                        className="flex-1 bg-gray-100 border border-gray-300 text-black rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-green-600"
                       >
                         <option value="">— Seleccionar —</option>
                         {teams.map(t => (
@@ -462,7 +462,7 @@ function ClasificacionTab() {
                     ? 'bg-green-800 text-green-300'
                     : isDirty
                     ? 'bg-green-700 hover:bg-green-600 text-white'
-                    : 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                    : 'bg-gray-100 text-gray-500 cursor-not-allowed'
                 }`}
               >
                 {saved[group] ? '✓ Guardado' : 'Guardar Grupo ' + group}
@@ -559,7 +559,7 @@ function BracketTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between flex-wrap gap-4">
-        <p className="text-gray-400 text-sm max-w-lg">
+        <p className="text-gray-600 text-sm max-w-lg">
           Carga los equipos clasificados de cada fase y registra los resultados.
           El campo "Ganador / Clasificado" es lo que se usa para calcular los puntos del bracket.
         </p>
@@ -582,11 +582,11 @@ function BracketTab() {
       {ROUND_ORDER.map(round => (
         <div key={round}>
           <div className="flex items-center gap-3 mb-3 flex-wrap">
-            <h3 className="text-white font-semibold flex items-center gap-2">
+            <h3 className="text-black font-semibold flex items-center gap-2">
               {round === 'final' && '🏆 '}
               {round === 'third' && '🥉 '}
               {ROUND_LABEL[round]}
-              <span className="text-xs text-gray-600 font-normal">
+              <span className="text-xs text-gray-500 font-normal">
                 ({byRound[round]?.length} partido{byRound[round]?.length !== 1 ? 's' : ''})
               </span>
             </h3>
@@ -613,7 +613,7 @@ function BracketTab() {
 
               const slots = SEED_SLOT_BY_POS[bm.id]
               return (
-                <div key={bm.id} className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
+                <div key={bm.id} className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-xs text-gray-500 font-medium">{bm.label}</p>
                     {slots && (
@@ -640,12 +640,12 @@ function BracketTab() {
                     <div className="flex items-center gap-1 shrink-0">
                       <input type="number" min="0" value={hS ?? ''}
                         onChange={e => setE(bm.id, 'homeScore', e.target.value==='' ? null : parseInt(e.target.value))}
-                        className="w-10 text-center bg-gray-800 border border-gray-700 text-white rounded py-1 text-base font-bold focus:outline-none"
+                        className="w-10 text-center bg-gray-100 border border-gray-300 text-black rounded py-1 text-base font-bold focus:outline-none"
                         placeholder="-" />
-                      <span className="text-gray-600">-</span>
+                      <span className="text-gray-500">-</span>
                       <input type="number" min="0" value={aS ?? ''}
                         onChange={e => setE(bm.id, 'awayScore', e.target.value==='' ? null : parseInt(e.target.value))}
-                        className="w-10 text-center bg-gray-800 border border-gray-700 text-white rounded py-1 text-base font-bold focus:outline-none"
+                        className="w-10 text-center bg-gray-100 border border-gray-300 text-black rounded py-1 text-base font-bold focus:outline-none"
                         placeholder="-" />
                     </div>
                     <Input value={aT} onChange={v => setE(bm.id, 'awayTeam', v)}
@@ -663,7 +663,7 @@ function BracketTab() {
                             className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${
                               wn === team
                                 ? 'bg-green-700 border-green-600 text-white font-semibold'
-                                : 'bg-gray-800 border-gray-700 text-gray-300 hover:border-gray-500'
+                                : 'bg-gray-100 border-gray-300 text-gray-700 hover:border-gray-400'
                             }`}
                           >
                             {team} {wn === team && '✓'}
@@ -671,7 +671,7 @@ function BracketTab() {
                         ))}
                         {wn && (
                           <button onClick={() => setE(bm.id, 'winner', null)}
-                            className="text-sm text-gray-600 hover:text-gray-400 px-2">
+                            className="text-sm text-gray-500 hover:text-gray-600 px-2">
                             Quitar
                           </button>
                         )}
@@ -682,7 +682,7 @@ function BracketTab() {
                   {dirty && (
                     <div className="flex gap-2 justify-end">
                       <button onClick={() => setEdits(prev => { const c={...prev}; delete c[bm.id]; return c })}
-                        className="text-sm text-gray-500 hover:text-gray-300 px-3 py-1">
+                        className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1">
                         Cancelar
                       </button>
                       <button onClick={() => saveMatch(bm)}
@@ -719,13 +719,13 @@ function GoleadoresTab() {
 
   return (
     <div className="max-w-md space-y-5">
-      <p className="text-gray-400 text-sm">
+      <p className="text-gray-600 text-sm">
         Ingresa el máximo goleador del torneo. Los participantes que lo acertaron ganan puntos.
       </p>
 
-      <form onSubmit={handleSave} className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+      <form onSubmit={handleSave} className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
         <div>
-          <label className="text-xs text-gray-400 block mb-1">Goleador del torneo</label>
+          <label className="text-xs text-gray-600 block mb-1">Goleador del torneo</label>
           <Input
             value={local}
             onChange={setLocal}
@@ -743,11 +743,11 @@ function GoleadoresTab() {
       </form>
 
       {topScorers[0] && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
           <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">Goleador actual</p>
           <div className="flex items-center gap-3 py-1.5">
             <span className="text-lg">🥇</span>
-            <span className="text-white font-medium">{topScorers[0]}</span>
+            <span className="text-black font-medium">{topScorers[0]}</span>
           </div>
         </div>
       )}
@@ -871,15 +871,15 @@ function BloqueosTab() {
 
       {/* Resumen */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 text-center">
+        <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
           <p className="text-3xl font-bold text-red-400">{lockedCount}</p>
           <p className="text-xs text-gray-500 mt-1">Fase(s) bloqueada(s)</p>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 text-center">
+        <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
           <p className="text-3xl font-bold text-green-400">{unlockedCount}</p>
           <p className="text-xs text-gray-500 mt-1">Fase(s) abierta(s)</p>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 text-center">
+        <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
           <p className="text-3xl font-bold text-blue-400">{allParticipants.length}</p>
           <p className="text-xs text-gray-500 mt-1">Participante(s) totales</p>
         </div>
@@ -907,7 +907,7 @@ function BloqueosTab() {
           className={`flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50 ${
             backupDone
               ? 'bg-blue-800 text-blue-200'
-              : 'bg-gray-700 hover:bg-gray-600 text-white'
+              : 'bg-gray-200 hover:bg-gray-300 text-black'
           }`}
         >
           {backingUp ? '⏳ Actualizando datos...' : backupDone ? '✓ CSV descargado' : '📥 Exportar backup CSV'}
@@ -952,10 +952,10 @@ function BloqueosTab() {
       )}
 
       {/* Control por fase */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-        <div className="bg-gray-800 px-4 py-3">
-          <p className="text-white font-semibold text-sm">Control de fases</p>
-          <p className="text-gray-400 text-xs mt-0.5">
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="bg-gray-100 px-4 py-3">
+          <p className="text-black font-semibold text-sm">Control de fases</p>
+          <p className="text-gray-600 text-xs mt-0.5">
             Cuando una fase está <span className="text-red-400 font-medium">Bloqueada</span>, los participantes no pueden ingresar ni modificar pronósticos.
             Cuando está <span className="text-green-400 font-medium">Abierta</span>, pueden hacerlo libremente.
           </p>
@@ -968,7 +968,7 @@ function BloqueosTab() {
               <div key={phase.id} className="flex items-center justify-between px-4 py-3 gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-white">{phase.label}</span>
+                    <span className="text-sm font-medium text-black">{phase.label}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
                       isLocked
                         ? 'bg-red-900/50 text-red-400'
@@ -1050,7 +1050,7 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
 
   return (
     <div className={`flex items-center gap-2 px-4 py-3 flex-wrap text-sm ${isOrphan ? 'bg-red-950/20' : ''}`}>
-      <span className="text-gray-600 w-5 shrink-0 text-center">{index + 1}</span>
+      <span className="text-gray-500 w-5 shrink-0 text-center">{index + 1}</span>
 
       {/* Nombre editable */}
       {editingName ? (
@@ -1060,7 +1060,7 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
             value={nameInput}
             onChange={e => setNameInput(e.target.value)}
             autoFocus
-            className="flex-1 bg-gray-800 border border-blue-600 text-white rounded px-2 py-0.5 text-sm focus:outline-none"
+            className="flex-1 bg-gray-100 border border-blue-600 text-black rounded px-2 py-0.5 text-sm focus:outline-none"
           />
           <button
             onClick={handleSaveName}
@@ -1071,14 +1071,14 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
           </button>
           <button
             onClick={() => { setEditingName(false); setNameInput(p.name) }}
-            className="text-xs text-gray-500 hover:text-gray-300 px-1"
+            className="text-xs text-gray-500 hover:text-gray-700 px-1"
           >✕</button>
         </div>
       ) : (
         <button
           onClick={() => setEditingName(true)}
           title="Editar nombre"
-          className="text-white font-medium flex-1 min-w-[80px] text-left hover:text-blue-300 transition-colors"
+          className="text-black font-medium flex-1 min-w-[80px] text-left hover:text-blue-300 transition-colors"
         >
           {p.name}
         </button>
@@ -1105,7 +1105,7 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
             maxLength={4}
             inputMode="numeric"
             autoFocus
-            className="w-14 text-center bg-gray-800 border border-yellow-600 text-yellow-400 rounded px-1 py-0.5 text-xs font-mono tracking-widest focus:outline-none"
+            className="w-14 text-center bg-gray-100 border border-yellow-600 text-yellow-400 rounded px-1 py-0.5 text-xs font-mono tracking-widest focus:outline-none"
           />
           <button
             onClick={handleSavePin}
@@ -1116,7 +1116,7 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
           </button>
           <button
             onClick={() => { setEditingPin(false); setPinInput('') }}
-            className="text-xs text-gray-500 hover:text-gray-300 px-1"
+            className="text-xs text-gray-500 hover:text-gray-700 px-1"
           >
             ✕
           </button>
@@ -1125,7 +1125,7 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
         <span
           title="Clic para cambiar PIN"
           onClick={() => !pinIsHashed && setEditingPin(true)}
-          className={`font-mono bg-gray-800 border border-gray-700 px-2 py-0.5 rounded text-xs tracking-widest shrink-0 ${
+          className={`font-mono bg-gray-100 border border-gray-300 px-2 py-0.5 rounded text-xs tracking-widest shrink-0 ${
             pinIsHashed ? 'text-gray-500 cursor-default' : 'text-yellow-400 hover:border-yellow-600 cursor-pointer'
           }`}
         >
@@ -1139,7 +1139,7 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
           <select
             value={assignId}
             onChange={e => setAssignId(e.target.value)}
-            className="bg-gray-800 border border-gray-700 text-white rounded px-2 py-0.5 text-xs"
+            className="bg-gray-100 border border-gray-300 text-black rounded px-2 py-0.5 text-xs"
           >
             <option value="">Asignar polla...</option>
             {pollas.map(pl => <option key={pl.id} value={pl.id}>{pl.name}</option>)}
@@ -1247,20 +1247,20 @@ function ParticipantesTab() {
       )}
 
       {/* Formulario de alta */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-4">
-        <h3 className="text-white font-semibold">Agregar participante</h3>
+      <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+        <h3 className="text-black font-semibold">Agregar participante</h3>
         <form onSubmit={handleAdd} className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Nombre</label>
+              <label className="text-xs text-gray-600 mb-1 block">Nombre</label>
               <Input value={nombre} onChange={setNombre} placeholder="Nombre del participante" className="w-full" />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Polla destino</label>
+              <label className="text-xs text-gray-600 mb-1 block">Polla destino</label>
               <select
                 value={pollaId}
                 onChange={e => setPollaId(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-green-600"
+                className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-green-600"
               >
                 <option value="">— Selecciona polla —</option>
                 {pollas.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -1269,7 +1269,7 @@ function ParticipantesTab() {
           </div>
 
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">PIN de acceso (4 dígitos — auto-generado)</label>
+            <label className="text-xs text-gray-600 mb-1 block">PIN de acceso (4 dígitos — auto-generado)</label>
             <div className="flex gap-2 items-center">
               <input
                 type="text"
@@ -1277,10 +1277,10 @@ function ParticipantesTab() {
                 onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
                 maxLength={4}
                 inputMode="numeric"
-                className="w-24 text-center bg-gray-800 border border-gray-700 text-yellow-400 rounded-lg px-3 py-1.5 text-lg font-bold font-mono tracking-widest focus:outline-none focus:border-green-600"
+                className="w-24 text-center bg-gray-100 border border-gray-300 text-yellow-400 rounded-lg px-3 py-1.5 text-lg font-bold font-mono tracking-widest focus:outline-none focus:border-green-600"
               />
               <button type="button" onClick={() => setPin(generatePin())}
-                className="text-xs text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 px-3 py-1.5 rounded-lg transition-colors">
+                className="text-xs text-gray-600 hover:text-black border border-gray-300 hover:border-gray-400 px-3 py-1.5 rounded-lg transition-colors">
                 🔀 Nuevo PIN
               </button>
             </div>
@@ -1299,16 +1299,16 @@ function ParticipantesTab() {
       </div>
 
       {/* Lista de todos los participantes */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         {/* Header con filtro */}
-        <div className="bg-gray-800 px-4 py-3 flex items-center gap-3 flex-wrap">
-          <span className="text-white font-semibold text-sm shrink-0">
+        <div className="bg-gray-100 px-4 py-3 flex items-center gap-3 flex-wrap">
+          <span className="text-black font-semibold text-sm shrink-0">
             Participantes ({allParticipants.length} total)
           </span>
           <select
             value={filterPolla}
             onChange={e => setFilterPolla(e.target.value)}
-            className="bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none flex-1 min-w-[160px]"
+            className="bg-gray-200 border border-gray-300 text-black rounded-lg px-3 py-1.5 text-sm focus:outline-none flex-1 min-w-[160px]"
           >
             <option value="">🌐 Todos ({allParticipants.length})</option>
             {pollas.map(p => {
@@ -1338,7 +1338,7 @@ function ParticipantesTab() {
         )}
 
         {displayList.length === 0 ? (
-          <p className="text-gray-600 text-sm p-6 text-center">
+          <p className="text-gray-500 text-sm p-6 text-center">
             {filterPolla ? 'No hay participantes en esta sección.' : 'No hay participantes registrados aún.'}
           </p>
         ) : (
@@ -1386,32 +1386,32 @@ function PollaRow({ polla, isActive, participantCount, onUpdate, onDelete, onSel
   const fmt = v => Number(v || 0).toLocaleString('es-CO')
 
   return (
-    <div className={`rounded-lg border p-3 space-y-2 ${isActive ? 'bg-green-900/20 border-green-700' : 'bg-gray-800 border-gray-700'}`}>
+    <div className={`rounded-lg border p-3 space-y-2 ${isActive ? 'bg-green-900/20 border-green-700' : 'bg-gray-100 border-gray-300'}`}>
       {editing ? (
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <label className="text-xs text-gray-400 w-14 shrink-0">Nombre:</label>
+            <label className="text-xs text-gray-600 w-14 shrink-0">Nombre:</label>
             <input
               value={name}
               onChange={e => setName(e.target.value)}
               autoFocus
-              className="flex-1 bg-gray-700 border border-gray-600 text-white rounded px-2 py-1 text-sm focus:outline-none focus:border-green-500"
+              className="flex-1 bg-gray-200 border border-gray-300 text-black rounded px-2 py-1 text-sm focus:outline-none focus:border-green-500"
             />
           </div>
           <div className="flex items-center gap-2">
-            <label className="text-xs text-gray-400 w-14 shrink-0">Valor ($):</label>
+            <label className="text-xs text-gray-600 w-14 shrink-0">Valor ($):</label>
             <input
               type="number"
               min="0"
               value={valor}
               onChange={e => setValor(e.target.value)}
               placeholder="Ej: 50000"
-              className="flex-1 bg-gray-700 border border-gray-600 text-white rounded px-2 py-1 text-sm focus:outline-none focus:border-green-500"
+              className="flex-1 bg-gray-200 border border-gray-300 text-black rounded px-2 py-1 text-sm focus:outline-none focus:border-green-500"
             />
           </div>
           <div className="flex gap-2 justify-end">
             <button onClick={() => { setEditing(false); setName(polla.name); setValor(polla.valor_polla ?? 0) }}
-              className="text-xs text-gray-500 hover:text-gray-300 px-2 py-1">Cancelar</button>
+              className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1">Cancelar</button>
             <button onClick={handleSave}
               className="text-xs bg-green-700 hover:bg-green-600 text-white font-semibold px-3 py-1 rounded">Guardar</button>
           </div>
@@ -1419,7 +1419,7 @@ function PollaRow({ polla, isActive, participantCount, onUpdate, onDelete, onSel
       ) : (
         <div className="flex items-center gap-2">
           <div className="flex-1 min-w-0">
-            <span className="text-white font-medium text-sm">{polla.name}</span>
+            <span className="text-black font-medium text-sm">{polla.name}</span>
             {isActive && (
               <span className="ml-2 text-xs bg-green-700 text-green-200 px-1.5 py-0.5 rounded-full">Activa</span>
             )}
@@ -1438,7 +1438,7 @@ function PollaRow({ polla, isActive, participantCount, onUpdate, onDelete, onSel
               Activar
             </button>
           )}
-          <button onClick={() => setEditing(true)} className="text-xs text-gray-400 hover:text-white px-2 py-1">Editar</button>
+          <button onClick={() => setEditing(true)} className="text-xs text-gray-600 hover:text-black px-2 py-1">Editar</button>
           <button onClick={handleDelete} className="text-xs text-red-600 hover:text-red-400 px-2 py-1">✕</button>
         </div>
       )}
@@ -1500,15 +1500,15 @@ function ConfigTab() {
     <div className="space-y-6 max-w-md">
 
       {/* Pollas */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-4">
-        <h3 className="text-white font-semibold">Pollas</h3>
+      <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+        <h3 className="text-black font-semibold">Pollas</h3>
         <p className="text-gray-500 text-xs">
           Crea grupos de participantes independientes. Cada polla tiene su propio ranking.
           El selector de polla aparece en la barra de navegación.
         </p>
 
         {pollas.length === 0 ? (
-          <p className="text-gray-600 text-sm py-2">
+          <p className="text-gray-500 text-sm py-2">
             No hay pollas creadas aún. Ejecuta la migración SQL v2 en Supabase y luego crea tu primera polla.
           </p>
         ) : (
@@ -1533,7 +1533,7 @@ function ConfigTab() {
             onChange={e => setNewPollaName(e.target.value)}
             placeholder="Nombre de la nueva polla..."
             maxLength={50}
-            className="flex-1 bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-green-600 placeholder-gray-600"
+            className="flex-1 bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-green-600 placeholder-gray-600"
           />
           <button
             type="submit"
@@ -1547,15 +1547,15 @@ function ConfigTab() {
 
       <form onSubmit={handleSave} className="space-y-5">
         {/* Torneo */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-4">
-          <h3 className="text-white font-semibold">Torneo</h3>
+        <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+          <h3 className="text-black font-semibold">Torneo</h3>
           {[
             { id: 'name',           label: 'Nombre de la app',    placeholder: 'Polla Mundial' },
             { id: 'tournamentName', label: 'Nombre del torneo',   placeholder: 'Mundial 2026' },
             { id: 'year',           label: 'Año',                 placeholder: '2026' },
           ].map(f => (
             <div key={f.id}>
-              <label className="text-xs text-gray-400 mb-1 block">{f.label}</label>
+              <label className="text-xs text-gray-600 mb-1 block">{f.label}</label>
               <Input
                 value={form[f.id]}
                 onChange={val => setForm(prev => ({ ...prev, [f.id]: val }))}
@@ -1567,8 +1567,8 @@ function ConfigTab() {
         </div>
 
         {/* Puntos */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-4">
-          <h3 className="text-white font-semibold">Puntos por categoría</h3>
+        <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+          <h3 className="text-black font-semibold">Puntos por categoría</h3>
           <p className="text-gray-500 text-xs">
             Modifica los puntos que se otorgan por cada tipo de acierto.
           </p>
@@ -1581,7 +1581,7 @@ function ConfigTab() {
                 max="99"
                 value={pts[f.key]}
                 onChange={e => setPts(prev => ({ ...prev, [f.key]: parseInt(e.target.value) || 0 }))}
-                className="w-16 text-center bg-gray-800 border border-gray-700 text-white rounded-lg py-1.5 text-lg font-bold focus:outline-none focus:border-green-600"
+                className="w-16 text-center bg-gray-100 border border-gray-300 text-black rounded-lg py-1.5 text-lg font-bold focus:outline-none focus:border-green-600"
               />
             </div>
           ))}
@@ -1596,15 +1596,15 @@ function ConfigTab() {
       </form>
 
       {/* Puntos fijos por fase eliminatoria */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-3">
-        <h3 className="text-white font-semibold">Puntos fase eliminatoria (fijos)</h3>
+      <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
+        <h3 className="text-black font-semibold">Puntos fase eliminatoria (fijos)</h3>
         <p className="text-gray-500 text-xs">Estos valores están fijos según el reglamento del torneo.</p>
         {BRACKET_ROUNDS
           .filter(r => BRACKET_PAIRING_PTS[r.pairingPtsKey || r.id] != null)
           .map(r => ({ label: `${r.label} — llave acertada`, pts: BRACKET_PAIRING_PTS[r.pairingPtsKey || r.id] }))
           .map(f => (
             <div key={f.label} className="flex items-center justify-between gap-4">
-              <span className="text-sm text-gray-400 flex-1">{f.label}</span>
+              <span className="text-sm text-gray-600 flex-1">{f.label}</span>
               <span className="w-16 text-center text-lg font-bold text-green-400">{f.pts}</span>
             </div>
           ))}
@@ -1613,7 +1613,7 @@ function ConfigTab() {
       {/* Zona peligrosa */}
       <div className="bg-red-950/30 border border-red-900 rounded-xl p-5">
         <h3 className="text-red-400 font-semibold mb-2">Zona peligrosa</h3>
-        <p className="text-gray-400 text-sm mb-4">
+        <p className="text-gray-600 text-sm mb-4">
           Reinicia el torneo: partidos, resultados y pronósticos (participantes y pollas se conservan).
         </p>
         <button
@@ -1654,7 +1654,7 @@ function GruposView({ groups, matches, predictions, participantId }) {
   return (
     <div className="space-y-5">
       {/* Leyenda */}
-      <div className="flex flex-wrap gap-4 text-xs text-gray-400">
+      <div className="flex flex-wrap gap-4 text-xs text-gray-600">
         <span className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-green-700 inline-block"></span>
           Clasificado directo (1° y 2°)
@@ -1672,14 +1672,14 @@ function GruposView({ groups, matches, predictions, participantId }) {
           const standings = allStandings[group] || []
           const hasPreds = standings.some(t => t.J > 0)
           return (
-            <div key={group} className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-              <div className="bg-gray-800 px-4 py-2 flex items-center justify-between">
-                <span className="text-white font-semibold text-sm">Grupo {group}</span>
-                {!hasPreds && <span className="text-xs text-gray-600">Sin pronósticos</span>}
+            <div key={group} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+              <div className="bg-gray-100 px-4 py-2 flex items-center justify-between">
+                <span className="text-black font-semibold text-sm">Grupo {group}</span>
+                {!hasPreds && <span className="text-xs text-gray-500">Sin pronósticos</span>}
               </div>
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="text-gray-500 border-b border-gray-800">
+                  <tr className="text-gray-500 border-b border-gray-200">
                     <th className="text-center px-2 py-1.5 font-medium w-7">#</th>
                     <th className="text-left px-2 py-1.5 font-medium">Equipo</th>
                     <th className="text-center px-2 py-1.5 font-medium">Pts</th>
@@ -1691,7 +1691,7 @@ function GruposView({ groups, matches, predictions, participantId }) {
                   {standings.map((team, i) => {
                     const isBest3rd = i === 2 && bestThirdsSet.has(team.name)
                     return (
-                      <tr key={team.name || i} className={`border-b border-gray-800/50 last:border-0 ${
+                      <tr key={team.name || i} className={`border-b border-gray-200 last:border-0 ${
                         i < 2     ? 'bg-green-900/10' :
                         isBest3rd ? 'bg-amber-900/10' : ''
                       }`}>
@@ -1699,27 +1699,27 @@ function GruposView({ groups, matches, predictions, participantId }) {
                           <span className={`font-bold text-sm ${
                             i === 0   ? 'text-yellow-400' :
                             i === 1   ? 'text-green-400'  :
-                            isBest3rd ? 'text-amber-400'  : 'text-gray-600'
+                            isBest3rd ? 'text-amber-400'  : 'text-gray-500'
                           }`}>{i + 1}</span>
                         </td>
-                        <td className="px-2 py-2 font-medium text-white truncate max-w-[120px]">
+                        <td className="px-2 py-2 font-medium text-black truncate max-w-[120px]">
                           {team.name || '—'}
                           {i < 2     && <span className="ml-1 text-green-500 text-xs">✓</span>}
                           {isBest3rd && <span className="ml-1 text-amber-500 text-xs">★</span>}
                         </td>
-                        <td className="px-2 py-2 text-center font-bold text-white">{team.Pts}</td>
+                        <td className="px-2 py-2 text-center font-bold text-black">{team.Pts}</td>
                         <td className={`px-2 py-2 text-center font-medium ${
                           team.DG > 0 ? 'text-green-400' : team.DG < 0 ? 'text-red-400' : 'text-gray-500'
                         }`}>
                           {team.DG > 0 ? '+' : ''}{team.DG}
                         </td>
-                        <td className="px-2 py-2 text-center text-gray-400">{team.GF}</td>
+                        <td className="px-2 py-2 text-center text-gray-600">{team.GF}</td>
                       </tr>
                     )
                   })}
                   {standings.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="px-3 py-4 text-center text-gray-600">Sin equipos</td>
+                      <td colSpan={5} className="px-3 py-4 text-center text-gray-500">Sin equipos</td>
                     </tr>
                   )}
                 </tbody>
@@ -1731,7 +1731,7 @@ function GruposView({ groups, matches, predictions, participantId }) {
 
       {/* Resumen mejores terceros */}
       {bestThirdsSet.size > 0 && (
-        <div className="bg-gray-900 border border-amber-800/50 rounded-xl p-4">
+        <div className="bg-white border border-amber-800/50 rounded-xl p-4">
           <h4 className="text-amber-400 font-semibold text-sm mb-3">
             ★ Mejores terceros clasificados según este participante ({bestThirdsSet.size}/{QUALIFIER_RULES.bestThirds})
           </h4>
@@ -1739,7 +1739,7 @@ function GruposView({ groups, matches, predictions, participantId }) {
             {sortedThirds.slice(0, QUALIFIER_RULES.bestThirds).map((t, i) => (
               <div key={t.name} className="flex items-center gap-1.5 bg-amber-900/20 border border-amber-800/40 rounded-lg px-3 py-1.5">
                 <span className="text-amber-500 font-bold text-xs">{i + 1}°</span>
-                <span className="text-white text-xs font-medium">{t.name}</span>
+                <span className="text-black text-xs font-medium">{t.name}</span>
                 <span className="text-gray-500 text-xs">Gr.{groupOf(t.name)} · {t.Pts}pts · DG{t.DG > 0 ? '+' : ''}{t.DG}</span>
               </div>
             ))}
@@ -1807,25 +1807,25 @@ function VerPronosticosTab() {
     <div className="space-y-5 max-w-4xl">
 
       {/* Selectores */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-wrap gap-4 items-end">
+      <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-wrap gap-4 items-end">
         {pollas.length > 1 && (
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">Polla</label>
+            <label className="text-xs text-gray-600 mb-1 block">Polla</label>
             <select
               value={selectedPollaId}
               onChange={e => { setSelectedPollaId(e.target.value); setSelectedParticipantId('') }}
-              className="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+              className="bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
             >
               {pollas.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </div>
         )}
         <div className="flex-1 min-w-[200px]">
-          <label className="text-xs text-gray-400 mb-1 block">Participante</label>
+          <label className="text-xs text-gray-600 mb-1 block">Participante</label>
           <select
             value={selectedParticipantId}
             onChange={e => setSelectedParticipantId(e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+            className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500"
           >
             <option value="">— Selecciona un participante —</option>
             {pollaParticipants
@@ -1838,24 +1838,24 @@ function VerPronosticosTab() {
       </div>
 
       {!participant && (
-        <p className="text-gray-600 text-sm text-center py-8">Selecciona un participante para ver sus pronósticos.</p>
+        <p className="text-gray-500 text-sm text-center py-8">Selecciona un participante para ver sus pronósticos.</p>
       )}
 
       {participant && (
         <>
           {/* Cabecera del participante */}
           <div className="flex items-center gap-3 flex-wrap">
-            <h3 className="text-white font-bold text-lg">{participant.name}</h3>
-            <span className="text-xs bg-gray-800 text-gray-400 px-2 py-1 rounded">
+            <h3 className="text-black font-bold text-lg">{participant.name}</h3>
+            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
               Grupos: {predCount}/{matches.filter(m => m.phase === 'groups').length} pronosticados
             </span>
-            <span className="text-xs bg-gray-800 text-gray-400 px-2 py-1 rounded">
+            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
               Llaves: {bracketPredCount} guardados
             </span>
           </div>
 
           {/* Sub-tabs */}
-          <div className="flex gap-1 border-b border-gray-800">
+          <div className="flex gap-1 border-b border-gray-200">
             {[
               { id: 'partidos',  label: '⚽ Partidos de Grupos' },
               { id: 'grupos',    label: '📊 Tabla de Grupos' },
@@ -1866,7 +1866,7 @@ function VerPronosticosTab() {
                 className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 -mb-px transition-colors ${
                   viewTab === t.id
                     ? 'border-green-500 text-green-400'
-                    : 'border-transparent text-gray-400 hover:text-white'
+                    : 'border-transparent text-gray-600 hover:text-black'
                 }`}
               >
                 {t.label}
@@ -1881,18 +1881,18 @@ function VerPronosticosTab() {
                 {groups.map(g => (
                   <button key={g} onClick={() => setActiveGroup(g)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      activeGroup === g ? 'bg-green-700 text-white' : 'bg-gray-900 text-gray-400 hover:text-white border border-gray-800'
+                      activeGroup === g ? 'bg-green-700 text-white' : 'bg-white text-gray-600 hover:text-black border border-gray-200'
                     }`}
                   >
                     Grupo {g}
                   </button>
                 ))}
               </div>
-              <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="bg-gray-800 text-gray-400 text-xs">
+                      <tr className="bg-gray-100 text-gray-600 text-xs">
                         <th className="text-left px-3 py-2 font-semibold">Jor.</th>
                         <th className="text-right px-3 py-2 font-semibold">Local</th>
                         <th className="text-center px-2 py-2 font-semibold text-blue-400">Pred.</th>
@@ -1908,31 +1908,31 @@ function VerPronosticosTab() {
                         const hasResult = match.homeScore !== null && match.awayScore !== null
                         const score    = hasResult && pred ? calcGroupScore(pred, match, config) : null
                         return (
-                          <tr key={match.id} className={`border-b border-gray-800 last:border-0 ${idx % 2 === 0 ? 'bg-gray-900' : 'bg-gray-900/60'}`}>
+                          <tr key={match.id} className={`border-b border-gray-200 last:border-0 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                             <td className="px-3 py-2">
                               <span className="text-xs font-semibold text-blue-400 bg-blue-900/30 px-1.5 py-0.5 rounded">
                                 {match.jornada || '—'}
                               </span>
                             </td>
                             <td className="px-3 py-2 text-right">
-                              <span className="font-medium text-white text-xs whitespace-nowrap">{match.homeTeam || '—'}</span>
+                              <span className="font-medium text-black text-xs whitespace-nowrap">{match.homeTeam || '—'}</span>
                             </td>
                             <td className="px-2 py-2 text-center">
                               {pred ? (
                                 <span className="font-bold text-blue-300 text-sm">{pred.homeScore ?? '?'}</span>
                               ) : (
-                                <span className="text-gray-700 text-xs">—</span>
+                                <span className="text-gray-300 text-xs">—</span>
                               )}
                             </td>
                             <td className="px-2 py-2 text-center">
                               {pred ? (
                                 <span className="font-bold text-blue-300 text-sm">{pred.awayScore ?? '?'}</span>
                               ) : (
-                                <span className="text-gray-700 text-xs">—</span>
+                                <span className="text-gray-300 text-xs">—</span>
                               )}
                             </td>
                             <td className="px-3 py-2">
-                              <span className="font-medium text-white text-xs whitespace-nowrap">{match.awayTeam || '—'}</span>
+                              <span className="font-medium text-black text-xs whitespace-nowrap">{match.awayTeam || '—'}</span>
                             </td>
                             <td className="px-2 py-2 text-center text-xs text-yellow-400 font-bold">
                               {hasResult ? `${match.homeScore}–${match.awayScore}` : '—'}
@@ -1942,10 +1942,10 @@ function VerPronosticosTab() {
                                 <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
                                   score === ptExacto    ? 'bg-yellow-700 text-yellow-200' :
                                   score === ptResultado ? 'bg-blue-900 text-blue-300' :
-                                  'bg-gray-800 text-gray-500'
+                                  'bg-gray-100 text-gray-500'
                                 }`}>+{score}</span>
                               ) : (
-                                <span className="text-gray-700 text-xs">—</span>
+                                <span className="text-gray-300 text-xs">—</span>
                               )}
                             </td>
                           </tr>
@@ -1971,7 +1971,7 @@ function VerPronosticosTab() {
                 if (!roundMatches?.length) return null
                 return (
                   <div key={round}>
-                    <h3 className="text-white font-bold mb-3 flex items-center gap-2">
+                    <h3 className="text-black font-bold mb-3 flex items-center gap-2">
                       {round === 'final' && '🏆 '}{round === 'third' && '🥉 '}
                       {ROUND_LABEL[round]}
                     </h3>
@@ -1986,14 +1986,14 @@ function VerPronosticosTab() {
                         const score = match.winner && pred ? calcBracketScore(pred, match, config) : null
                         if (!homeTeam && !awayTeam) {
                           return (
-                            <div key={match.id} className="bg-gray-900/50 border border-dashed border-gray-800 rounded-xl p-3 min-w-[200px]">
-                              <p className="text-xs text-gray-600 text-center">{match.label}</p>
-                              <p className="text-xs text-gray-700 text-center mt-1">Pendiente</p>
+                            <div key={match.id} className="bg-gray-50 border border-dashed border-gray-200 rounded-xl p-3 min-w-[200px]">
+                              <p className="text-xs text-gray-500 text-center">{match.label}</p>
+                              <p className="text-xs text-gray-300 text-center mt-1">Pendiente</p>
                             </div>
                           )
                         }
                         return (
-                          <div key={match.id} className={`bg-gray-900 border rounded-xl p-3 min-w-[200px] ${round === 'final' ? 'border-yellow-700' : 'border-gray-800'}`}>
+                          <div key={match.id} className={`bg-white border rounded-xl p-3 min-w-[200px] ${round === 'final' ? 'border-yellow-700' : 'border-gray-200'}`}>
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-xs text-gray-500">{match.label}</span>
                               {score !== null && score > 0 && (
@@ -2019,9 +2019,9 @@ function VerPronosticosTab() {
                                 <div key={team} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border mb-1 ${
                                   wonReal ? 'bg-green-800/30 border-green-700' :
                                   pred?.predictedWinner === team ? 'bg-blue-900/30 border-blue-700' :
-                                  'bg-gray-800/50 border-gray-700'
+                                  'bg-gray-100 border-gray-300'
                                 }`}>
-                                  <span className="flex-1 text-xs font-medium text-white truncate">{team}</span>
+                                  <span className="flex-1 text-xs font-medium text-black truncate">{team}</span>
                                   {predScore !== null && predScore !== undefined && (
                                     <span className="text-xs font-bold text-blue-300 shrink-0">{predScore}</span>
                                   )}
@@ -2034,7 +2034,7 @@ function VerPronosticosTab() {
                               )
                             })}
                             {!pred && (
-                              <p className="text-xs text-gray-700 text-center mt-1">Sin pronóstico</p>
+                              <p className="text-xs text-gray-300 text-center mt-1">Sin pronóstico</p>
                             )}
                           </div>
                         )
@@ -2048,23 +2048,23 @@ function VerPronosticosTab() {
 
           {/* ── Tab Goleador ── */}
           {viewTab === 'goleador' && (
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 max-w-sm space-y-3">
-              <h3 className="text-white font-semibold">Pronóstico Goleador</h3>
+            <div className="bg-white border border-gray-200 rounded-xl p-5 max-w-sm space-y-3">
+              <h3 className="text-black font-semibold">Pronóstico Goleador</h3>
               <div>
                 <p className="text-xs text-gray-500 mb-1">Pronóstico de {participant.name}</p>
                 {scorerPred?.scorers?.[0] ? (
                   <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${
                     scorerPred.scorers[0] === topScorers?.[0]
                       ? 'bg-green-900/30 border-green-700'
-                      : 'bg-gray-800 border-gray-700'
+                      : 'bg-gray-100 border-gray-300'
                   }`}>
-                    <span className="text-white font-medium flex-1">{scorerPred.scorers[0]}</span>
+                    <span className="text-black font-medium flex-1">{scorerPred.scorers[0]}</span>
                     {scorerPred.scorers[0] === topScorers?.[0] && (
                       <span className="text-green-400 text-xs font-bold">+{ptGoleador}pt</span>
                     )}
                   </div>
                 ) : (
-                  <p className="text-gray-600 text-sm">Sin pronóstico de goleador.</p>
+                  <p className="text-gray-500 text-sm">Sin pronóstico de goleador.</p>
                 )}
               </div>
               {topScorers?.[0] && (
@@ -2072,7 +2072,7 @@ function VerPronosticosTab() {
                   <p className="text-xs text-gray-500 mb-1">Goleador oficial</p>
                   <div className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-yellow-900/20 border-yellow-700">
                     <span className="text-lg">🥇</span>
-                    <span className="text-white font-medium">{topScorers[0]}</span>
+                    <span className="text-black font-medium">{topScorers[0]}</span>
                   </div>
                 </div>
               )}
@@ -2108,8 +2108,8 @@ export default function Admin() {
     return (
       <div className="text-center py-24 space-y-4">
         <div className="text-6xl">🔒</div>
-        <h2 className="text-xl font-bold text-white">Acceso restringido</h2>
-        <p className="text-gray-400 text-sm">
+        <h2 className="text-xl font-bold text-black">Acceso restringido</h2>
+        <p className="text-gray-600 text-sm">
           Debes iniciar sesión como administrador desde la pantalla de login.
         </p>
       </div>
@@ -2139,12 +2139,12 @@ export default function Admin() {
     <div className="space-y-5">
       {/* Encabezado */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Panel de Administración</h1>
-        <p className="text-gray-400 text-sm">Gestiona participantes, equipos, resultados y configuración.</p>
+        <h1 className="text-2xl font-bold text-black">Panel de Administración</h1>
+        <p className="text-gray-600 text-sm">Gestiona participantes, equipos, resultados y configuración.</p>
       </div>
 
       {/* ── Panel de Pollas ─────────────────────────────────────── */}
-      <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 space-y-3">
+      <div className="bg-white border border-gray-300 rounded-xl p-4 space-y-3">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-green-400 font-semibold text-sm shrink-0">Pollas:</span>
 
@@ -2153,7 +2153,7 @@ export default function Admin() {
             <select
               value={currentPollaId || ''}
               onChange={e => setCurrentPolla(e.target.value)}
-              className="bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-1.5 text-sm min-w-[160px] focus:outline-none focus:border-green-500"
+              className="bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-1.5 text-sm min-w-[160px] focus:outline-none focus:border-green-500"
             >
               {pollas.map(p => {
                 const count = allParticipants.filter(x => x.polla_id === p.id).length
@@ -2177,7 +2177,7 @@ export default function Admin() {
               onChange={e => { setNewPollaName(e.target.value); setPollaError('') }}
               placeholder="Nombre de la nueva polla..."
               maxLength={50}
-              className="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-1.5 text-sm w-48 focus:outline-none focus:border-green-600 placeholder-gray-600"
+              className="bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-1.5 text-sm w-48 focus:outline-none focus:border-green-600 placeholder-gray-600"
             />
             <button
               type="submit"
@@ -2196,21 +2196,21 @@ export default function Admin() {
         )}
 
         {pollas.length > 0 && (
-          <p className="text-gray-600 text-xs">
-            Administrando: <span className="text-gray-400 font-medium">{pollas.find(p => p.id === currentPollaId)?.name ?? '—'}</span>
-            &nbsp;· Renombrar o eliminar pollas en <button onClick={() => setTab('config')} className="underline text-gray-500 hover:text-gray-300">Configuración</button>
+          <p className="text-gray-500 text-xs">
+            Administrando: <span className="text-gray-600 font-medium">{pollas.find(p => p.id === currentPollaId)?.name ?? '—'}</span>
+            &nbsp;· Renombrar o eliminar pollas en <button onClick={() => setTab('config')} className="underline text-gray-500 hover:text-gray-700">Configuración</button>
           </p>
         )}
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-gray-800 overflow-x-auto pb-0">
+      <div className="flex gap-1 border-b border-gray-200 overflow-x-auto pb-0">
         {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 -mb-px transition-colors ${
               tab === t.id
                 ? 'border-green-500 text-green-400'
-                : 'border-transparent text-gray-400 hover:text-white'
+                : 'border-transparent text-gray-600 hover:text-black'
             }`}
           >
             {t.label}

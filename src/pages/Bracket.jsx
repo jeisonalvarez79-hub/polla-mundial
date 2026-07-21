@@ -131,26 +131,26 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
   // ── helpers de estilo ──
   const rowBg = (team) =>
     match.winner === team   ? 'bg-green-800/40 border-green-700' :
-    displayWinner === team  ? 'bg-blue-900/40 border-blue-700'   : 'bg-gray-800/50 border-gray-700'
+    displayWinner === team  ? 'bg-blue-900/40 border-blue-700'   : 'bg-gray-100 border-gray-300'
 
   const nameColor = (team) =>
     match.winner === team   ? 'text-green-300' :
-    displayWinner === team  ? 'text-blue-200'  : 'text-gray-300'
+    displayWinner === team  ? 'text-blue-200'  : 'text-gray-700'
 
   if (empty) {
     return (
-      <div className="bg-gray-900/50 border border-dashed border-gray-800 rounded-xl p-4 min-w-[220px]">
-        <p className="text-xs text-gray-600 text-center font-medium">{match.label}</p>
-        <p className="text-xs text-gray-700 text-center mt-1">Pendiente de ronda anterior</p>
+      <div className="bg-gray-50 border border-dashed border-gray-200 rounded-xl p-4 min-w-[220px]">
+        <p className="text-xs text-gray-500 text-center font-medium">{match.label}</p>
+        <p className="text-xs text-gray-300 text-center mt-1">Pendiente de ronda anterior</p>
       </div>
     )
   }
 
   return (
-    <div className={`bg-gray-900 border rounded-xl p-4 min-w-[220px] ${
+    <div className={`bg-white border rounded-xl p-4 min-w-[220px] ${
       match.round === 'final'     ? 'border-yellow-700 shadow-lg shadow-yellow-900/20' :
-      match.status === 'finished' ? 'border-gray-700' :
-      match.status === 'live'     ? 'border-yellow-700' : 'border-gray-800'
+      match.status === 'finished' ? 'border-gray-300' :
+      match.status === 'live'     ? 'border-yellow-700' : 'border-gray-200'
     }`}>
 
       {/* Encabezado */}
@@ -179,21 +179,21 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
             value={localHome ?? ''}
             onChange={e => handleHome(e.target.value === '' ? null : Number(e.target.value))}
             onBlur={handleBlur}
-            className="w-9 shrink-0 text-center bg-gray-800 border border-gray-600 text-white rounded py-1 text-sm font-bold focus:outline-none focus:border-blue-500"
+            className="w-9 shrink-0 text-center bg-gray-100 border border-gray-300 text-black rounded py-1 text-sm font-bold focus:outline-none focus:border-blue-500"
           />
         ) : (
-          localHome !== null && <span className="text-sm font-bold text-gray-400 shrink-0">{localHome}</span>
+          localHome !== null && <span className="text-sm font-bold text-gray-600 shrink-0">{localHome}</span>
         )}
       </div>
 
       {/* Separador */}
-      <div className="flex items-center gap-2 my-1.5 text-xs text-gray-600">
-        <span className="flex-1 border-t border-gray-800" />
+      <div className="flex items-center gap-2 my-1.5 text-xs text-gray-500">
+        <span className="flex-1 border-t border-gray-200" />
         <span>vs</span>
         {match.homeScore !== null && (
           <span className="text-yellow-400 font-bold ml-1">({match.homeScore}–{match.awayScore} real)</span>
         )}
-        <span className="flex-1 border-t border-gray-800" />
+        <span className="flex-1 border-t border-gray-200" />
       </div>
 
       {/* Equipo visitante */}
@@ -205,10 +205,10 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
             value={localAway ?? ''}
             onChange={e => handleAway(e.target.value === '' ? null : Number(e.target.value))}
             onBlur={handleBlur}
-            className="w-9 shrink-0 text-center bg-gray-800 border border-gray-600 text-white rounded py-1 text-sm font-bold focus:outline-none focus:border-blue-500"
+            className="w-9 shrink-0 text-center bg-gray-100 border border-gray-300 text-black rounded py-1 text-sm font-bold focus:outline-none focus:border-blue-500"
           />
         ) : (
-          localAway !== null && <span className="text-sm font-bold text-gray-400 shrink-0">{localAway}</span>
+          localAway !== null && <span className="text-sm font-bold text-gray-600 shrink-0">{localAway}</span>
         )}
         <span className={`flex-1 text-sm font-medium truncate ${nameColor(awayTeam)}`}>{awayTeam}</span>
         {match.winner === awayTeam  && <span className="shrink-0 text-xs">✅</span>}
@@ -217,7 +217,7 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
 
       {/* Desempate */}
       {canScore && isTied && (
-        <div className="mt-3 pt-2 border-t border-gray-800">
+        <div className="mt-3 pt-2 border-t border-gray-200">
           <p className="text-xs text-gray-500 mb-1.5 text-center">Empate — ¿Quién avanza? (penales)</p>
           <div className="flex gap-2">
             {[homeTeam, awayTeam].map(team => (
@@ -227,7 +227,7 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
                 className={`flex-1 text-xs py-1.5 rounded-lg border font-medium transition-colors ${
                   prediction?.predictedWinner === team
                     ? 'bg-blue-700 border-blue-600 text-white'
-                    : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-blue-600 hover:text-blue-300'
+                    : 'bg-gray-100 border-gray-300 text-gray-600 hover:border-blue-600 hover:text-blue-300'
                 }`}
               >
                 {team}
@@ -244,7 +244,7 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
           disabled={saving || (!bothFilled && !prediction?.predictedWinner)}
           className={`mt-2 w-full text-xs py-1.5 rounded-lg font-medium transition-colors ${
             saving
-              ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+              ? 'bg-gray-200 text-gray-600 cursor-not-allowed'
               : saved
               ? 'bg-green-800 text-green-300'
               : 'bg-green-700 hover:bg-green-600 text-white'
@@ -335,24 +335,24 @@ export default function Bracket() {
       {/* Encabezado */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-1">Llaves · Fase Eliminatoria</h1>
-          <p className="text-gray-400 text-sm">
+          <h1 className="text-2xl font-bold text-black mb-1">Llaves · Fase Eliminatoria</h1>
+          <p className="text-gray-600 text-sm">
             Ingresa el marcador de cada llave. El ganador pasa automáticamente a la siguiente fase.
           </p>
           <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-500">
             {BRACKET_ROUNDS
               .filter(r => r.id !== 'third' && BRACKET_PAIRING_PTS[r.pairingPtsKey || r.id] != null)
               .map(r => (
-                <span key={r.id} className="bg-gray-800 px-2 py-1 rounded">
+                <span key={r.id} className="bg-gray-100 px-2 py-1 rounded">
                   {r.shortLabel || r.label}: <span className="text-green-400 font-semibold">{BRACKET_PAIRING_PTS[r.pairingPtsKey || r.id]}pts</span>
                 </span>
               ))}
           </div>
         </div>
         {currentParticipant && (
-          <div className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 text-sm">
-            <span className="text-gray-400">Jugando como: </span>
-            <span className="font-semibold text-white">{currentParticipant.name}</span>
+          <div className="bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm">
+            <span className="text-gray-600">Jugando como: </span>
+            <span className="font-semibold text-black">{currentParticipant.name}</span>
             <span className="ml-3 text-green-400">{myPredCount}/{totalWithTeams} guardados</span>
           </div>
         )}
@@ -395,7 +395,7 @@ export default function Bracket() {
           Clasificado real (✅)
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-gray-900/50 border border-dashed border-gray-700 inline-block" />
+          <span className="w-3 h-3 rounded bg-gray-50 border border-dashed border-gray-300 inline-block" />
           Pendiente de ronda anterior
         </span>
       </div>
@@ -408,7 +408,7 @@ export default function Bracket() {
         return (
           <div key={round}>
             <div className="flex items-center gap-3 mb-4 flex-wrap">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <h2 className="text-lg font-bold text-black flex items-center gap-2">
                 {round === 'final' && '🏆 '}
                 {round === 'third' && '🥉 '}
                 {ROUND_LABEL[round]}
@@ -453,7 +453,7 @@ export default function Bracket() {
 
       {/* Estado vacío */}
       {!currentParticipant && bracketMatches.every(m => !m.homeTeam) && (
-        <div className="text-center py-16 text-gray-600">
+        <div className="text-center py-16 text-gray-500">
           <div className="text-5xl mb-4">🎯</div>
           <p className="text-lg font-medium">El bracket aún no está disponible.</p>
           <p className="text-sm mt-2">Selecciona un participante, o el admin debe cargar el sorteo.</p>
@@ -461,7 +461,7 @@ export default function Bracket() {
       )}
 
       {currentParticipant && totalWithTeams === 0 && groupPredCount === 0 && (
-        <div className="text-center py-12 text-gray-600">
+        <div className="text-center py-12 text-gray-500">
           <div className="text-5xl mb-4">⚽</div>
           <p className="text-lg font-medium">Tu bracket está vacío.</p>
           <p className="text-sm mt-2">

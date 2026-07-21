@@ -42,29 +42,29 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
 
         {/* Logo / Hero */}
         <div className="text-center">
           <div className="text-7xl mb-4">⚽</div>
-          <h1 className="text-3xl font-bold text-white">{config?.name || 'Polla Mundial'}</h1>
+          <h1 className="text-3xl font-bold text-black">{config?.name || 'Polla Mundial'}</h1>
           <p className="text-green-300 mt-1 text-sm">
             {config?.tournamentName} {config?.year}
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
+        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-2xl">
 
           {/* Tabs */}
-          <div className="flex border-b border-gray-800">
+          <div className="flex border-b border-gray-200">
             <button
               onClick={() => { setTab('participante'); setLoginError('') }}
               className={`flex-1 py-3.5 text-sm font-semibold transition-colors ${
                 tab === 'participante'
-                  ? 'bg-gray-800 text-green-400 border-b-2 border-green-500'
-                  : 'text-gray-500 hover:text-gray-300'
+                  ? 'bg-gray-100 text-green-400 border-b-2 border-green-500'
+                  : 'text-gray-500 hover:text-gray-700'
               }`}
             >
               👤 Participante
@@ -73,8 +73,8 @@ export default function Login() {
               onClick={() => { setTab('admin'); setAdminError('') }}
               className={`flex-1 py-3.5 text-sm font-semibold transition-colors ${
                 tab === 'admin'
-                  ? 'bg-gray-800 text-green-400 border-b-2 border-green-500'
-                  : 'text-gray-500 hover:text-gray-300'
+                  ? 'bg-gray-100 text-green-400 border-b-2 border-green-500'
+                  : 'text-gray-500 hover:text-gray-700'
               }`}
             >
               🔒 Administrador
@@ -86,7 +86,7 @@ export default function Login() {
             <form onSubmit={handleParticipantLogin} className="p-6 space-y-4">
               {/* Polla */}
               <div>
-                <label className="text-xs text-gray-400 mb-1.5 block font-medium">
+                <label className="text-xs text-gray-600 mb-1.5 block font-medium">
                   1. Selecciona tu polla
                 </label>
                 <select
@@ -97,7 +97,7 @@ export default function Login() {
                     setPin('')
                     setLoginError('')
                   }}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-600"
+                  className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-600"
                 >
                   <option value="">— Seleccionar polla —</option>
                   {pollas.map(p => (
@@ -108,14 +108,14 @@ export default function Login() {
 
               {/* Nombre */}
               <div>
-                <label className="text-xs text-gray-400 mb-1.5 block font-medium">
+                <label className="text-xs text-gray-600 mb-1.5 block font-medium">
                   2. Selecciona tu nombre
                 </label>
                 <select
                   value={participantId}
                   onChange={e => { setParticipantId(e.target.value); setPin(''); setLoginError('') }}
                   disabled={!pollaId}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-600 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-600 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <option value="">— Seleccionar nombre —</option>
                   {pollaParticipants.map(p => (
@@ -131,7 +131,7 @@ export default function Login() {
 
               {/* PIN */}
               <div>
-                <label className="text-xs text-gray-400 mb-1.5 block font-medium">
+                <label className="text-xs text-gray-600 mb-1.5 block font-medium">
                   3. Ingresa tu PIN de 4 dígitos
                 </label>
                 <input
@@ -146,7 +146,7 @@ export default function Login() {
                   inputMode="numeric"
                   maxLength={4}
                   autoComplete="off"
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-3 text-center text-3xl tracking-[1em] font-bold focus:outline-none focus:border-green-600 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-3 text-center text-3xl tracking-[1em] font-bold focus:outline-none focus:border-green-600 disabled:opacity-40 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -170,7 +170,7 @@ export default function Login() {
           {tab === 'admin' && (
             <form onSubmit={handleAdminLogin} className="p-6 space-y-4">
               <div>
-                <label className="text-xs text-gray-400 mb-1.5 block font-medium">
+                <label className="text-xs text-gray-600 mb-1.5 block font-medium">
                   Correo electrónico
                 </label>
                 <input
@@ -179,11 +179,11 @@ export default function Login() {
                   onChange={e => { setEmail(e.target.value); setAdminError('') }}
                   placeholder="admin@ejemplo.com"
                   autoComplete="email"
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-600"
+                  className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-600"
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-400 mb-1.5 block font-medium">
+                <label className="text-xs text-gray-600 mb-1.5 block font-medium">
                   Contraseña
                 </label>
                 <input
@@ -192,7 +192,7 @@ export default function Login() {
                   onChange={e => { setPassword(e.target.value); setAdminError('') }}
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-600"
+                  className="w-full bg-gray-100 border border-gray-300 text-black rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-600"
                 />
               </div>
 
@@ -210,7 +210,7 @@ export default function Login() {
                 {adminLoading ? 'Autenticando...' : 'Acceder como Admin →'}
               </button>
 
-              <p className="text-xs text-gray-700 text-center">
+              <p className="text-xs text-gray-300 text-center">
                 Acceso restringido. Requiere cuenta en Supabase Auth y correo autorizado.
               </p>
             </form>

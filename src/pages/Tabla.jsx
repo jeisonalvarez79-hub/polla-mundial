@@ -20,7 +20,7 @@ function ParticipantDetail({
   const pts = config?.pts
 
   return (
-    <div className="mt-3 bg-gray-800 rounded-lg p-4 space-y-4 text-sm">
+    <div className="mt-3 bg-gray-100 rounded-lg p-4 space-y-4 text-sm">
 
       {/* Fase de grupos */}
       {finishedGroups.length > 0 && (
@@ -31,8 +31,8 @@ function ParticipantDetail({
             const score = calcGroupScore(pred, match, config)
             const ptEx = pts?.exacto ?? 3
             return (
-              <div key={match.id} className="flex items-center justify-between py-1 border-b border-gray-700/50 last:border-0">
-                <span className="text-gray-300 text-xs">
+              <div key={match.id} className="flex items-center justify-between py-1 border-b border-gray-200 last:border-0">
+                <span className="text-gray-700 text-xs">
                   {match.homeTeam} {match.homeScore}-{match.awayScore} {match.awayTeam}
                 </span>
                 <div className="flex items-center gap-2 shrink-0 ml-2">
@@ -40,7 +40,7 @@ function ParticipantDetail({
                     {pred ? `(${pred.homeScore}-${pred.awayScore})` : '—'}
                   </span>
                   <span className={`w-8 text-center font-bold text-sm ${
-                    score === ptEx ? 'text-yellow-400' : score > 0 ? 'text-blue-400' : 'text-gray-600'
+                    score === ptEx ? 'text-yellow-400' : score > 0 ? 'text-blue-400' : 'text-gray-500'
                   }`}>{score}</span>
                 </div>
               </div>
@@ -64,11 +64,11 @@ function ParticipantDetail({
               const pred   = calcPredictedGroupStandings(matches, predictions, pid, group).map(t => t.name)
               const score  = calcStandingsScore(pred, actual, config)
               return (
-                <div key={group} className="flex items-center justify-between py-1 border-b border-gray-700/50 last:border-0">
-                  <span className="text-gray-300 text-xs">Grupo {group}</span>
+                <div key={group} className="flex items-center justify-between py-1 border-b border-gray-200 last:border-0">
+                  <span className="text-gray-700 text-xs">Grupo {group}</span>
                   <div className="flex items-center gap-2 shrink-0 ml-2">
                     <span className="text-gray-500 text-xs">{pred.filter(Boolean).join(' · ')}</span>
-                    <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-purple-300' : 'text-gray-600'}`}>
+                    <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-purple-300' : 'text-gray-500'}`}>
                       {score}
                     </span>
                   </div>
@@ -95,7 +95,7 @@ function ParticipantDetail({
             <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">Clasificados a {SEED_ROUND_LABEL} ({TOTAL_QUALIFIERS})</p>
             <div className="flex items-center justify-between py-1">
               <span className="text-gray-500 text-xs">{aciertos.length}/{TOTAL_QUALIFIERS} equipos acertados</span>
-              <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-purple-400' : 'text-gray-600'}`}>
+              <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-purple-400' : 'text-gray-500'}`}>
                 {score}
               </span>
             </div>
@@ -117,21 +117,21 @@ function ParticipantDetail({
           <div>
             <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">Bracket</p>
             <div className="space-y-1">
-              <div className="flex justify-between py-1 border-b border-gray-700/50">
-                <span className="text-gray-400 text-xs">Llaves acertadas (ambos equipos)</span>
-                <span className={`font-bold text-sm ${ptsPairing > 0 ? 'text-green-400' : 'text-gray-600'}`}>{ptsPairing}</span>
+              <div className="flex justify-between py-1 border-b border-gray-200">
+                <span className="text-gray-600 text-xs">Llaves acertadas (ambos equipos)</span>
+                <span className={`font-bold text-sm ${ptsPairing > 0 ? 'text-green-400' : 'text-gray-500'}`}>{ptsPairing}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-gray-700/50">
-                <span className="text-gray-400 text-xs">Equipos clasificados por ronda</span>
-                <span className={`font-bold text-sm ${ptsTeam > 0 ? 'text-cyan-400' : 'text-gray-600'}`}>{ptsTeam}</span>
+              <div className="flex justify-between py-1 border-b border-gray-200">
+                <span className="text-gray-600 text-xs">Equipos clasificados por ronda</span>
+                <span className={`font-bold text-sm ${ptsTeam > 0 ? 'text-cyan-400' : 'text-gray-500'}`}>{ptsTeam}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-gray-700/50">
-                <span className="text-gray-400 text-xs">Bonus (campeón / subcampeón / 3ro / 4to)</span>
-                <span className={`font-bold text-sm ${ptsBonus > 0 ? 'text-orange-400' : 'text-gray-600'}`}>{ptsBonus}</span>
+              <div className="flex justify-between py-1 border-b border-gray-200">
+                <span className="text-gray-600 text-xs">Bonus (campeón / subcampeón / 3ro / 4to)</span>
+                <span className={`font-bold text-sm ${ptsBonus > 0 ? 'text-orange-400' : 'text-gray-500'}`}>{ptsBonus}</span>
               </div>
               <div className="flex justify-between py-1">
-                <span className="text-gray-300 text-xs font-semibold">Total bracket</span>
-                <span className={`font-bold text-sm ${totalBracket > 0 ? 'text-white' : 'text-gray-600'}`}>{totalBracket}</span>
+                <span className="text-gray-700 text-xs font-semibold">Total bracket</span>
+                <span className={`font-bold text-sm ${totalBracket > 0 ? 'text-black' : 'text-gray-500'}`}>{totalBracket}</span>
               </div>
             </div>
           </div>
@@ -147,10 +147,10 @@ function ParticipantDetail({
             const score = calcScorerScore(pred?.scorers, topScorers, config)
             return (
               <div className="flex items-center justify-between py-1">
-                <span className="text-gray-300 text-xs">
+                <span className="text-gray-700 text-xs">
                   {pred ? pred.scorers.filter(Boolean).join(' · ') : '—'}
                 </span>
-                <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-orange-400' : 'text-gray-600'}`}>
+                <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-orange-400' : 'text-gray-500'}`}>
                   {score}
                 </span>
               </div>
@@ -160,7 +160,7 @@ function ParticipantDetail({
       )}
 
       {finishedGroups.length === 0 && finishedBracket.length === 0 && (
-        <p className="text-gray-600 text-center py-2">Aún no hay partidos finalizados.</p>
+        <p className="text-gray-500 text-center py-2">Aún no hay partidos finalizados.</p>
       )}
     </div>
   )
@@ -194,7 +194,7 @@ export default function Tabla() {
 
   if (participants.length === 0) {
     return (
-      <div className="text-center py-20 text-gray-600">
+      <div className="text-center py-20 text-gray-500">
         <div className="text-5xl mb-4">📊</div>
         <p className="text-lg">No hay participantes todavía.</p>
       </div>
@@ -204,17 +204,17 @@ export default function Tabla() {
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-1">Tabla de Puntuaciones</h1>
-        <p className="text-gray-400 text-sm">
+        <h1 className="text-2xl font-bold text-black mb-1">Tabla de Puntuaciones</h1>
+        <p className="text-gray-600 text-sm">
           {finishedGroups} partido{finishedGroups !== 1 ? 's' : ''} de grupos · {finishedBracket} resultado{finishedBracket !== 1 ? 's' : ''} de bracket
         </p>
       </div>
 
       {/* Leyenda de puntos */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
+      <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
         <p className="text-xs text-gray-500 uppercase tracking-wide">Sistema de puntos</p>
         <div>
-          <p className="text-xs text-gray-600 mb-1.5">Fase de grupos</p>
+          <p className="text-xs text-gray-500 mb-1.5">Fase de grupos</p>
           <div className="flex flex-wrap gap-4 text-xs">
             {[
               { label: 'Marcador exacto',        value: pts?.exacto,      color: 'text-yellow-400' },
@@ -224,13 +224,13 @@ export default function Tabla() {
             ].map(item => (
               <span key={item.label} className="flex items-center gap-1.5">
                 <span className={`font-bold text-sm ${item.color}`}>{item.value}</span>
-                <span className="text-gray-400">{item.label}</span>
+                <span className="text-gray-600">{item.label}</span>
               </span>
             ))}
           </div>
         </div>
         <div>
-          <p className="text-xs text-gray-600 mb-1.5">Bracket — llaves acertadas (ambos equipos)</p>
+          <p className="text-xs text-gray-500 mb-1.5">Bracket — llaves acertadas (ambos equipos)</p>
           <div className="flex flex-wrap gap-4 text-xs">
             {BRACKET_ROUNDS
               .filter(r => BRACKET_PAIRING_PTS[r.pairingPtsKey || r.id] != null)
@@ -241,13 +241,13 @@ export default function Tabla() {
               })).map(item => (
               <span key={item.label} className="flex items-center gap-1.5">
                 <span className={`font-bold text-sm ${item.color}`}>{item.value}</span>
-                <span className="text-gray-400">{item.label}</span>
+                <span className="text-gray-600">{item.label}</span>
               </span>
             ))}
           </div>
         </div>
         <div>
-          <p className="text-xs text-gray-600 mb-1.5">Bracket — equipo clasificado por ronda (acumulativo)</p>
+          <p className="text-xs text-gray-500 mb-1.5">Bracket — equipo clasificado por ronda (acumulativo)</p>
           <div className="flex flex-wrap gap-4 text-xs">
             {BRACKET_ROUNDS
               .filter(r => !r.qualifierMap && r.id !== 'third' && r.id !== 'final' && BRACKET_TEAM_PTS[r.teamPtsKey || r.id] != null)
@@ -262,13 +262,13 @@ export default function Tabla() {
               .map(item => (
               <span key={item.label} className="flex items-center gap-1.5">
                 <span className={`font-bold text-sm ${item.color}`}>{item.value}</span>
-                <span className="text-gray-400">{item.label}</span>
+                <span className="text-gray-600">{item.label}</span>
               </span>
             ))}
           </div>
         </div>
         <div>
-          <p className="text-xs text-gray-600 mb-1.5">Bonus final</p>
+          <p className="text-xs text-gray-500 mb-1.5">Bonus final</p>
           <div className="flex flex-wrap gap-4 text-xs">
             {[
               { label: 'Campeón',     value: BONUS_PTS.champion,    color: 'text-orange-400' },
@@ -279,7 +279,7 @@ export default function Tabla() {
             ].map(item => (
               <span key={item.label} className="flex items-center gap-1.5">
                 <span className={`font-bold text-sm ${item.color}`}>{item.value}</span>
-                <span className="text-gray-400">{item.label}</span>
+                <span className="text-gray-600">{item.label}</span>
               </span>
             ))}
           </div>
@@ -298,11 +298,11 @@ export default function Tabla() {
                 <div className="text-2xl mb-1">{posLabel}</div>
                 <div className={`rounded-xl p-3 ${
                   realPos === 0 ? 'bg-yellow-900/30 border border-yellow-700' :
-                  realPos === 1 ? 'bg-gray-700/30 border border-gray-600' :
+                  realPos === 1 ? 'bg-gray-200 border border-gray-300' :
                   'bg-orange-900/20 border border-orange-900'
                 }`}>
-                  <p className="font-bold text-white text-sm truncate">{entry.participant.name}</p>
-                  <p className={`text-xl font-bold mt-1 ${realPos === 0 ? 'text-yellow-400' : 'text-gray-300'}`}>
+                  <p className="font-bold text-black text-sm truncate">{entry.participant.name}</p>
+                  <p className={`text-xl font-bold mt-1 ${realPos === 0 ? 'text-yellow-400' : 'text-gray-700'}`}>
                     {entry.stats.total}
                   </p>
                   <p className="text-xs text-gray-500">pts</p>
@@ -314,9 +314,9 @@ export default function Tabla() {
       )}
 
       {/* Tabla completa */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         {/* Header */}
-        <div className="grid grid-cols-[2rem_1fr_3.5rem_3.5rem_3.5rem_3.5rem_3.5rem_4.5rem] gap-1 px-4 py-3 bg-gray-800 text-xs font-semibold text-gray-400 uppercase tracking-wide">
+        <div className="grid grid-cols-[2rem_1fr_3.5rem_3.5rem_3.5rem_3.5rem_3.5rem_4.5rem] gap-1 px-4 py-3 bg-gray-100 text-xs font-semibold text-gray-600 uppercase tracking-wide">
           <span>#</span>
           <span>Nombre</span>
           <span className="text-center text-yellow-500">Exact.</span>
@@ -324,7 +324,7 @@ export default function Tabla() {
           <span className="text-center text-green-400">Brack.</span>
           <span className="text-center text-purple-400">Grupos</span>
           <span className="text-center text-orange-400">Goles</span>
-          <span className="text-center text-white">Total</span>
+          <span className="text-center text-black">Total</span>
         </div>
 
         {ranking.map(({ participant, stats, position }) => {
@@ -334,12 +334,12 @@ export default function Tabla() {
             <div key={participant.id}>
               <button
                 onClick={() => setExpanded(prev => prev === participant.id ? null : participant.id)}
-                className={`w-full grid grid-cols-[2rem_1fr_3.5rem_3.5rem_3.5rem_3.5rem_3.5rem_4.5rem] gap-1 px-4 py-3 border-t border-gray-800 text-left transition-colors ${
-                  isMe ? 'bg-green-900/20 hover:bg-green-900/30' : 'hover:bg-gray-800/50'
+                className={`w-full grid grid-cols-[2rem_1fr_3.5rem_3.5rem_3.5rem_3.5rem_3.5rem_4.5rem] gap-1 px-4 py-3 border-t border-gray-200 text-left transition-colors ${
+                  isMe ? 'bg-green-900/20 hover:bg-green-900/30' : 'hover:bg-gray-100'
                 }`}
               >
                 <span className="text-gray-500 text-sm self-center">{MEDAL[position - 1] ?? position}</span>
-                <span className={`font-medium self-center truncate ${isMe ? 'text-green-400' : 'text-white'}`}>
+                <span className={`font-medium self-center truncate ${isMe ? 'text-green-400' : 'text-black'}`}>
                   {participant.name}
                   {isMe && <span className="ml-1 text-xs text-green-600">(tú)</span>}
                 </span>
@@ -348,11 +348,11 @@ export default function Tabla() {
                 <span className="text-center text-green-400 font-bold self-center">{stats.ptsBracket}</span>
                 <span className="text-center text-purple-400 font-bold self-center">{stats.ptsStandings}</span>
                 <span className="text-center text-orange-400 font-bold self-center">{stats.ptsScorers}</span>
-                <span className="text-center text-white text-lg font-bold self-center">{stats.total}</span>
+                <span className="text-center text-black text-lg font-bold self-center">{stats.total}</span>
               </button>
 
               {isOpen && (
-                <div className="px-4 pb-4 border-t border-gray-800">
+                <div className="px-4 pb-4 border-t border-gray-200">
                   <ParticipantDetail
                     participant={participant}
                     matches={matches}
@@ -372,7 +372,7 @@ export default function Tabla() {
         })}
       </div>
 
-      <p className="text-center text-xs text-gray-600">
+      <p className="text-center text-xs text-gray-500">
         Haz clic en un participante para ver el desglose de puntos por categoría
       </p>
     </div>
