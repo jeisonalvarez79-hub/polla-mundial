@@ -23,7 +23,7 @@ export const ADMIN_EMAILS = [
   'jeisonalvarez79@gmail.com',
   'andres858@gmail.com',
 ]
-const ADMIN_PASSWORD = 'Mundial2026*'  // ← Cambia por la contraseña que prefieras
+const ADMIN_PASSWORD = 'Pasado2026.'  // ← Cambia por la contraseña que prefieras
 
 const EMPTY_STANDINGS = Object.fromEntries(GROUP_LETTERS.map(g => [g, ['', '', '', '']]))
 
