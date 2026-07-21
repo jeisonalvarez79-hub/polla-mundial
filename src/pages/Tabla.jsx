@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
 import { buildRanking, calcGroupScore, calcBracketScoreAll, calcStandingsScore, calcClasificadoScore, calcScorerScore, calcGroupStandings, calcPredictedGroupStandings, calcR32Qualifiers, calcPredictedR32Qualifiers } from '../utils/scoring'
-import { GROUP_LETTERS, BRACKET_PAIRING_PTS, BRACKET_TEAM_PTS, BONUS_PTS } from '../data/initialData'
+import { GROUP_LETTERS, BRACKET_ROUNDS, BRACKET_PAIRING_PTS, BRACKET_TEAM_PTS, BONUS_PTS, TOTAL_QUALIFIERS } from '../data/initialData'
+
+const SEED_ROUND_LABEL = BRACKET_ROUNDS[0].label
 
 const MEDAL = ['🥇', '🥈', '🥉']
 
@@ -77,7 +79,7 @@ function ParticipantDetail({
         )
       })()}
 
-      {/* Clasificados a dieciseisavos: conjunto completo de 32 (top-2 + mejores terceros) */}
+      {/* Clasificados a la primera ronda eliminatoria: conjunto completo (top-2 + mejores terceros si aplica) */}
       {(() => {
         const groupMatches = matches.filter(m => m.phase === 'groups')
         const allFinished = groupMatches.length > 0 && groupMatches.every(m => m.homeScore !== null && m.awayScore !== null)
@@ -90,9 +92,9 @@ function ParticipantDetail({
 
         return (
           <div>
-            <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">Clasificados a dieciseisavos (32)</p>
+            <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">Clasificados a {SEED_ROUND_LABEL} ({TOTAL_QUALIFIERS})</p>
             <div className="flex items-center justify-between py-1">
-              <span className="text-gray-500 text-xs">{aciertos.length}/32 equipos acertados</span>
+              <span className="text-gray-500 text-xs">{aciertos.length}/{TOTAL_QUALIFIERS} equipos acertados</span>
               <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-purple-400' : 'text-gray-600'}`}>
                 {score}
               </span>
@@ -108,41 +110,6 @@ function ParticipantDetail({
         )
         const hasBracketData = bracketMatches.some(m => m.homeTeam && m.awayTeam)
         if (!hasBracketData) return null
-
-        // Helper: ¿coinciden los 2 equipos sin importar orden?
-        function pairsMatch(ph, pa, ah, aa) {
-          if (!ph || !pa || !ah || !aa) return false
-          return (ph === ah && pa === aa) || (ph === aa && pa === ah)
-        }
-        // Equipos reales de una ronda
-        function aTeams(round) {
-          return new Set(bracketMatches.filter(m => m.round === round).flatMap(m => [m.homeTeam, m.awayTeam]).filter(Boolean))
-        }
-        // Equipos predichos para una lista de IDs
-        const predTeamMap = (() => {
-          // Construir mapa simple: para cada llave, equipos predichos
-          const map = {}
-          bracketMatches.forEach(bm => {
-            const p = bracketPredictions.find(p => p.participantId === pid && p.bracketMatchId === bm.id)
-            map[bm.id] = { home: bm.homeTeam, away: bm.awayTeam, predWinner: p?.predictedWinner }
-          })
-          return map
-        })()
-
-        const rows = []
-
-        // R32 pairings
-        const r32actual = bracketMatches.filter(m => m.round === 'r32' && m.homeTeam && m.awayTeam)
-        if (r32actual.length > 0) {
-          let correct = 0
-          r32actual.forEach(bm => {
-            const pred = bracketPredictions.find(p => p.participantId === pid && p.bracketMatchId === bm.id)
-            // Para R32 los equipos predichos vienen de los pronósticos de grupos (no de bracketPredictions directamente)
-            // Solo contamos las que el admin ya llenó
-            if (bm.homeTeam && bm.awayTeam) correct++ // placeholder — el scoring real ya se calculó arriba
-          })
-          rows.push({ label: `16avos — llaves registradas: ${r32actual.length}/16`, pts: ptsPairing > 0 ? '(ver total)' : 0, color: 'text-green-400' })
-        }
 
         // Resumen por categoría
         const totalBracket = ptsPairing + ptsTeam + ptsBonus
@@ -252,7 +219,7 @@ export default function Tabla() {
             {[
               { label: 'Marcador exacto',        value: pts?.exacto,      color: 'text-yellow-400' },
               { label: 'Resultado correcto',      value: pts?.resultado,   color: 'text-blue-400' },
-              { label: 'Clasificado a dieciseisavos', value: pts?.clasificado, color: 'text-purple-400' },
+              { label: `Clasificado a ${SEED_ROUND_LABEL}`, value: pts?.clasificado, color: 'text-purple-400' },
               { label: 'Posición exacta grupo',   value: pts?.ordenGrupo,  color: 'text-purple-300' },
             ].map(item => (
               <span key={item.label} className="flex items-center gap-1.5">
@@ -265,14 +232,13 @@ export default function Tabla() {
         <div>
           <p className="text-xs text-gray-600 mb-1.5">Bracket — llaves acertadas (ambos equipos)</p>
           <div className="flex flex-wrap gap-4 text-xs">
-            {[
-              { label: '16avos llave',    value: BRACKET_PAIRING_PTS.r32,   color: 'text-green-400' },
-              { label: 'Octavos llave',   value: BRACKET_PAIRING_PTS.r16,   color: 'text-green-400' },
-              { label: 'Cuartos llave',   value: BRACKET_PAIRING_PTS.qf,    color: 'text-green-400' },
-              { label: 'Semis llave',     value: BRACKET_PAIRING_PTS.sf,    color: 'text-green-400' },
-              { label: '3er puesto llave',value: BRACKET_PAIRING_PTS.third, color: 'text-green-400' },
-              { label: 'Final llave',     value: BRACKET_PAIRING_PTS.final, color: 'text-green-400' },
-            ].map(item => (
+            {BRACKET_ROUNDS
+              .filter(r => BRACKET_PAIRING_PTS[r.pairingPtsKey || r.id] != null)
+              .map(r => ({
+                label: `${r.shortLabel || r.label} llave`,
+                value: BRACKET_PAIRING_PTS[r.pairingPtsKey || r.id],
+                color: 'text-green-400',
+              })).map(item => (
               <span key={item.label} className="flex items-center gap-1.5">
                 <span className={`font-bold text-sm ${item.color}`}>{item.value}</span>
                 <span className="text-gray-400">{item.label}</span>
@@ -283,12 +249,17 @@ export default function Tabla() {
         <div>
           <p className="text-xs text-gray-600 mb-1.5">Bracket — equipo clasificado por ronda (acumulativo)</p>
           <div className="flex flex-wrap gap-4 text-xs">
-            {[
-              { label: 'Equipo en octavos',      value: BRACKET_TEAM_PTS.r16,       color: 'text-cyan-400' },
-              { label: 'Equipo en cuartos',      value: BRACKET_TEAM_PTS.qf,        color: 'text-cyan-400' },
-              { label: 'Equipo en semis',        value: BRACKET_TEAM_PTS.sf,        color: 'text-cyan-400' },
-              { label: 'Equipo final/3er puesto',value: BRACKET_TEAM_PTS.finalFour, color: 'text-cyan-400' },
-            ].map(item => (
+            {BRACKET_ROUNDS
+              .filter(r => !r.qualifierMap && r.id !== 'third' && r.id !== 'final' && BRACKET_TEAM_PTS[r.teamPtsKey || r.id] != null)
+              .map(r => ({
+                label: `Equipo en ${(r.shortLabel || r.label).toLowerCase()}`,
+                value: BRACKET_TEAM_PTS[r.teamPtsKey || r.id],
+                color: 'text-cyan-400',
+              }))
+              .concat(BRACKET_TEAM_PTS.finalFour != null
+                ? [{ label: 'Equipo final/3er puesto', value: BRACKET_TEAM_PTS.finalFour, color: 'text-cyan-400' }]
+                : [])
+              .map(item => (
               <span key={item.label} className="flex items-center gap-1.5">
                 <span className={`font-bold text-sm ${item.color}`}>{item.value}</span>
                 <span className="text-gray-400">{item.label}</span>

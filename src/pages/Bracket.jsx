@@ -2,17 +2,7 @@ import { useMemo, useState, useRef, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { calcBracketScore, calcPredictedBracketTeams } from '../utils/scoring'
-import { BRACKET_PTS } from '../data/initialData'
-
-const ROUND_LABEL = {
-  r32:   'Dieciseisavos de Final',
-  r16:   'Octavos de Final',
-  qf:    'Cuartos de Final',
-  sf:    'Semifinal',
-  third: 'Tercer Lugar',
-  final: 'Final',
-}
-const ROUND_ORDER = ['r32', 'r16', 'qf', 'sf', 'third', 'final']
+import { BRACKET_PAIRING_PTS, BRACKET_ROUNDS, ROUND_LABEL, ROUND_ORDER } from '../data/initialData'
 
 // ── BracketCard ───────────────────────────────────────────────────────────────
 
@@ -350,17 +340,13 @@ export default function Bracket() {
             Ingresa el marcador de cada llave. El ganador pasa automáticamente a la siguiente fase.
           </p>
           <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-500">
-            {[
-              { round: 'r32',   label: '16avos' },
-              { round: 'r16',   label: 'Octavos' },
-              { round: 'qf',    label: 'Cuartos' },
-              { round: 'sf',    label: 'Semis' },
-              { round: 'final', label: 'Final' },
-            ].map(r => (
-              <span key={r.round} className="bg-gray-800 px-2 py-1 rounded">
-                {r.label}: <span className="text-green-400 font-semibold">{BRACKET_PTS[r.round]}pts</span>
-              </span>
-            ))}
+            {BRACKET_ROUNDS
+              .filter(r => r.id !== 'third' && BRACKET_PAIRING_PTS[r.pairingPtsKey || r.id] != null)
+              .map(r => (
+                <span key={r.id} className="bg-gray-800 px-2 py-1 rounded">
+                  {r.shortLabel || r.label}: <span className="text-green-400 font-semibold">{BRACKET_PAIRING_PTS[r.pairingPtsKey || r.id]}pts</span>
+                </span>
+              ))}
           </div>
         </div>
         {currentParticipant && (
@@ -377,14 +363,14 @@ export default function Bracket() {
         <div className="bg-blue-950/30 border border-blue-900 rounded-xl p-4 text-sm text-blue-300">
           <p className="font-semibold mb-1">¿Cómo funciona?</p>
           <ol className="list-decimal list-inside space-y-0.5 text-blue-400 ml-2 text-xs">
-            <li>Los equipos del R32 vienen de tus <Link to="/pronosticos" className="underline">pronósticos de grupos</Link> (o del sorteo real si aún no los llenaste).</li>
+            <li>Los equipos de la primera ronda eliminatoria vienen de tus <Link to="/pronosticos" className="underline">pronósticos de grupos</Link> (o del sorteo real si aún no los llenaste).</li>
             <li>Ingresa el marcador (goles) de cada llave. Si no hay empate, el ganador (★) pasa automáticamente a la siguiente ronda. El auto-guardado se activa 700 ms después de ingresar ambos goles.</li>
             <li>Si hay empate, elige quién avanza (penales). Ese equipo pasa a la siguiente ronda.</li>
             <li>Usa el botón <strong>Guardar</strong> para guardar en cualquier momento.</li>
           </ol>
           {groupPredCount > 0 && (
             <p className="text-green-400 mt-2 text-xs">
-              ✓ {groupPredCount} partido(s) de grupos pronosticado(s) — el R32 se calcula automáticamente.
+              ✓ {groupPredCount} partido(s) de grupos pronosticado(s) — la primera ronda eliminatoria se calcula automáticamente.
             </p>
           )}
         </div>

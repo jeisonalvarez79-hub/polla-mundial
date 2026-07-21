@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo } from 'react'
 import { useApp } from '../context/AppContext'
-import { GROUP_LETTERS, R32_BRACKET_MAP, DEFAULT_LOCKS, BRACKET_PTS } from '../data/initialData'
+import { GROUP_LETTERS, DEFAULT_LOCKS, BRACKET_ROUNDS, QUALIFIER_RULES, ROUND_LABEL, ROUND_ORDER, TOTAL_GROUP_MATCHES, BRACKET_PAIRING_PTS } from '../data/initialData'
 import { buildRanking, calcGroupScore, calcBracketScore, calcPredictedBracketTeams, calcPredictedGroupStandings } from '../utils/scoring'
 
 // ─── CSV helpers ──────────────────────────────────────────────────────────────
@@ -477,15 +477,7 @@ function ClasificacionTab() {
 
 // ─── Tab: Bracket ─────────────────────────────────────────────────────────────
 
-const ROUND_ORDER = ['r32', 'r16', 'qf', 'sf', 'third', 'final']
-const ROUND_LABEL = {
-  r32:   'Dieciseisavos de Final',
-  r16:   'Octavos de Final',
-  qf:    'Cuartos de Final',
-  sf:    'Semifinal',
-  third: 'Tercer Lugar',
-  final: 'Final',
-}
+const SEED_ROUND = BRACKET_ROUNDS.find(r => r.qualifierMap)
 
 // Etiquetas legibles para los slots del bracket
 const SLOT_LABEL = Object.fromEntries([
@@ -493,20 +485,30 @@ const SLOT_LABEL = Object.fromEntries([
     [`1${g}`, `1° Grupo ${g}`],
     [`2${g}`, `2° Grupo ${g}`],
   ]),
-  ...Array.from({ length: 8 }, (_, i) => [`t${i + 1}`, `${i + 1}° mejor 3°`]),
+  ...Array.from({ length: QUALIFIER_RULES.bestThirds }, (_, i) => [`t${i + 1}`, `${i + 1}° mejor 3°`]),
 ])
 
-const R32_SLOT_BY_POS = Object.fromEntries(
-  R32_BRACKET_MAP.map(({ pos, home, away }) => [`r32_${pos}`, { home, away }])
+const SEED_SLOT_BY_POS = Object.fromEntries(
+  SEED_ROUND.qualifierMap.map(({ pos, home, away }) => [`${SEED_ROUND.id}_${pos}`, { home, away }])
 )
 
-// Configuración de auto-propagación por ronda
-const PROPAGATE_CONFIG = {
-  r16:   { label: '⚡ Poblar Octavos desde 16avos',          toRound: 'r16',   fromLabel: '16avos' },
-  qf:    { label: '⚡ Poblar Cuartos desde Octavos',          toRound: 'qf',    fromLabel: 'Octavos' },
-  sf:    { label: '⚡ Poblar Semis desde Cuartos',            toRound: 'sf',    fromLabel: 'Cuartos' },
-  third: { label: '⚡ Poblar Final y 3° Lugar desde Semis',   toRound: 'final', fromLabel: 'Semis' },
-}
+// Configuración de auto-propagación por ronda: un botón por cada ronda que
+// depende de otra (pairing/losersPairing), derivado de BRACKET_ROUNDS —
+// aparece en la sección de la ronda que puebla.
+function roundIdOf(matchId) { return matchId.split('_')[0] }
+const PROPAGATE_CONFIG = Object.fromEntries(
+  BRACKET_ROUNDS
+    .filter(r => r.pairing || r.losersPairing)
+    .map(r => {
+      const sourceId = (r.pairing || r.losersPairing)[0][0]
+      const sourceRound = BRACKET_ROUNDS.find(sr => sr.id === roundIdOf(sourceId))
+      return [r.id, {
+        label: `⚡ Poblar ${r.shortLabel || r.label} desde ${sourceRound?.shortLabel || sourceRound?.label || ''}`,
+        toRound: r.id,
+        fromLabel: sourceRound?.shortLabel || sourceRound?.label || '',
+      }]
+    })
+)
 
 function BracketTab() {
   const { bracketMatches, updateBracketMatch, generateBracket, propagateBracketRound } = useApp()
@@ -516,7 +518,7 @@ function BracketTab() {
   const [propagating, setPropagating] = useState(null)
 
   async function handleGenerateBracket() {
-    if (!window.confirm('¿Generar las llaves del R32 automáticamente desde los resultados de grupos? Esto sobreescribirá los equipos actuales del R32.')) return
+    if (!window.confirm(`¿Generar las llaves de ${SEED_ROUND.label} automáticamente desde los resultados de grupos? Esto sobreescribirá los equipos actuales de esa ronda.`)) return
     setGenerating(true)
     const qualifiers = await generateBracket()
     setGenResult(qualifiers)
@@ -566,13 +568,13 @@ function BracketTab() {
           disabled={generating}
           className="bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors whitespace-nowrap"
         >
-          {generating ? 'Generando...' : '⚡ Generar R32 desde Grupos'}
+          {generating ? 'Generando...' : `⚡ Generar ${SEED_ROUND.label} desde Grupos`}
         </button>
       </div>
 
       {genResult && (
         <div className="bg-green-950/40 border border-green-800 rounded-xl p-4 text-sm text-green-300">
-          ✓ Llaves del R32 generadas. Se encontraron {Object.keys(genResult).length} clasificados.
+          ✓ Llaves de {SEED_ROUND.label} generadas. Se encontraron {Object.keys(genResult).length} clasificados.
           Revisa el bracket a continuación.
         </div>
       )}
@@ -609,7 +611,7 @@ function BracketTab() {
               const st = getE(bm.id, 'status',    bm.status)
               const dirty = !!edits[bm.id] && Object.keys(edits[bm.id]).length > 0
 
-              const slots = R32_SLOT_BY_POS[bm.id]
+              const slots = SEED_SLOT_BY_POS[bm.id]
               return (
                 <div key={bm.id} className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -757,13 +759,11 @@ function GoleadoresTab() {
 
 const PHASE_INFO = [
   { id: 'scorer', label: 'Goleador del Torneo',   desc: 'Pronóstico del máximo goleador · Bloquear antes de iniciar el torneo' },
-  { id: 'groups', label: 'Fase de Grupos',        desc: '72 partidos de grupos · Pronósticos de marcadores y tabla' },
-  { id: 'r32',    label: 'Dieciseisavos de Final', desc: 'Bracket · 16 llaves' },
-  { id: 'r16',    label: 'Octavos de Final',        desc: 'Bracket · 8 llaves' },
-  { id: 'qf',     label: 'Cuartos de Final',        desc: 'Bracket · 4 llaves' },
-  { id: 'sf',     label: 'Semifinal',               desc: 'Bracket · 2 llaves' },
-  { id: 'third',  label: 'Tercer Lugar',            desc: 'Bracket · 1 llave' },
-  { id: 'final',  label: 'Final',                  desc: 'Bracket · 1 llave' },
+  { id: 'groups', label: 'Fase de Grupos',        desc: `${TOTAL_GROUP_MATCHES} partidos de grupos · Pronósticos de marcadores y tabla` },
+  ...BRACKET_ROUNDS.map(r => ({
+    id: r.id, label: r.label,
+    desc: `Bracket · ${r.count} llave${r.count !== 1 ? 's' : ''}`,
+  })),
 ]
 
 function BloqueosTab() {
@@ -1469,7 +1469,7 @@ function ConfigTab() {
   }
 
   function handleReset() {
-    if (window.confirm('¿Reiniciar TODOS los datos? Se perderán participantes, pronósticos y resultados. Esta acción no se puede deshacer.')) {
+    if (window.confirm('¿Reiniciar el torneo? Se perderán los partidos, resultados y pronósticos actuales (participantes y pollas se conservan). Esta acción no se puede deshacer.')) {
       resetTournament()
       window.location.href = '/'
     }
@@ -1478,7 +1478,7 @@ function ConfigTab() {
   const PT_FIELDS = [
     { key: 'exacto',      label: 'Marcador exacto',                                  color: 'text-yellow-400' },
     { key: 'resultado',   label: 'Ganador o empate correcto',                        color: 'text-blue-400' },
-    { key: 'clasificado', label: 'Clasificado a dieciseisavos (top-2 o mejor 3°)',   color: 'text-green-400' },
+    { key: 'clasificado', label: `Clasificado a ${SEED_ROUND.label}${QUALIFIER_RULES.bestThirds > 0 ? ' (top-2 o mejor 3°)' : ' (top-2 de grupo)'}`, color: 'text-green-400' },
     { key: 'ordenGrupo',  label: 'Posición exacta en tabla de grupo',                color: 'text-purple-400' },
     { key: 'goleador',    label: 'Goleador en posición exacta',                      color: 'text-orange-400' },
   ]
@@ -1599,26 +1599,22 @@ function ConfigTab() {
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-3">
         <h3 className="text-white font-semibold">Puntos fase eliminatoria (fijos)</h3>
         <p className="text-gray-500 text-xs">Estos valores están fijos según el reglamento del torneo.</p>
-        {[
-          { label: '16avos de Final — llave acertada', pts: 3 },
-          { label: 'Octavos de Final — llave acertada', pts: 4 },
-          { label: 'Cuartos de Final — llave acertada', pts: 8 },
-          { label: 'Semifinal — finalista acertado', pts: 8 },
-          { label: 'Tercer lugar — llave acertada', pts: 8 },
-          { label: 'Final — acertada completamente', pts: 12 },
-        ].map(f => (
-          <div key={f.label} className="flex items-center justify-between gap-4">
-            <span className="text-sm text-gray-400 flex-1">{f.label}</span>
-            <span className="w-16 text-center text-lg font-bold text-green-400">{f.pts}</span>
-          </div>
-        ))}
+        {BRACKET_ROUNDS
+          .filter(r => BRACKET_PAIRING_PTS[r.pairingPtsKey || r.id] != null)
+          .map(r => ({ label: `${r.label} — llave acertada`, pts: BRACKET_PAIRING_PTS[r.pairingPtsKey || r.id] }))
+          .map(f => (
+            <div key={f.label} className="flex items-center justify-between gap-4">
+              <span className="text-sm text-gray-400 flex-1">{f.label}</span>
+              <span className="w-16 text-center text-lg font-bold text-green-400">{f.pts}</span>
+            </div>
+          ))}
       </div>
 
       {/* Zona peligrosa */}
       <div className="bg-red-950/30 border border-red-900 rounded-xl p-5">
         <h3 className="text-red-400 font-semibold mb-2">Zona peligrosa</h3>
         <p className="text-gray-400 text-sm mb-4">
-          Reinicia todos los datos: participantes, pronósticos, resultados y bracket.
+          Reinicia el torneo: partidos, resultados y pronósticos (participantes y pollas se conservan).
         </p>
         <button
           onClick={handleReset}
@@ -1632,12 +1628,6 @@ function ConfigTab() {
 }
 
 // ─── Ver Pronósticos (admin read-only) ───────────────────────────────────────
-
-const ROUND_LABEL_ADMIN = {
-  r32: '16avos de Final', r16: 'Octavos de Final', qf: 'Cuartos de Final',
-  sf: 'Semifinal', third: 'Tercer Lugar', final: 'Final',
-}
-const ROUND_ORDER_ADMIN = ['r32', 'r16', 'qf', 'sf', 'third', 'final']
 
 function GruposView({ groups, matches, predictions, participantId }) {
   const allStandings = Object.fromEntries(
@@ -1655,7 +1645,9 @@ function GruposView({ groups, matches, predictions, participantId }) {
     return a.name.localeCompare(b.name)
   })
 
-  const best8Set = new Set(sortedThirds.slice(0, 8).map(t => t.name))
+  const best8Set = QUALIFIER_RULES.bestThirds > 0
+    ? new Set(sortedThirds.slice(0, QUALIFIER_RULES.bestThirds).map(t => t.name))
+    : new Set()
 
   const groupOf = name => groups.find(g => allStandings[g]?.[2]?.name === name) ?? '?'
 
@@ -1667,10 +1659,12 @@ function GruposView({ groups, matches, predictions, participantId }) {
           <span className="w-2.5 h-2.5 rounded-full bg-green-700 inline-block"></span>
           Clasificado directo (1° y 2°)
         </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-amber-700 inline-block"></span>
-          Mejor 3° clasificado (top 8)
-        </span>
+        {QUALIFIER_RULES.bestThirds > 0 && (
+          <span className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-700 inline-block"></span>
+            Mejor 3° clasificado (top {QUALIFIER_RULES.bestThirds})
+          </span>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1735,14 +1729,14 @@ function GruposView({ groups, matches, predictions, participantId }) {
         })}
       </div>
 
-      {/* Resumen mejores 8 terceros */}
+      {/* Resumen mejores terceros */}
       {best8Set.size > 0 && (
         <div className="bg-gray-900 border border-amber-800/50 rounded-xl p-4">
           <h4 className="text-amber-400 font-semibold text-sm mb-3">
-            ★ Mejores terceros clasificados según este participante ({best8Set.size}/8)
+            ★ Mejores terceros clasificados según este participante ({best8Set.size}/{QUALIFIER_RULES.bestThirds})
           </h4>
           <div className="flex flex-wrap gap-2">
-            {sortedThirds.slice(0, 8).map((t, i) => (
+            {sortedThirds.slice(0, QUALIFIER_RULES.bestThirds).map((t, i) => (
               <div key={t.name} className="flex items-center gap-1.5 bg-amber-900/20 border border-amber-800/40 rounded-lg px-3 py-1.5">
                 <span className="text-amber-500 font-bold text-xs">{i + 1}°</span>
                 <span className="text-white text-xs font-medium">{t.name}</span>
@@ -1804,7 +1798,7 @@ function VerPronosticosTab() {
     return calcPredictedBracketTeams(matches, predictions, bracketPredictions, participant.id, bracketMatches)
   }, [matches, predictions, bracketPredictions, participant, bracketMatches])
 
-  const byRound = ROUND_ORDER_ADMIN.reduce((acc, r) => {
+  const byRound = ROUND_ORDER.reduce((acc, r) => {
     acc[r] = bracketMatches.filter(m => m.round === r)
     return acc
   }, {})
@@ -1972,14 +1966,14 @@ function VerPronosticosTab() {
           {/* ── Tab Llaves ── */}
           {viewTab === 'llaves' && (
             <div className="space-y-6">
-              {ROUND_ORDER_ADMIN.map(round => {
+              {ROUND_ORDER.map(round => {
                 const roundMatches = byRound[round]
                 if (!roundMatches?.length) return null
                 return (
                   <div key={round}>
                     <h3 className="text-white font-bold mb-3 flex items-center gap-2">
                       {round === 'final' && '🏆 '}{round === 'third' && '🥉 '}
-                      {ROUND_LABEL_ADMIN[round]}
+                      {ROUND_LABEL[round]}
                     </h3>
                     <div className="flex flex-wrap gap-3">
                       {roundMatches.map(match => {
