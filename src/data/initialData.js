@@ -7,12 +7,22 @@ export const DEFAULT_GROUPS = Object.fromEntries(
 
 // Pares de partidos por jornada: [local_idx, visitante_idx]
 // C(4,2) = 6 combinaciones — índices 0-1 = J1, 2-3 = J2, 4-5 = J3
-const MATCH_PAIRS = [
+export const MATCH_PAIRS = [
   [0, 1], [2, 3],
   [0, 2], [1, 3],
   [0, 3], [1, 2],
 ]
 const JORNADAS = ['J1', 'J1', 'J2', 'J2', 'J3', 'J3']
+
+// Cuántos equipos clasifican por grupo (siempre 2: 1° y 2°) y cuántos "mejores
+// terceros" adicionales se suman entre todos los grupos (Mundial 2026: 8; en
+// formatos sin mejores terceros, como Copa América, este valor es 0).
+export const QUALIFIER_RULES = {
+  directPerGroup: 2,
+  bestThirds: 8,
+}
+export const TOTAL_QUALIFIERS = GROUP_LETTERS.length * QUALIFIER_RULES.directPerGroup + QUALIFIER_RULES.bestThirds
+export const TOTAL_GROUP_MATCHES = GROUP_LETTERS.length * MATCH_PAIRS.length
 
 export function generateGroupMatches(groups = DEFAULT_GROUPS) {
   const matches = []
@@ -34,35 +44,6 @@ export function generateGroupMatches(groups = DEFAULT_GROUPS) {
         status: 'pending',
       })
     })
-  })
-  return matches
-}
-
-export function generateBracketMatches() {
-  const rounds = [
-    { round: 'r32',   label: 'Dieciseisavos de Final', count: 16 },
-    { round: 'r16',   label: 'Octavos de Final',        count: 8  },
-    { round: 'qf',    label: 'Cuartos de Final',         count: 4  },
-    { round: 'sf',    label: 'Semifinal',                count: 2  },
-    { round: 'third', label: 'Tercer Lugar',             count: 1  },
-    { round: 'final', label: 'Final',                    count: 1  },
-  ]
-  const matches = []
-  rounds.forEach(({ round, label, count }) => {
-    for (let i = 1; i <= count; i++) {
-      matches.push({
-        id: `${round}_${i}`,
-        round,
-        position: i,
-        label: count > 1 ? `${label} ${i}` : label,
-        homeTeam: '',
-        awayTeam: '',
-        homeScore: null,
-        awayScore: null,
-        winner: null,
-        status: 'pending',
-      })
-    }
   })
   return matches
 }
@@ -120,6 +101,59 @@ export const SF_FROM_QF = [
   ['qf_1', 'qf_3'],  // sf_1 (M101): Ganador M97 vs Ganador M99
   ['qf_2', 'qf_4'],  // sf_2 (M102): Ganador M98 vs Ganador M100
 ]
+
+// ─── Fuente única de verdad del bracket eliminatorio ───────────────────────────
+// Reemplaza los `if/else if` por ronda que solían vivir repartidos en
+// AppContext.jsx (bracket real) y scoring.js (pronósticos) — ambos consumen
+// esta misma lista, así que "quién juega contra quién" nunca puede
+// desincronizarse entre el bracket real y los pronósticos (ver bug corregido
+// 2026-07-21: calcPredictedBracketTeams usaba pairing lineal mientras
+// AppContext.jsx usaba el fixture oficial).
+//
+// Cada entrada:
+//   id            - prefijo de los partidos de esta ronda (`${id}_${n}`)
+//   label/shortLabel - texto para UI
+//   count         - número de llaves en la ronda
+//   qualifierMap  - SOLO en la ronda semilla: de dónde sale cada llave a
+//                   partir de los clasificados de grupos ('1A'/'2B'/'tN')
+//   pairing       - [[idPartidoA, idPartidoB], ...] cuyos GANADORES arman
+//                   cada llave de esta ronda (longitud === count)
+//   losersPairing - igual que `pairing` pero con los PERDEDORES (solo 3er lugar)
+//   teamPtsKey/pairingPtsKey - claves en BRACKET_TEAM_PTS/BRACKET_PAIRING_PTS
+//                   (por defecto, el propio `id`; final/third usan 'finalFour'
+//                   para los puntos de equipo, ya que ambos son "el final four")
+export const BRACKET_ROUNDS = [
+  { id: 'r32',   label: 'Dieciseisavos de Final', shortLabel: '16avos', count: 16, qualifierMap: R32_BRACKET_MAP },
+  { id: 'r16',   label: 'Octavos de Final',       shortLabel: 'Octavos', count: 8, pairing: R16_FROM_R32 },
+  { id: 'qf',    label: 'Cuartos de Final',        shortLabel: 'Cuartos', count: 4, pairing: QF_FROM_R16 },
+  { id: 'sf',    label: 'Semifinal',               shortLabel: 'Semis',   count: 2, pairing: SF_FROM_QF },
+  { id: 'third', label: 'Tercer Lugar',            shortLabel: '3er Lugar', count: 1, losersPairing: [['sf_1', 'sf_2']], teamPtsKey: 'finalFour' },
+  { id: 'final', label: 'Final',                   shortLabel: 'Final',   count: 1, pairing: [['sf_1', 'sf_2']], teamPtsKey: 'finalFour' },
+]
+
+export const ROUND_ORDER = BRACKET_ROUNDS.map(r => r.id)
+export const ROUND_LABEL = Object.fromEntries(BRACKET_ROUNDS.map(r => [r.id, r.label]))
+
+export function generateBracketMatches() {
+  const matches = []
+  BRACKET_ROUNDS.forEach(({ id: round, label, count }) => {
+    for (let i = 1; i <= count; i++) {
+      matches.push({
+        id: `${round}_${i}`,
+        round,
+        position: i,
+        label: count > 1 ? `${label} ${i}` : label,
+        homeTeam: '',
+        awayTeam: '',
+        homeScore: null,
+        awayScore: null,
+        winner: null,
+        status: 'pending',
+      })
+    }
+  })
+  return matches
+}
 
 // Puntos por defecto — fase de grupos (modificables desde Admin > Configuración)
 export const DEFAULT_PTS = {

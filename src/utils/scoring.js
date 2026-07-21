@@ -1,4 +1,4 @@
-import { DEFAULT_PTS, BRACKET_PAIRING_PTS, BRACKET_TEAM_PTS, BONUS_PTS, GROUP_LETTERS, R32_BRACKET_MAP, R16_FROM_R32, QF_FROM_R16, SF_FROM_QF } from '../data/initialData.js'
+import { DEFAULT_PTS, BRACKET_PAIRING_PTS, BRACKET_TEAM_PTS, BONUS_PTS, GROUP_LETTERS, BRACKET_ROUNDS, QUALIFIER_RULES } from '../data/initialData.js'
 
 function pts(config) {
   return { ...DEFAULT_PTS, ...(config?.pts || {}) }
@@ -143,15 +143,17 @@ export function calcPredictedR32Qualifiers(matches, predictions, participantId) 
     if (standings[2]?.name) thirdPlaceTeams.push({ ...standings[2], group })
   })
 
-  thirdPlaceTeams
-    .sort((a, b) => {
-      if (b.Pts !== a.Pts) return b.Pts - a.Pts
-      if (b.DG  !== a.DG)  return b.DG  - a.DG
-      if (b.GF  !== a.GF)  return b.GF  - a.GF
-      return a.name.localeCompare(b.name)
-    })
-    .slice(0, 8)
-    .forEach((t, i) => { qualifiers[`t${i + 1}`] = t.name })
+  if (QUALIFIER_RULES.bestThirds > 0) {
+    thirdPlaceTeams
+      .sort((a, b) => {
+        if (b.Pts !== a.Pts) return b.Pts - a.Pts
+        if (b.DG  !== a.DG)  return b.DG  - a.DG
+        if (b.GF  !== a.GF)  return b.GF  - a.GF
+        return a.name.localeCompare(b.name)
+      })
+      .slice(0, QUALIFIER_RULES.bestThirds)
+      .forEach((t, i) => { qualifiers[`t${i + 1}`] = t.name })
+  }
 
   return qualifiers
 }
@@ -166,15 +168,6 @@ export function calcPredictedR32Qualifiers(matches, predictions, participantId) 
 export function calcPredictedBracketTeams(matches, predictions, bracketPredictions, participantId, adminBracket = []) {
   const qualifiers = calcPredictedR32Qualifiers(matches, predictions, participantId)
   const teamMap = {}
-
-  // R32: equipos según pronósticos de grupos; si no hay, usa el bracket del admin como fallback
-  R32_BRACKET_MAP.forEach(({ pos, home, away }) => {
-    const admin = adminBracket.find(m => m.id === `r32_${pos}`)
-    teamMap[`r32_${pos}`] = {
-      homeTeam: qualifiers[home] || admin?.homeTeam || '',
-      awayTeam: qualifiers[away] || admin?.awayTeam || '',
-    }
-  })
 
   // Retorna el ganador pronosticado de una llave, validando que sea uno de los equipos
   // que realmente juegan ese partido según los pronósticos del participante.
@@ -202,42 +195,36 @@ export function calcPredictedBracketTeams(matches, predictions, bracketPredictio
     return teams.homeTeam === winner ? teams.awayTeam : teams.homeTeam
   }
 
-  // R16: cruce oficial FIFA 2026 (mismo mapeo que usa el bracket real del admin),
-  // no un pairing lineal por posición.
-  R16_FROM_R32.forEach(([id1, id2], i) => {
-    teamMap[`r16_${i + 1}`] = {
-      homeTeam: getPredWinner(id1),
-      awayTeam: getPredWinner(id2),
+  // Misma fuente de verdad (BRACKET_ROUNDS) que usa el bracket real del admin
+  // (AppContext.jsx propagateBracketRound) — ver comentario en initialData.js.
+  BRACKET_ROUNDS.forEach(roundDef => {
+    if (roundDef.qualifierMap) {
+      // Ronda semilla: equipos según pronósticos de grupos; si no hay,
+      // usa el bracket del admin como fallback.
+      roundDef.qualifierMap.forEach(({ pos, home, away }) => {
+        const id = `${roundDef.id}_${pos}`
+        const admin = adminBracket.find(m => m.id === id)
+        teamMap[id] = {
+          homeTeam: qualifiers[home] || admin?.homeTeam || '',
+          awayTeam: qualifiers[away] || admin?.awayTeam || '',
+        }
+      })
+    } else if (roundDef.pairing) {
+      roundDef.pairing.forEach(([id1, id2], i) => {
+        teamMap[`${roundDef.id}_${i + 1}`] = {
+          homeTeam: getPredWinner(id1),
+          awayTeam: getPredWinner(id2),
+        }
+      })
+    } else if (roundDef.losersPairing) {
+      roundDef.losersPairing.forEach(([id1, id2], i) => {
+        teamMap[`${roundDef.id}_${i + 1}`] = {
+          homeTeam: getLoser(id1),
+          awayTeam: getLoser(id2),
+        }
+      })
     }
   })
-
-  // Cuartos de Final
-  QF_FROM_R16.forEach(([id1, id2], i) => {
-    teamMap[`qf_${i + 1}`] = {
-      homeTeam: getPredWinner(id1),
-      awayTeam: getPredWinner(id2),
-    }
-  })
-
-  // Semifinal
-  SF_FROM_QF.forEach(([id1, id2], i) => {
-    teamMap[`sf_${i + 1}`] = {
-      homeTeam: getPredWinner(id1),
-      awayTeam: getPredWinner(id2),
-    }
-  })
-
-  // Tercer lugar: perdedores de las semis
-  teamMap['third_1'] = {
-    homeTeam: getLoser('sf_1'),
-    awayTeam: getLoser('sf_2'),
-  }
-
-  // Final
-  teamMap['final_1'] = {
-    homeTeam: getPredWinner('sf_1'),
-    awayTeam: getPredWinner('sf_2'),
-  }
 
   return teamMap
 }
@@ -257,15 +244,17 @@ export function calcR32Qualifiers(matches) {
     if (standings[2]?.name) thirdPlaceTeams.push({ ...standings[2], group })
   })
 
-  thirdPlaceTeams
-    .sort((a, b) => {
-      if (b.Pts !== a.Pts) return b.Pts - a.Pts
-      if (b.DG  !== a.DG)  return b.DG  - a.DG
-      if (b.GF  !== a.GF)  return b.GF  - a.GF
-      return a.name.localeCompare(b.name)
-    })
-    .slice(0, 8)
-    .forEach((t, i) => { qualifiers[`t${i + 1}`] = t.name })
+  if (QUALIFIER_RULES.bestThirds > 0) {
+    thirdPlaceTeams
+      .sort((a, b) => {
+        if (b.Pts !== a.Pts) return b.Pts - a.Pts
+        if (b.DG  !== a.DG)  return b.DG  - a.DG
+        if (b.GF  !== a.GF)  return b.GF  - a.GF
+        return a.name.localeCompare(b.name)
+      })
+      .slice(0, QUALIFIER_RULES.bestThirds)
+      .forEach((t, i) => { qualifiers[`t${i + 1}`] = t.name })
+  }
 
   return qualifiers
 }
@@ -322,12 +311,6 @@ export function calcBracketScoreAll(participantId, bracketMatches, bracketPredic
     matches, predictions, bracketPredictions, participantId, bracketMatches
   )
 
-  // ¿Los 2 equipos de una llave coinciden sin importar orden?
-  function pairsMatch(ph, pa, ah, aa) {
-    if (!ph || !pa || !ah || !aa) return false
-    return (ph === ah && pa === aa) || (ph === aa && pa === ah)
-  }
-
   // Todos los equipos registrados en una ronda real (flat set)
   function actualTeamsSet(round) {
     return new Set(
@@ -356,102 +339,44 @@ export function calcBracketScoreAll(participantId, bracketMatches, bracketPredic
     return s
   }
 
-  // ── R32: llave acertada (3 pts) — comparación por conjunto, no por slot ────
-  const r32ActualPairings = actualPairingsSet('r32')
-  const r32UsedPairings   = new Set()
-  for (let i = 1; i <= 16; i++) {
-    const pm = predTeamMap[`r32_${i}`]
-    if (!pm?.homeTeam || !pm?.awayTeam) continue
-    const key = [pm.homeTeam, pm.awayTeam].sort().join('|')
-    if (r32ActualPairings.has(key) && !r32UsedPairings.has(key)) {
-      ptsPairing += BRACKET_PAIRING_PTS.r32
-      r32UsedPairings.add(key)
-    }
-  }
+  // ── Por cada ronda del bracket (misma fuente BRACKET_ROUNDS que usa el
+  // bracket real): puntos por equipo clasificado + puntos por llave acertada,
+  // siempre comparando por CONJUNTO de equipos, no por slot/posición. La
+  // ronda semilla (qualifierMap, ej. R32) no da puntos de "equipo avanzado"
+  // — llegar ahí ya se premia aparte con calcClasificadoScore.
+  BRACKET_ROUNDS.forEach(roundDef => {
+    const ids = Array.from({ length: roundDef.count }, (_, i) => `${roundDef.id}_${i + 1}`)
 
-  // ── R16: 2 pts/equipo + 4 pts/llave — comparación por conjunto, no por slot
-  const aR16 = actualTeamsSet('r16')
-  if (aR16.size > 0) {
-    const pR16 = predTeamsSet(Array.from({ length: 8 }, (_, i) => `r16_${i + 1}`))
-    for (const t of pR16) if (aR16.has(t)) ptsTeam += BRACKET_TEAM_PTS.r16
-    const r16ActualPairings = actualPairingsSet('r16')
-    const r16UsedPairings   = new Set()
-    for (let i = 1; i <= 8; i++) {
-      const pm = predTeamMap[`r16_${i}`]
-      if (!pm?.homeTeam || !pm?.awayTeam) continue
-      const key = [pm.homeTeam, pm.awayTeam].sort().join('|')
-      if (r16ActualPairings.has(key) && !r16UsedPairings.has(key)) {
-        ptsPairing += BRACKET_PAIRING_PTS.r16
-        r16UsedPairings.add(key)
+    const teamPtsKey = roundDef.teamPtsKey || roundDef.id
+    if (!roundDef.qualifierMap && BRACKET_TEAM_PTS[teamPtsKey] != null) {
+      const actualTeams = actualTeamsSet(roundDef.id)
+      if (actualTeams.size > 0) {
+        const predTeams = predTeamsSet(ids)
+        for (const t of predTeams) if (actualTeams.has(t)) ptsTeam += BRACKET_TEAM_PTS[teamPtsKey]
       }
     }
-  }
 
-  // ── QF: 4 pts/equipo + 8 pts/llave — comparación por conjunto, no por slot ─
-  const aQF = actualTeamsSet('qf')
-  if (aQF.size > 0) {
-    const pQF = predTeamsSet(['qf_1', 'qf_2', 'qf_3', 'qf_4'])
-    for (const t of pQF) if (aQF.has(t)) ptsTeam += BRACKET_TEAM_PTS.qf
-    const qfActualPairings = actualPairingsSet('qf')
-    const qfUsedPairings   = new Set()
-    for (let i = 1; i <= 4; i++) {
-      const pm = predTeamMap[`qf_${i}`]
-      if (!pm?.homeTeam || !pm?.awayTeam) continue
-      const key = [pm.homeTeam, pm.awayTeam].sort().join('|')
-      if (qfActualPairings.has(key) && !qfUsedPairings.has(key)) {
-        ptsPairing += BRACKET_PAIRING_PTS.qf
-        qfUsedPairings.add(key)
-      }
+    const pairingPtsKey = roundDef.pairingPtsKey || roundDef.id
+    if (BRACKET_PAIRING_PTS[pairingPtsKey] != null) {
+      const actualPairings = actualPairingsSet(roundDef.id)
+      const usedPairings = new Set()
+      ids.forEach(id => {
+        const pm = predTeamMap[id]
+        if (!pm?.homeTeam || !pm?.awayTeam) return
+        const key = [pm.homeTeam, pm.awayTeam].sort().join('|')
+        if (actualPairings.has(key) && !usedPairings.has(key)) {
+          ptsPairing += BRACKET_PAIRING_PTS[pairingPtsKey]
+          usedPairings.add(key)
+        }
+      })
     }
-  }
+  })
 
-  // ── SF: 4 pts/equipo + 8 pts/llave — comparación por conjunto, no por slot ─
-  const aSF = actualTeamsSet('sf')
-  if (aSF.size > 0) {
-    const pSF = predTeamsSet(['sf_1', 'sf_2'])
-    for (const t of pSF) if (aSF.has(t)) ptsTeam += BRACKET_TEAM_PTS.sf
-    const sfActualPairings = actualPairingsSet('sf')
-    const sfUsedPairings   = new Set()
-    for (let i = 1; i <= 2; i++) {
-      const pm = predTeamMap[`sf_${i}`]
-      if (!pm?.homeTeam || !pm?.awayTeam) continue
-      const key = [pm.homeTeam, pm.awayTeam].sort().join('|')
-      if (sfActualPairings.has(key) && !sfUsedPairings.has(key)) {
-        ptsPairing += BRACKET_PAIRING_PTS.sf
-        sfUsedPairings.add(key)
-      }
-    }
-  }
-
-  // ── Final four: 8 pts/equipo, pero el equipo debe estar en el partido
-  // correcto (Final o 3er puesto) — llegar a la Final (ganar la semi) y
-  // jugar el 3er puesto (perder la semi) son logros distintos, no intercambiables.
+  // ── Bonus: campeón (15), subcampeón (10), 3ro (8), 4to (6) — 'final'/'third'
+  // son conceptos permanentes en cualquier formato, se dejan explícitos ──────
   const bmFinal = bracketMatches.find(m => m.id === 'final_1')
   const bmThird = bracketMatches.find(m => m.id === 'third_1')
-  const aFinalTeams = new Set([bmFinal?.homeTeam, bmFinal?.awayTeam].filter(Boolean))
-  const aThirdTeams = new Set([bmThird?.homeTeam, bmThird?.awayTeam].filter(Boolean))
 
-  if (aFinalTeams.size > 0 || aThirdTeams.size > 0) {
-    const pmFinal = predTeamMap['final_1']
-    const pmThird = predTeamMap['third_1']
-    const pFinalTeams = new Set([pmFinal?.homeTeam, pmFinal?.awayTeam].filter(Boolean))
-    const pThirdTeams = new Set([pmThird?.homeTeam, pmThird?.awayTeam].filter(Boolean))
-
-    for (const t of pFinalTeams) if (aFinalTeams.has(t)) ptsTeam += BRACKET_TEAM_PTS.finalFour
-    for (const t of pThirdTeams) if (aThirdTeams.has(t)) ptsTeam += BRACKET_TEAM_PTS.finalFour
-
-    // Llave 3er puesto (8 pts)
-    if (bmThird?.homeTeam && bmThird?.awayTeam && pmThird?.homeTeam && pmThird?.awayTeam)
-      if (pairsMatch(pmThird.homeTeam, pmThird.awayTeam, bmThird.homeTeam, bmThird.awayTeam))
-        ptsPairing += BRACKET_PAIRING_PTS.third
-
-    // Llave final (12 pts)
-    if (bmFinal?.homeTeam && bmFinal?.awayTeam && pmFinal?.homeTeam && pmFinal?.awayTeam)
-      if (pairsMatch(pmFinal.homeTeam, pmFinal.awayTeam, bmFinal.homeTeam, bmFinal.awayTeam))
-        ptsPairing += BRACKET_PAIRING_PTS.final
-  }
-
-  // ── Bonus: campeón (15), subcampeón (10), 3ro (8), 4to (6) ────────────────
   if (bmFinal?.winner) {
     const predWinner = bracketPredictions.find(
       p => p.participantId === participantId && p.bracketMatchId === 'final_1'

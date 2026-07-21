@@ -8,10 +8,8 @@ import {
   DEFAULT_PTS,
   DEFAULT_LOCKS,
   GROUP_LETTERS,
-  R32_BRACKET_MAP,
-  R16_FROM_R32,
-  QF_FROM_R16,
-  SF_FROM_QF,
+  MATCH_PAIRS,
+  BRACKET_ROUNDS,
 } from '../data/initialData'
 import { calcR32Qualifiers, calcPredictedGroupStandings } from '../utils/scoring'
 
@@ -879,16 +877,15 @@ export function AppProvider({ children }) {
   }, [])
 
   const updateGroupTeams = useCallback(async (group, teams) => {
-    const PAIRS = [[0,1],[2,3],[0,2],[1,3],[0,3],[1,2]]
     const groupMatches = matches.filter(m => m.group === group).sort((a, b) => a.id.localeCompare(b.id))
     await Promise.all(groupMatches.map((m, i) =>
-      supabase.from('matches').update({ home_team: teams[PAIRS[i][0]] || '', away_team: teams[PAIRS[i][1]] || '' }).eq('id', m.id)
+      supabase.from('matches').update({ home_team: teams[MATCH_PAIRS[i][0]] || '', away_team: teams[MATCH_PAIRS[i][1]] || '' }).eq('id', m.id)
     ))
     setMatches(prev => prev.map(m => {
       if (m.group !== group) return m
       const idx = groupMatches.findIndex(gm => gm.id === m.id)
       if (idx < 0) return m
-      return { ...m, homeTeam: teams[PAIRS[idx][0]] || '', awayTeam: teams[PAIRS[idx][1]] || '' }
+      return { ...m, homeTeam: teams[MATCH_PAIRS[idx][0]] || '', awayTeam: teams[MATCH_PAIRS[idx][1]] || '' }
     }))
   }, [matches])
 
@@ -957,8 +954,9 @@ export function AppProvider({ children }) {
 
   const generateBracket = useCallback(async () => {
     const qualifiers = calcR32Qualifiers(matches)
-    const updates = R32_BRACKET_MAP.map(({ pos, home, away }) => ({
-      id: `r32_${pos}`,
+    const seedRound = BRACKET_ROUNDS.find(r => r.qualifierMap)
+    const updates = seedRound.qualifierMap.map(({ pos, home, away }) => ({
+      id: `${seedRound.id}_${pos}`,
       homeTeam: qualifiers[home] || '',
       awayTeam: qualifiers[away] || '',
     }))
@@ -972,34 +970,21 @@ export function AppProvider({ children }) {
     return qualifiers
   }, [matches])
 
-  const propagateBracketRound = useCallback(async (toRound) => {
+  const propagateBracketRound = useCallback(async (toRoundId) => {
+    const roundDef = BRACKET_ROUNDS.find(r => r.id === toRoundId)
     const updates = []
-    if (toRound === 'r16') {
-      R16_FROM_R32.forEach(([id1, id2], i) => {
-        const m1 = bracketMatches.find(m => m.id === id1)
-        const m2 = bracketMatches.find(m => m.id === id2)
-        updates.push({ id: `r16_${i + 1}`, homeTeam: m1?.winner || '', awayTeam: m2?.winner || '' })
-      })
-    } else if (toRound === 'qf') {
-      QF_FROM_R16.forEach(([id1, id2], i) => {
-        const m1 = bracketMatches.find(m => m.id === id1)
-        const m2 = bracketMatches.find(m => m.id === id2)
-        updates.push({ id: `qf_${i + 1}`, homeTeam: m1?.winner || '', awayTeam: m2?.winner || '' })
-      })
-    } else if (toRound === 'sf') {
-      SF_FROM_QF.forEach(([id1, id2], i) => {
-        const m1 = bracketMatches.find(m => m.id === id1)
-        const m2 = bracketMatches.find(m => m.id === id2)
-        updates.push({ id: `sf_${i + 1}`, homeTeam: m1?.winner || '', awayTeam: m2?.winner || '' })
-      })
-    } else if (toRound === 'final') {
-      const sf1 = bracketMatches.find(m => m.id === 'sf_1')
-      const sf2 = bracketMatches.find(m => m.id === 'sf_2')
-      const loser1 = sf1?.winner ? (sf1.homeTeam === sf1.winner ? sf1.awayTeam : sf1.homeTeam) : ''
-      const loser2 = sf2?.winner ? (sf2.homeTeam === sf2.winner ? sf2.awayTeam : sf2.homeTeam) : ''
-      updates.push({ id: 'third_1', homeTeam: loser1, awayTeam: loser2 })
-      updates.push({ id: 'final_1', homeTeam: sf1?.winner || '', awayTeam: sf2?.winner || '' })
-    }
+    ;(roundDef?.pairing || []).forEach(([id1, id2], i) => {
+      const m1 = bracketMatches.find(m => m.id === id1)
+      const m2 = bracketMatches.find(m => m.id === id2)
+      updates.push({ id: `${toRoundId}_${i + 1}`, homeTeam: m1?.winner || '', awayTeam: m2?.winner || '' })
+    })
+    ;(roundDef?.losersPairing || []).forEach(([id1, id2], i) => {
+      const m1 = bracketMatches.find(m => m.id === id1)
+      const m2 = bracketMatches.find(m => m.id === id2)
+      const loser1 = m1?.winner ? (m1.homeTeam === m1.winner ? m1.awayTeam : m1.homeTeam) : ''
+      const loser2 = m2?.winner ? (m2.homeTeam === m2.winner ? m2.awayTeam : m2.homeTeam) : ''
+      updates.push({ id: `${toRoundId}_${i + 1}`, homeTeam: loser1, awayTeam: loser2 })
+    })
     if (!updates.length) return
     await Promise.all(updates.map(u =>
       supabase.from('bracket_matches').update({ home_team: u.homeTeam, away_team: u.awayTeam }).eq('id', u.id)
@@ -1014,12 +999,14 @@ export function AppProvider({ children }) {
     return updates
   }, [bracketMatches])
 
+  // Reinicia el TORNEO (partidos, resultados, pronósticos) para arrancar una
+  // nueva ronda/torneo con la misma app — mantiene participantes y pollas
+  // intactos, ya que esos no dependen del formato del torneo.
   const resetTournament = useCallback(async () => {
     await supabase.from('predictions').delete().neq('id', 0)
     await supabase.from('bracket_predictions').delete().neq('id', 0)
     await supabase.from('standings_predictions').delete().neq('id', 0)
     await supabase.from('scorer_predictions').delete().neq('id', 0)
-    await supabase.from('participants').delete().neq('id', '')
     await supabase.from('group_standings').delete().neq('group', '')
     await supabase.from('top_scorers').update({ scorers: ['', '', ''] }).eq('id', 1)
     await supabase.from('matches').delete().neq('id', '')
@@ -1028,9 +1015,6 @@ export function AppProvider({ children }) {
     const newBracket = generateBracketMatches()
     await supabase.from('matches').insert(newMatches.map(matchToDb))
     await supabase.from('bracket_matches').insert(newBracket.map(bracketToDb))
-    setAllParticipants([])
-    setCurrentParticipantIdState(null)
-    localStorage.removeItem('pm_current_participant')
     setPredictions([]); setBracketPredictions([]); setGroupStandings(EMPTY_STANDINGS)
     setStandingsPredictions([]); setTopScorers(['', '', '']); setScorerPredictions([])
     setMatches(newMatches); setBracketMatches(newBracket)
