@@ -69,8 +69,8 @@ function generateCSV({ pollas, participants, predictions, bracketPredictions, st
   pollas.forEach(p => rows.push(`${E(p.id)},${E(p.name)},${p.valor_polla ?? 0}`))
   rows.push('')
 
-  rows.push('SECTION,participants', 'id,name,polla_id,pin')
-  participants.forEach(p => rows.push(`${E(p.id)},${E(p.name)},${E(p.polla_id || '')},${E(p.pin || '')}`))
+  rows.push('SECTION,participants', 'id,name,polla_id,pin,email')
+  participants.forEach(p => rows.push(`${E(p.id)},${E(p.name)},${E(p.polla_id || '')},${E(p.pin || '')},${E(p.email || '')}`))
   rows.push('')
 
   // Resultados reales de partidos de grupos (ingresados por el admin)
@@ -1084,6 +1084,11 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
         </button>
       )}
 
+      {/* Email */}
+      <span className={`text-xs shrink-0 ${p.email ? 'text-gray-500' : 'text-red-500'}`} title={p.email ? 'Correo para recordatorios' : 'Sin correo — no recibirá recordatorios'}>
+        {p.email || '⚠ sin correo'}
+      </span>
+
       {/* Polla badge */}
       {pollaName ? (
         <span className="text-xs bg-green-900/30 border border-green-800 text-green-400 px-2 py-0.5 rounded-full shrink-0">
@@ -1185,12 +1190,15 @@ function ParticipantesTab() {
 
   const defaultPolla = currentPollaId || pollas[0]?.id || ''
   const [nombre, setNombre]           = useState('')
+  const [email, setEmail]             = useState('')
   const [pollaId, setPollaId]         = useState(defaultPolla)
   const [pin, setPin]                 = useState(generatePin)
   const [filterPolla, setFilterPolla] = useState('')   // '' = mostrar todos
   const [adding, setAdding]           = useState(false)
   const [addError, setAddError]       = useState('')
   const [addSuccess, setAddSuccess]   = useState('')
+
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
 
   // Derived
   const knownPollaIds = new Set(pollas.map(p => p.id))
@@ -1204,13 +1212,15 @@ function ParticipantesTab() {
 
   async function handleAdd(e) {
     e.preventDefault()
-    if (!nombre.trim() || !pollaId || pin.length !== 4) return
+    if (!nombre.trim() || !pollaId || pin.length !== 4 || !emailValid) return
     setAdding(true)
     setAddError('')
-    const result = await addParticipant(nombre.trim(), pollaId, pin)
+    const result = await addParticipant(nombre.trim(), pollaId, pin, email.trim())
     if (!result || result.error) {
       if (result?.error === 'duplicate') {
         setAddError(`"${nombre.trim()}" ya existe en esa polla (nombre duplicado).`)
+      } else if (result?.error === 'email_required') {
+        setAddError('El correo es obligatorio (se usa para el recordatorio antes de cada partido).')
       } else if (result?.error) {
         setAddError(`Error al guardar en la base de datos: ${result.error}`)
       } else {
@@ -1220,6 +1230,7 @@ function ParticipantesTab() {
       const pollaName = pollas.find(p => p.id === pollaId)?.name || ''
       setAddSuccess(`${result.name} agregado a "${pollaName}" · PIN: ${pin}`)
       setNombre('')
+      setEmail('')
       setPin(generatePin())
       setTimeout(() => setAddSuccess(''), 5000)
     }
@@ -1269,6 +1280,24 @@ function ParticipantesTab() {
           </div>
 
           <div>
+            <label className="text-xs text-gray-600 mb-1 block">
+              Correo electrónico <span className="text-red-500">*</span>
+            </label>
+            <Input
+              value={email}
+              onChange={setEmail}
+              placeholder="correo@ejemplo.com"
+              className="w-full"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Obligatorio — aquí se envía el recordatorio 15 min antes de cada partido.
+            </p>
+            {email.trim() && !emailValid && (
+              <p className="text-xs text-red-500 mt-1">Correo inválido.</p>
+            )}
+          </div>
+
+          <div>
             <label className="text-xs text-gray-600 mb-1 block">PIN de acceso (4 dígitos — auto-generado)</label>
             <div className="flex gap-2 items-center">
               <input
@@ -1288,7 +1317,7 @@ function ParticipantesTab() {
 
           <button
             type="submit"
-            disabled={adding || !nombre.trim() || !pollaId || pin.length !== 4}
+            disabled={adding || !nombre.trim() || !pollaId || pin.length !== 4 || !emailValid}
             className="bg-green-700 hover:bg-green-600 disabled:opacity-40 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors"
           >
             {adding ? 'Agregando...' : '+ Agregar participante'}

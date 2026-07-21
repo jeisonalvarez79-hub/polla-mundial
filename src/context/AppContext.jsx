@@ -624,10 +624,14 @@ export function AppProvider({ children }) {
 
   // ─── Participantes ────────────────────────────────────────────────────────────
 
-  // Solo el Admin llama esta función; targetPollaId indica la polla destino
-  const addParticipant = useCallback(async (name, targetPollaId, pin) => {
+  // Solo el Admin llama esta función; targetPollaId indica la polla destino.
+  // email es requerido: se usa para enviar el recordatorio 15 min antes de
+  // cada partido (ver supabase/functions/send-match-reminders).
+  const addParticipant = useCallback(async (name, targetPollaId, pin, email) => {
     const trimmed = name.trim().replace(/^[,;\s]+|[,;\s]+$/g, '')
     if (!trimmed) return null
+    const trimmedEmail = (email || '').trim().toLowerCase()
+    if (!trimmedEmail) return { error: 'email_required' }
     const pollaId = targetPollaId || currentPollaId || null
 
     // Duplicado solo dentro de la misma polla
@@ -641,7 +645,7 @@ export function AppProvider({ children }) {
 
     const id = `p_${Date.now()}`
     const { data, error } = await supabase.from('participants')
-      .insert({ id, name: trimmed, polla_id: pollaId, pin: pin || null })
+      .insert({ id, name: trimmed, polla_id: pollaId, pin: pin || null, email: trimmedEmail })
       .select().single()
 
     if (error) {
@@ -1040,7 +1044,7 @@ export function AppProvider({ children }) {
       for (const p of sections.participants) {
         if (p.id && p.name) {
           await supabase.from('participants').upsert(
-            { id: p.id, name: p.name, polla_id: p.polla_id || null, pin: p.pin || null },
+            { id: p.id, name: p.name, polla_id: p.polla_id || null, pin: p.pin || null, email: p.email || null },
             { onConflict: 'id' }
           )
         }
