@@ -1,6 +1,6 @@
-export const GROUP_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
+export const GROUP_LETTERS = ['A', 'B', 'C', 'D']
 
-// 12 grupos vacíos — se rellenan desde el panel Admin
+// Grupos vacíos — se rellenan desde el panel Admin
 export const DEFAULT_GROUPS = Object.fromEntries(
   GROUP_LETTERS.map(g => [g, ['', '', '', '']])
 )
@@ -19,7 +19,7 @@ const JORNADAS = ['J1', 'J1', 'J2', 'J2', 'J3', 'J3']
 // formatos sin mejores terceros, como Copa América, este valor es 0).
 export const QUALIFIER_RULES = {
   directPerGroup: 2,
-  bestThirds: 8,
+  bestThirds: 0,
 }
 export const TOTAL_QUALIFIERS = GROUP_LETTERS.length * QUALIFIER_RULES.directPerGroup + QUALIFIER_RULES.bestThirds
 export const TOTAL_GROUP_MATCHES = GROUP_LETTERS.length * MATCH_PAIRS.length
@@ -48,58 +48,26 @@ export function generateGroupMatches(groups = DEFAULT_GROUPS) {
   return matches
 }
 
-// Mapa de llaves para el R32 según sorteo oficial FIFA 2026 (M73–M88)
-// "1A"=1°GrupoA  "2A"=2°GrupoA  "t1"–"t8"=mejores 3eros (por ranking)
-// Los "t" se asignan por ranking entre los 8 mejores 3eros; el mapa exacto
-// de qué grupo va a qué partido depende de la tabla de 495 combinaciones
-// de FIFA (Anexo C). El admin puede ajustar manualmente si lo necesita.
-export const R32_BRACKET_MAP = [
-  { pos: 1,  home: '2A', away: '2B' },  // M73
-  { pos: 2,  home: '1E', away: 't1' },  // M74
-  { pos: 3,  home: '1F', away: '2C' },  // M75
-  { pos: 4,  home: '1C', away: '2F' },  // M76
-  { pos: 5,  home: '1I', away: 't2' },  // M77
-  { pos: 6,  home: '2E', away: '2I' },  // M78
-  { pos: 7,  home: '1A', away: 't3' },  // M79
-  { pos: 8,  home: '1L', away: 't4' },  // M80
-  { pos: 9,  home: '1D', away: 't5' },  // M81
-  { pos: 10, home: '1G', away: 't6' },  // M82
-  { pos: 11, home: '2K', away: '2L' },  // M83
-  { pos: 12, home: '1H', away: '2J' },  // M84
-  { pos: 13, home: '1B', away: 't7' },  // M85
-  { pos: 14, home: '1J', away: '2H' },  // M86
-  { pos: 15, home: '1K', away: 't8' },  // M87
-  { pos: 16, home: '2D', away: '2G' },  // M88
+// Mapa de llaves para Cuartos de Final según el cruce oficial de Copa América
+// (confirmado contra Copa América 2024: 1° de un grupo enfrenta al 2° del
+// grupo "pareja" — 1A-2B, 1B-2A, 1C-2D, 1D-2C — no al 2° de su propio grupo).
+// "1A"=1°GrupoA  "2A"=2°GrupoA. Este formato no usa "mejores terceros"
+// (QUALIFIER_RULES.bestThirds = 0): los 8 cupos a cuartos salen directo del
+// top-2 de los 4 grupos.
+export const QF_BRACKET_MAP = [
+  { pos: 1, home: '1A', away: '2B' },
+  { pos: 2, home: '1B', away: '2A' },
+  { pos: 3, home: '1C', away: '2D' },
+  { pos: 4, home: '1D', away: '2C' },
 ]
 
-// Mapeo oficial FIFA 2026: qué partidos de R32 forman cada octavo (R16, M89-M96).
-// [homeId, awayId] = IDs de los partidos de R32 cuyos ganadores se enfrentan.
-export const R16_FROM_R32 = [
-  ['r32_2',  'r32_5'],  // r16_1 (M89): Ganador M74 vs Ganador M77
-  ['r32_1',  'r32_3'],  // r16_2 (M90): Ganador M73 vs Ganador M75
-  ['r32_4',  'r32_6'],  // r16_3 (M91): Ganador M76 vs Ganador M78
-  ['r32_7',  'r32_8'],  // r16_4 (M92): Ganador M79 vs Ganador M80
-  ['r32_11', 'r32_12'], // r16_5 (M93): Ganador M83 vs Ganador M84
-  ['r32_9',  'r32_10'], // r16_6 (M94): Ganador M81 vs Ganador M82
-  ['r32_14', 'r32_16'], // r16_7 (M95): Ganador M86 vs Ganador M88
-  ['r32_13', 'r32_15'], // r16_8 (M96): Ganador M85 vs Ganador M87
-]
-
-// Mapeo oficial FIFA 2026: qué partidos de R16 forman cada cuarto (QF, M97-M100).
-export const QF_FROM_R16 = [
-  ['r16_1', 'r16_2'],  // qf_1 (M97): Ganador M89 vs Ganador M90
-  ['r16_5', 'r16_6'],  // qf_2 (M98): Ganador M93 vs Ganador M94
-  ['r16_3', 'r16_4'],  // qf_3 (M99): Ganador M91 vs Ganador M92
-  ['r16_7', 'r16_8'],  // qf_4 (M100): Ganador M95 vs Ganador M96
-]
-
-// Mapeo oficial FIFA 2026: qué cuartos forman cada semifinal (SF, M101-M102).
-// qf_1 y qf_3 vienen de la misma mitad del cuadro (r16_1-4); qf_2 y qf_4 de la
-// otra mitad (r16_5-8). Por eso se enfrentan qf_1 con qf_3, y qf_2 con qf_4
-// (no qf_1 con qf_2), para no mezclar mitades del cuadro.
+// Cruce oficial de semifinales (confirmado contra Copa América 2024: SF1 =
+// ganador QF1 vs ganador QF2, SF2 = ganador QF3 vs ganador QF4 — adyacente,
+// a diferencia del cruce del Mundial que salta una posición para no mezclar
+// mitades de un cuadro de 8 cuartos).
 export const SF_FROM_QF = [
-  ['qf_1', 'qf_3'],  // sf_1 (M101): Ganador M97 vs Ganador M99
-  ['qf_2', 'qf_4'],  // sf_2 (M102): Ganador M98 vs Ganador M100
+  ['qf_1', 'qf_2'],  // sf_1
+  ['qf_3', 'qf_4'],  // sf_2
 ]
 
 // ─── Fuente única de verdad del bracket eliminatorio ───────────────────────────
@@ -123,9 +91,7 @@ export const SF_FROM_QF = [
 //                   (por defecto, el propio `id`; final/third usan 'finalFour'
 //                   para los puntos de equipo, ya que ambos son "el final four")
 export const BRACKET_ROUNDS = [
-  { id: 'r32',   label: 'Dieciseisavos de Final', shortLabel: '16avos', count: 16, qualifierMap: R32_BRACKET_MAP },
-  { id: 'r16',   label: 'Octavos de Final',       shortLabel: 'Octavos', count: 8, pairing: R16_FROM_R32 },
-  { id: 'qf',    label: 'Cuartos de Final',        shortLabel: 'Cuartos', count: 4, pairing: QF_FROM_R16 },
+  { id: 'qf',    label: 'Cuartos de Final',        shortLabel: 'Cuartos', count: 4, qualifierMap: QF_BRACKET_MAP },
   { id: 'sf',    label: 'Semifinal',               shortLabel: 'Semis',   count: 2, pairing: SF_FROM_QF },
   { id: 'third', label: 'Tercer Lugar',            shortLabel: '3er Lugar', count: 1, losersPairing: [['sf_1', 'sf_2']], teamPtsKey: 'finalFour' },
   { id: 'final', label: 'Final',                   shortLabel: 'Final',   count: 1, pairing: [['sf_1', 'sf_2']], teamPtsKey: 'finalFour' },
@@ -164,30 +130,20 @@ export const DEFAULT_PTS = {
   goleador:   10,  // Goleador correcto
 }
 
-// Alias legacy (usado en Bracket.jsx y Admin.jsx para display)
-export const BRACKET_PTS = {
-  r32:   3,
-  r16:   4,
-  qf:    8,
-  sf:    8,
-  third: 8,
-  final: 12,
-}
-
-// Puntos por llave acertada (ambos equipos correctos, sin importar orden)
+// Puntos por llave acertada (ambos equipos correctos, sin importar orden).
+// Mismos valores que se usaban en el Mundial 2026 para estas rondas — no se
+// rebalancean por tener un bracket más corto (decisión explícita).
 export const BRACKET_PAIRING_PTS = {
-  r32:   3,   // 16avos
-  r16:   4,   // Octavos
   qf:    8,   // Cuartos
   sf:    8,   // Semis
   third: 8,   // 3er y 4to puesto
   final: 12,  // Final
 }
 
-// Puntos por equipo correctamente clasificado a cada ronda (acumulativos)
+// Puntos por equipo correctamente clasificado a cada ronda (acumulativos).
+// La ronda semilla (qf) no otorga puntos de "equipo avanzado" — llegar ahí
+// ya se premia con "clasificado" (ver calcClasificadoScore).
 export const BRACKET_TEAM_PTS = {
-  r16:       2,  // por equipo que llegó a octavos
-  qf:        4,  // por equipo que llegó a cuartos
   sf:        4,  // por equipo que llegó a semis
   finalFour: 8,  // por equipo en la final o partido de 3er puesto (los 4 restantes)
 }
@@ -204,8 +160,6 @@ export const BONUS_PTS = {
 export const DEFAULT_LOCKS = {
   scorer: false,
   groups: false,
-  r32:    false,
-  r16:    false,
   qf:     false,
   sf:     false,
   third:  false,
@@ -213,9 +167,9 @@ export const DEFAULT_LOCKS = {
 }
 
 export const DEFAULT_CONFIG = {
-  name:           'Polla Mundial',
-  tournamentName: 'Mundial 2026',
-  year:           '2026',
+  name:           'Polla Copa América',
+  tournamentName: 'Copa América',
+  year:           '',
   pts:            { ...DEFAULT_PTS },
   locks:          { ...DEFAULT_LOCKS },
 }
