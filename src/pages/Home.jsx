@@ -42,23 +42,23 @@ export default function Home() {
   return (
     <div className="space-y-8">
       {/* Hero */}
-      <div className="text-center py-10 bg-gradient-to-b from-green-900/40 to-transparent rounded-2xl">
+      <div className="text-center py-10 bg-white border-2 border-green-600 rounded-2xl">
         <div className="text-6xl mb-3">⚽</div>
         <h1 className="text-4xl font-bold text-black mb-2">{config.name}</h1>
-        <p className="text-green-700 text-lg">{config.tournamentName}</p>
+        <p className="text-green-800 text-lg font-semibold">{config.tournamentName}</p>
         {currentPolla && (
-          <p className="text-green-600 text-sm mt-1 font-medium">{currentPolla.name}</p>
+          <p className="text-green-800 text-sm mt-1 font-medium">{currentPolla.name}</p>
         )}
         {!currentParticipant && (
           <Link
             to="/registro"
-            className="mt-6 inline-block bg-green-600 hover:bg-green-500 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+            className="mt-6 inline-block bg-green-700 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
           >
             Unirse al torneo →
           </Link>
         )}
         {currentParticipant && (
-          <p className="mt-4 text-green-700">
+          <p className="mt-4 text-green-800">
             Bienvenido, <span className="font-bold text-black">{currentParticipant.name}</span> 👋
           </p>
         )}
@@ -67,7 +67,7 @@ export default function Home() {
       {/* Premio de la polla */}
       {currentPolla && (
         <div className="bg-white border border-yellow-800/50 rounded-xl overflow-hidden">
-          <div className="bg-yellow-50 px-5 py-3 border-b border-yellow-300 flex items-center gap-2">
+          <div className="bg-white px-5 py-3 border-b-2 border-yellow-600 flex items-center gap-2">
             <span className="text-xl">💰</span>
             <h2 className="text-black font-bold">Premio — {currentPolla.name}</h2>
           </div>
@@ -98,7 +98,7 @@ export default function Home() {
 
             {/* Distribución de premios */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-yellow-50 border border-yellow-300 rounded-xl p-4 text-center">
+              <div className="bg-white border-2 border-yellow-600 rounded-xl p-4 text-center">
                 <p className="text-yellow-600 font-bold text-sm mb-1">🥇 1er Puesto</p>
                 <p className="text-xs text-yellow-600 mb-2">70% del total</p>
                 {totalRecaudado > 0 ? (
@@ -169,7 +169,7 @@ export default function Home() {
                 <div className="flex items-center gap-3">
                   {totalRecaudado > 0 && i < 2 && (
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                      i === 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-200 text-gray-700'
+                      i === 0 ? 'bg-yellow-700 text-white' : 'bg-gray-200 text-gray-700'
                     }`}>
                       {i === 0 ? `$${fmt(premio1)}` : `$${fmt(premio2)}`}
                     </span>

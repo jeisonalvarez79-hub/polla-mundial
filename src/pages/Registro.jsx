@@ -28,7 +28,7 @@ export default function Registro() {
       </div>
 
       {currentParticipant && (
-        <div className="bg-green-50 border border-green-300 rounded-xl px-5 py-3 flex items-center gap-2">
+        <div className="bg-white border-2 border-green-600 rounded-xl px-5 py-3 flex items-center gap-2">
           <span className="text-green-600 text-sm font-medium">
             Participando como: <strong>{currentParticipant.name}</strong>
           </span>
@@ -57,7 +57,7 @@ export default function Registro() {
               return (
                 <div
                   key={participant.id}
-                  className={`flex items-center gap-3 px-5 py-3 ${isMe ? 'bg-green-50' : ''}`}
+                  className={`flex items-center gap-3 px-5 py-3 ${isMe ? 'border-l-4 border-green-600' : ''}`}
                 >
                   <span className="text-gray-500 text-sm w-5 text-center shrink-0">{position}</span>
                   <span className={`font-medium flex-1 ${isMe ? 'text-green-600' : 'text-black'}`}>
