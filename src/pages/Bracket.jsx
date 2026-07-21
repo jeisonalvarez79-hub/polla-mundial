@@ -160,7 +160,7 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
           {saving && <span className="text-xs text-gray-500">guardando…</span>}
           {saved && !saving && <span className="text-xs text-green-800">✓</span>}
           {realScore !== null && realScore > 0 && (
-            <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-green-800 text-green-300">
+            <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-green-900 text-green-300">
               {realScore} pts
             </span>
           )}
@@ -226,7 +226,7 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
                 onClick={() => handleTieWinner(team)}
                 className={`flex-1 text-xs py-1.5 rounded-lg border font-medium transition-colors ${
                   prediction?.predictedWinner === team
-                    ? 'bg-blue-700 border-blue-800 text-white'
+                    ? 'bg-blue-800 border-blue-800 text-white'
                     : 'bg-gray-100 border-gray-300 text-gray-600 hover:border-blue-800 hover:text-blue-800'
                 }`}
               >
@@ -246,8 +246,8 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
             saving
               ? 'bg-gray-200 text-gray-600 cursor-not-allowed'
               : saved
-              ? 'bg-green-800 text-green-300'
-              : 'bg-green-700 hover:bg-green-600 text-white'
+              ? 'bg-green-900 text-green-300'
+              : 'bg-green-800 hover:bg-green-700 text-white'
           }`}
         >
           {saving ? 'Guardando…' : saved ? '✓ Guardado' : 'Guardar'}
@@ -387,11 +387,11 @@ export default function Bracket() {
       {/* Leyenda */}
       <div className="flex flex-wrap gap-4 text-xs text-gray-500">
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-blue-700 inline-block" />
+          <span className="w-3 h-3 rounded bg-blue-800 inline-block" />
           Pronóstico ganador (★)
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-green-800 border border-green-800 inline-block" />
+          <span className="w-3 h-3 rounded bg-green-900 border border-green-800 inline-block" />
           Clasificado real (✅)
         </span>
         <span className="flex items-center gap-1.5">
@@ -414,7 +414,7 @@ export default function Bracket() {
                 {ROUND_LABEL[round]}
               </h2>
               {roundLocked && (
-                <span className="text-xs bg-red-700 text-white px-2 py-0.5 rounded-full font-medium">
+                <span className="text-xs bg-red-800 text-white px-2 py-0.5 rounded-full font-medium">
                   🔒 Bloqueado por admin
                 </span>
               )}

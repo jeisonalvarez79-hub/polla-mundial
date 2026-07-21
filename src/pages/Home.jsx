@@ -52,7 +52,7 @@ export default function Home() {
         {!currentParticipant && (
           <Link
             to="/registro"
-            className="mt-6 inline-block bg-green-700 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+            className="mt-6 inline-block bg-green-800 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
           >
             Unirse al torneo →
           </Link>
@@ -169,7 +169,7 @@ export default function Home() {
                 <div className="flex items-center gap-3">
                   {totalRecaudado > 0 && i < 2 && (
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                      i === 0 ? 'bg-yellow-700 text-white' : 'bg-gray-200 text-gray-700'
+                      i === 0 ? 'bg-yellow-800 text-white' : 'bg-gray-200 text-gray-700'
                     }`}>
                       {i === 0 ? `$${fmt(premio1)}` : `$${fmt(premio2)}`}
                     </span>

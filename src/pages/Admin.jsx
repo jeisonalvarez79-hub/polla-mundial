@@ -133,7 +133,7 @@ function StatusBadge({ value, active, onClick }) {
       onClick={onClick}
       className={`text-xs px-3 py-1 rounded-full border transition-colors ${
         active
-          ? 'bg-green-700 border-green-800 text-white'
+          ? 'bg-green-800 border-green-800 text-white'
           : 'bg-gray-100 border-gray-300 text-gray-600 hover:border-gray-400'
       }`}
     >
@@ -251,7 +251,7 @@ function EquiposTab() {
           <button
             onClick={saveAllEdits}
             disabled={savingAll}
-            className="bg-blue-700 hover:bg-blue-600 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors"
+            className="bg-blue-800 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors"
           >
             {savingAll ? 'Guardando...' : `Guardar todos (${totalDirty} cambio${totalDirty !== 1 ? 's' : ''})`}
           </button>
@@ -264,7 +264,7 @@ function EquiposTab() {
           <button key={g}
             onClick={() => setActiveGroup(g)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              activeGroup === g ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-600 hover:text-black'
+              activeGroup === g ? 'bg-green-800 text-white' : 'bg-gray-100 text-gray-600 hover:text-black'
             }`}
           >
             Grupo {g}
@@ -291,7 +291,7 @@ function EquiposTab() {
         <button
           onClick={saveTeams}
           disabled={!teamsChanged}
-          className="bg-green-700 hover:bg-green-600 disabled:opacity-40 text-white text-sm px-5 py-1.5 rounded-lg transition-colors"
+          className="bg-green-800 hover:bg-green-700 disabled:opacity-40 text-white text-sm px-5 py-1.5 rounded-lg transition-colors"
         >
           Actualizar equipos en partidos
         </button>
@@ -370,7 +370,7 @@ function EquiposTab() {
                     Cancelar
                   </button>
                   <button onClick={() => saveME(match)}
-                    className="text-sm bg-green-700 hover:bg-green-600 text-white px-4 py-1 rounded-lg">
+                    className="text-sm bg-green-800 hover:bg-green-700 text-white px-4 py-1 rounded-lg">
                     Guardar
                   </button>
                 </div>
@@ -459,9 +459,9 @@ function ClasificacionTab() {
                 disabled={!isDirty}
                 className={`mt-3 w-full text-sm py-1.5 rounded-lg transition-colors ${
                   saved[group]
-                    ? 'bg-green-800 text-green-300'
+                    ? 'bg-green-900 text-green-300'
                     : isDirty
-                    ? 'bg-green-700 hover:bg-green-600 text-white'
+                    ? 'bg-green-800 hover:bg-green-700 text-white'
                     : 'bg-gray-100 text-gray-500 cursor-not-allowed'
                 }`}
               >
@@ -566,7 +566,7 @@ function BracketTab() {
         <button
           onClick={handleGenerateBracket}
           disabled={generating}
-          className="bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors whitespace-nowrap"
+          className="bg-green-800 hover:bg-green-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors whitespace-nowrap"
         >
           {generating ? 'Generando...' : `⚡ Generar ${SEED_ROUND.label} desde Grupos`}
         </button>
@@ -594,7 +594,7 @@ function BracketTab() {
               <button
                 onClick={() => handlePropagate(PROPAGATE_CONFIG[round].toRound, PROPAGATE_CONFIG[round].fromLabel)}
                 disabled={propagating === PROPAGATE_CONFIG[round].toRound}
-                className="text-xs bg-blue-800 hover:bg-blue-700 disabled:opacity-50 text-white px-3 py-1 rounded-lg transition-colors whitespace-nowrap"
+                className="text-xs bg-blue-900 hover:bg-blue-800 disabled:opacity-50 text-white px-3 py-1 rounded-lg transition-colors whitespace-nowrap"
               >
                 {propagating === PROPAGATE_CONFIG[round].toRound ? 'Actualizando...' : PROPAGATE_CONFIG[round].label}
               </button>
@@ -617,7 +617,7 @@ function BracketTab() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-xs text-gray-500 font-medium">{bm.label}</p>
                     {slots && (
-                      <span className="text-xs text-white bg-blue-700 px-2 py-0.5 rounded-full">
+                      <span className="text-xs text-white bg-blue-800 px-2 py-0.5 rounded-full">
                         {SLOT_LABEL[slots.home]} vs {SLOT_LABEL[slots.away]}
                       </span>
                     )}
@@ -662,7 +662,7 @@ function BracketTab() {
                             onClick={() => setE(bm.id, 'winner', wn === team ? null : team)}
                             className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${
                               wn === team
-                                ? 'bg-green-700 border-green-800 text-white font-semibold'
+                                ? 'bg-green-800 border-green-800 text-white font-semibold'
                                 : 'bg-gray-100 border-gray-300 text-gray-700 hover:border-gray-400'
                             }`}
                           >
@@ -686,7 +686,7 @@ function BracketTab() {
                         Cancelar
                       </button>
                       <button onClick={() => saveMatch(bm)}
-                        className="text-sm bg-green-700 hover:bg-green-600 text-white px-4 py-1 rounded-lg">
+                        className="text-sm bg-green-800 hover:bg-green-700 text-white px-4 py-1 rounded-lg">
                         Guardar
                       </button>
                     </div>
@@ -736,7 +736,7 @@ function GoleadoresTab() {
         <button
           type="submit"
           disabled={!changed || !local.trim()}
-          className="w-full bg-green-700 hover:bg-green-600 disabled:opacity-40 text-white font-semibold py-2 rounded-lg transition-colors"
+          className="w-full bg-green-800 hover:bg-green-700 disabled:opacity-40 text-white font-semibold py-2 rounded-lg transition-colors"
         >
           {saved ? '✓ Guardado' : 'Guardar goleador'}
         </button>
@@ -890,14 +890,14 @@ function BloqueosTab() {
         <button
           onClick={lockAll}
           disabled={saving === 'all'}
-          className="flex items-center gap-2 bg-red-800 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-red-900 hover:bg-red-800 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
         >
           🔒 Bloquear todas las fases
         </button>
         <button
           onClick={unlockAll}
           disabled={saving === 'all'}
-          className="flex items-center gap-2 bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-green-800 hover:bg-green-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
         >
           🔓 Abrir todas las fases
         </button>
@@ -906,7 +906,7 @@ function BloqueosTab() {
           disabled={backingUp}
           className={`flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50 ${
             backupDone
-              ? 'bg-blue-800 text-blue-200'
+              ? 'bg-blue-900 text-blue-200'
               : 'bg-gray-200 hover:bg-gray-300 text-black'
           }`}
         >
@@ -923,7 +923,7 @@ function BloqueosTab() {
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={importing}
-            className="flex items-center gap-2 bg-purple-800 hover:bg-purple-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+            className="flex items-center gap-2 bg-purple-900 hover:bg-purple-800 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
           >
             {importing ? 'Importando...' : '📤 Cargar backup CSV'}
           </button>
@@ -931,7 +931,7 @@ function BloqueosTab() {
         <button
           onClick={handleSyncStandings}
           disabled={syncing}
-          className="flex items-center gap-2 bg-yellow-700 hover:bg-yellow-600 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-yellow-800 hover:bg-yellow-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
         >
           {syncing ? 'Sincronizando...' : '🔄 Sincronizar posiciones de grupo'}
         </button>
@@ -971,8 +971,8 @@ function BloqueosTab() {
                     <span className="text-sm font-medium text-black">{phase.label}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
                       isLocked
-                        ? 'bg-red-700 text-white'
-                        : 'bg-green-700 text-white'
+                        ? 'bg-red-800 text-white'
+                        : 'bg-green-800 text-white'
                     }`}>
                       {isLocked ? '🔒 Bloqueado' : '🔓 Abierto'}
                     </span>
@@ -984,8 +984,8 @@ function BloqueosTab() {
                   disabled={isSaving}
                   className={`shrink-0 text-xs font-semibold px-4 py-2 rounded-lg border transition-colors disabled:opacity-50 ${
                     isLocked
-                      ? 'bg-green-700 border-green-800 text-white hover:bg-green-600'
-                      : 'bg-red-700 border-red-800 text-white hover:bg-red-600'
+                      ? 'bg-green-800 border-green-800 text-white hover:bg-green-700'
+                      : 'bg-red-800 border-red-800 text-white hover:bg-red-700'
                   }`}
                 >
                   {isSaving ? '...' : isLocked ? 'Abrir' : 'Bloquear'}
@@ -1065,7 +1065,7 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
           <button
             onClick={handleSaveName}
             disabled={!nameInput.trim() || savingName}
-            className="text-xs bg-blue-700 hover:bg-blue-600 disabled:opacity-40 text-white px-2 py-0.5 rounded"
+            className="text-xs bg-blue-800 hover:bg-blue-700 disabled:opacity-40 text-white px-2 py-0.5 rounded"
           >
             {savingName ? '…' : 'OK'}
           </button>
@@ -1091,11 +1091,11 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
 
       {/* Polla badge */}
       {pollaName ? (
-        <span className="text-xs bg-green-700 text-white px-2 py-0.5 rounded-full shrink-0">
+        <span className="text-xs bg-green-800 text-white px-2 py-0.5 rounded-full shrink-0">
           {pollaName}
         </span>
       ) : (
-        <span className="text-xs bg-red-700 text-white px-2 py-0.5 rounded-full shrink-0">
+        <span className="text-xs bg-red-800 text-white px-2 py-0.5 rounded-full shrink-0">
           ⚠ Sin polla
         </span>
       )}
@@ -1115,7 +1115,7 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
           <button
             onClick={handleSavePin}
             disabled={pinInput.length !== 4 || savingPin}
-            className="text-xs bg-yellow-700 hover:bg-yellow-600 disabled:opacity-40 text-white px-2 py-0.5 rounded"
+            className="text-xs bg-yellow-800 hover:bg-yellow-700 disabled:opacity-40 text-white px-2 py-0.5 rounded"
           >
             {savingPin ? '…' : 'OK'}
           </button>
@@ -1152,7 +1152,7 @@ function ParticipantRow({ p, index, pollas, onRemove, onWhatsApp: getWAUrl, onAs
           <button
             onClick={() => { if (assignId) onAssign(p.id, assignId) }}
             disabled={!assignId}
-            className="text-xs bg-blue-700 hover:bg-blue-600 disabled:opacity-40 text-white px-2 py-0.5 rounded transition-colors"
+            className="text-xs bg-blue-800 hover:bg-blue-700 disabled:opacity-40 text-white px-2 py-0.5 rounded transition-colors"
           >
             OK
           </button>
@@ -1318,7 +1318,7 @@ function ParticipantesTab() {
           <button
             type="submit"
             disabled={adding || !nombre.trim() || !pollaId || pin.length !== 4 || !emailValid}
-            className="bg-green-700 hover:bg-green-600 disabled:opacity-40 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors"
+            className="bg-green-800 hover:bg-green-700 disabled:opacity-40 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors"
           >
             {adding ? 'Agregando...' : '+ Agregar participante'}
           </button>
@@ -1442,7 +1442,7 @@ function PollaRow({ polla, isActive, participantCount, onUpdate, onDelete, onSel
             <button onClick={() => { setEditing(false); setName(polla.name); setValor(polla.valor_polla ?? 0) }}
               className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1">Cancelar</button>
             <button onClick={handleSave}
-              className="text-xs bg-green-700 hover:bg-green-600 text-white font-semibold px-3 py-1 rounded">Guardar</button>
+              className="text-xs bg-green-800 hover:bg-green-700 text-white font-semibold px-3 py-1 rounded">Guardar</button>
           </div>
         </div>
       ) : (
@@ -1450,7 +1450,7 @@ function PollaRow({ polla, isActive, participantCount, onUpdate, onDelete, onSel
           <div className="flex-1 min-w-0">
             <span className="text-black font-medium text-sm">{polla.name}</span>
             {isActive && (
-              <span className="ml-2 text-xs bg-green-700 text-green-200 px-1.5 py-0.5 rounded-full">Activa</span>
+              <span className="ml-2 text-xs bg-green-800 text-green-200 px-1.5 py-0.5 rounded-full">Activa</span>
             )}
             <span className="ml-2 text-xs text-gray-500">
               {participantCount} participante{participantCount !== 1 ? 's' : ''}
@@ -1567,7 +1567,7 @@ function ConfigTab() {
           <button
             type="submit"
             disabled={addingPolla || !newPollaName.trim()}
-            className="bg-green-700 hover:bg-green-600 disabled:opacity-40 text-white text-sm px-4 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+            className="bg-green-800 hover:bg-green-700 disabled:opacity-40 text-white text-sm px-4 py-1.5 rounded-lg transition-colors whitespace-nowrap"
           >
             + Nueva polla
           </button>
@@ -1618,7 +1618,7 @@ function ConfigTab() {
 
         <button
           type="submit"
-          className="w-full bg-green-700 hover:bg-green-600 text-white font-semibold py-2.5 rounded-xl transition-colors"
+          className="w-full bg-green-800 hover:bg-green-700 text-white font-semibold py-2.5 rounded-xl transition-colors"
         >
           {saved ? '✓ Guardado' : 'Guardar configuración'}
         </button>
@@ -1647,7 +1647,7 @@ function ConfigTab() {
         </p>
         <button
           onClick={handleReset}
-          className="bg-red-800 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+          className="bg-red-900 hover:bg-red-800 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
         >
           Reiniciar torneo completo
         </button>
@@ -1685,12 +1685,12 @@ function GruposView({ groups, matches, predictions, participantId }) {
       {/* Leyenda */}
       <div className="flex flex-wrap gap-4 text-xs text-gray-600">
         <span className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-green-700 inline-block"></span>
+          <span className="w-2.5 h-2.5 rounded-full bg-green-800 inline-block"></span>
           Clasificado directo (1° y 2°)
         </span>
         {QUALIFIER_RULES.bestThirds > 0 && (
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-700 inline-block"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-800 inline-block"></span>
             Mejor 3° clasificado (top {QUALIFIER_RULES.bestThirds})
           </span>
         )}
@@ -1766,7 +1766,7 @@ function GruposView({ groups, matches, predictions, participantId }) {
           </h4>
           <div className="flex flex-wrap gap-2">
             {sortedThirds.slice(0, QUALIFIER_RULES.bestThirds).map((t, i) => (
-              <div key={t.name} className="flex items-center gap-1.5 bg-amber-700 text-white rounded-lg px-3 py-1.5">
+              <div key={t.name} className="flex items-center gap-1.5 bg-amber-800 text-white rounded-lg px-3 py-1.5">
                 <span className="text-white font-bold text-xs">{i + 1}°</span>
                 <span className="text-white text-xs font-medium">{t.name}</span>
                 <span className="text-white/80 text-xs">Gr.{groupOf(t.name)} · {t.Pts}pts · DG{t.DG > 0 ? '+' : ''}{t.DG}</span>
@@ -1910,7 +1910,7 @@ function VerPronosticosTab() {
                 {groups.map(g => (
                   <button key={g} onClick={() => setActiveGroup(g)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      activeGroup === g ? 'bg-green-700 text-white' : 'bg-white text-gray-600 hover:text-black border border-gray-200'
+                      activeGroup === g ? 'bg-green-800 text-white' : 'bg-white text-gray-600 hover:text-black border border-gray-200'
                     }`}
                   >
                     Grupo {g}
@@ -1939,7 +1939,7 @@ function VerPronosticosTab() {
                         return (
                           <tr key={match.id} className={`border-b border-gray-200 last:border-0 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                             <td className="px-3 py-2">
-                              <span className="text-xs font-semibold text-white bg-blue-700 px-1.5 py-0.5 rounded">
+                              <span className="text-xs font-semibold text-white bg-blue-800 px-1.5 py-0.5 rounded">
                                 {match.jornada || '—'}
                               </span>
                             </td>
@@ -1969,7 +1969,7 @@ function VerPronosticosTab() {
                             <td className="px-2 py-2 text-center">
                               {score !== null ? (
                                 <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
-                                  score === ptExacto    ? 'bg-yellow-700 text-yellow-200' :
+                                  score === ptExacto    ? 'bg-yellow-800 text-yellow-200' :
                                   score === ptResultado ? 'bg-blue-900 text-blue-300' :
                                   'bg-gray-100 text-gray-500'
                                 }`}>+{score}</span>
@@ -2026,7 +2026,7 @@ function VerPronosticosTab() {
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-xs text-gray-500">{match.label}</span>
                               {score !== null && score > 0 && (
-                                <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-green-800 text-green-300">
+                                <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-green-900 text-green-300">
                                   {score} pts
                                 </span>
                               )}
@@ -2194,7 +2194,7 @@ export default function Admin() {
               })}
             </select>
           ) : (
-            <span className="text-white text-xs bg-yellow-700 px-3 py-1.5 rounded-lg">
+            <span className="text-white text-xs bg-yellow-800 px-3 py-1.5 rounded-lg">
               Sin pollas — crea la primera a continuación
             </span>
           )}
@@ -2211,7 +2211,7 @@ export default function Admin() {
             <button
               type="submit"
               disabled={addingPolla || !newPollaName.trim()}
-              className="bg-green-700 hover:bg-green-600 disabled:opacity-40 text-white text-sm font-semibold px-4 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+              className="bg-green-800 hover:bg-green-700 disabled:opacity-40 text-white text-sm font-semibold px-4 py-1.5 rounded-lg transition-colors whitespace-nowrap"
             >
               {addingPolla ? 'Creando...' : '+ Nueva polla'}
             </button>

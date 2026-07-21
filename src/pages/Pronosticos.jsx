@@ -54,7 +54,7 @@ function StandingsTable({ standings }) {
             <tr key={t.name} className={`border-b border-gray-200 ${i < 2 ? 'text-black' : 'text-gray-600'}`}>
               <td className="py-1.5 pr-1">
                 <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold ${
-                  i === 0 ? 'bg-yellow-600 text-white' :
+                  i === 0 ? 'bg-yellow-700 text-white' :
                   i === 1 ? 'bg-gray-500 text-white'   :
                   'bg-gray-100 text-gray-500'
                 }`}>{i + 1}</span>
@@ -254,7 +254,7 @@ function PartidosTab() {
         {groups.map(g => (
           <button key={g} onClick={() => handleGroupChange(g)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeGroup === g ? 'bg-green-700 text-white' : 'bg-white text-gray-600 hover:text-black border border-gray-200'
+              activeGroup === g ? 'bg-green-800 text-white' : 'bg-white text-gray-600 hover:text-black border border-gray-200'
             }`}
           >
             Grupo {g}
@@ -312,7 +312,7 @@ function PartidosTab() {
                       </td>
                       {/* Jornada */}
                       <td className="px-2 py-2">
-                        <span className="text-xs font-semibold text-white bg-blue-700 px-1.5 py-0.5 rounded">
+                        <span className="text-xs font-semibold text-white bg-blue-800 px-1.5 py-0.5 rounded">
                           {match.jornada || '—'}
                         </span>
                       </td>
@@ -353,7 +353,7 @@ function PartidosTab() {
                         <div className="flex items-center gap-2">
                           {score !== null && (
                             <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
-                              score === ptExacto    ? 'bg-yellow-700 text-yellow-200' :
+                              score === ptExacto    ? 'bg-yellow-800 text-yellow-200' :
                               score === ptResultado ? 'bg-blue-900 text-blue-300'     :
                               'bg-gray-100 text-gray-500'
                             }`}>
@@ -365,7 +365,7 @@ function PartidosTab() {
                           ) : canSave ? (
                             <button
                               onClick={() => handleSave(match.id)}
-                              className="text-xs bg-green-700 hover:bg-green-600 text-white px-2 py-1 rounded whitespace-nowrap"
+                              className="text-xs bg-green-800 hover:bg-green-700 text-white px-2 py-1 rounded whitespace-nowrap"
                             >
                               {pred ? 'OK' : 'Guardar'}
                             </button>
@@ -510,7 +510,7 @@ function GoleadoresTab() {
               <button
                 type="submit"
                 disabled={!changed || !local.trim()}
-                className="w-full bg-green-700 hover:bg-green-600 disabled:opacity-40 text-white text-sm py-2 rounded-lg mt-2 transition-colors"
+                className="w-full bg-green-800 hover:bg-green-700 disabled:opacity-40 text-white text-sm py-2 rounded-lg mt-2 transition-colors"
               >
                 {pred?.scorers?.[0] ? 'Actualizar pronóstico' : 'Guardar pronóstico'}
               </button>

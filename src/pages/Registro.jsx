@@ -62,7 +62,7 @@ export default function Registro() {
                   <span className="text-gray-500 text-sm w-5 text-center shrink-0">{position}</span>
                   <span className={`font-medium flex-1 ${isMe ? 'text-green-800' : 'text-black'}`}>
                     {participant.name}
-                    {isMe && <span className="ml-2 text-xs bg-green-700 text-green-200 px-2 py-0.5 rounded-full">Tú</span>}
+                    {isMe && <span className="ml-2 text-xs bg-green-800 text-green-200 px-2 py-0.5 rounded-full">Tú</span>}
                   </span>
                   <span className="text-green-800 font-bold text-sm shrink-0">{stats.total} pts</span>
                 </div>

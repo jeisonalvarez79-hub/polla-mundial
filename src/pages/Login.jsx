@@ -159,7 +159,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loginLoading || !participantId || pin.length !== 4}
-                className="w-full bg-green-700 hover:bg-green-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg transition-colors text-sm"
+                className="w-full bg-green-800 hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg transition-colors text-sm"
               >
                 {loginLoading ? 'Verificando...' : 'Ingresar →'}
               </button>
@@ -205,7 +205,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={adminLoading || !email || !password}
-                className="w-full bg-green-700 hover:bg-green-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg transition-colors text-sm"
+                className="w-full bg-green-800 hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg transition-colors text-sm"
               >
                 {adminLoading ? 'Autenticando...' : 'Acceder como Admin →'}
               </button>
