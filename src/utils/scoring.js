@@ -129,7 +129,9 @@ export function calcPredictedGroupStandings(matches, predictions, participantId,
 }
 
 /**
- * Calcula los 32 clasificados según los PRONÓSTICOS de un participante.
+ * Calcula los clasificados a la ronda semilla del bracket según los PRONÓSTICOS
+ * de un participante (TOTAL_QUALIFIERS equipos: top-2 por grupo + mejores
+ * terceros si el formato los usa).
  * Retorna { '1A': 'España', '2B': 'Francia', 't1': 'Marruecos', ... }
  */
 export function calcPredictedR32Qualifiers(matches, predictions, participantId) {
@@ -230,7 +232,8 @@ export function calcPredictedBracketTeams(matches, predictions, bracketPredictio
 }
 
 /**
- * Determina los 32 clasificados al R32 (24 líderes + subcampeones + 8 mejores 3eros).
+ * Determina los clasificados a la ronda semilla del bracket (líderes + subcampeones
+ * de cada grupo, más los mejores terceros si el formato los usa — QUALIFIER_RULES.bestThirds).
  * Retorna un mapa { '1A': 'España', '2B': 'Francia', 't1': 'Marruecos', ... }
  */
 export function calcR32Qualifiers(matches) {

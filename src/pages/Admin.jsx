@@ -1645,7 +1645,7 @@ function GruposView({ groups, matches, predictions, participantId }) {
     return a.name.localeCompare(b.name)
   })
 
-  const best8Set = QUALIFIER_RULES.bestThirds > 0
+  const bestThirdsSet = QUALIFIER_RULES.bestThirds > 0
     ? new Set(sortedThirds.slice(0, QUALIFIER_RULES.bestThirds).map(t => t.name))
     : new Set()
 
@@ -1689,7 +1689,7 @@ function GruposView({ groups, matches, predictions, participantId }) {
                 </thead>
                 <tbody>
                   {standings.map((team, i) => {
-                    const isBest3rd = i === 2 && best8Set.has(team.name)
+                    const isBest3rd = i === 2 && bestThirdsSet.has(team.name)
                     return (
                       <tr key={team.name || i} className={`border-b border-gray-800/50 last:border-0 ${
                         i < 2     ? 'bg-green-900/10' :
@@ -1730,10 +1730,10 @@ function GruposView({ groups, matches, predictions, participantId }) {
       </div>
 
       {/* Resumen mejores terceros */}
-      {best8Set.size > 0 && (
+      {bestThirdsSet.size > 0 && (
         <div className="bg-gray-900 border border-amber-800/50 rounded-xl p-4">
           <h4 className="text-amber-400 font-semibold text-sm mb-3">
-            ★ Mejores terceros clasificados según este participante ({best8Set.size}/{QUALIFIER_RULES.bestThirds})
+            ★ Mejores terceros clasificados según este participante ({bestThirdsSet.size}/{QUALIFIER_RULES.bestThirds})
           </h4>
           <div className="flex flex-wrap gap-2">
             {sortedThirds.slice(0, QUALIFIER_RULES.bestThirds).map((t, i) => (
