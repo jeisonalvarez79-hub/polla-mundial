@@ -1,4 +1,4 @@
-import { DEFAULT_PTS, BRACKET_PAIRING_PTS, BRACKET_TEAM_PTS, BONUS_PTS, GROUP_LETTERS, R32_BRACKET_MAP } from '../data/initialData.js'
+import { DEFAULT_PTS, BRACKET_PAIRING_PTS, BRACKET_TEAM_PTS, BONUS_PTS, GROUP_LETTERS, R32_BRACKET_MAP, R16_FROM_R32, QF_FROM_R16, SF_FROM_QF } from '../data/initialData.js'
 
 function pts(config) {
   return { ...DEFAULT_PTS, ...(config?.pts || {}) }
@@ -202,30 +202,30 @@ export function calcPredictedBracketTeams(matches, predictions, bracketPredictio
     return teams.homeTeam === winner ? teams.awayTeam : teams.homeTeam
   }
 
-  // R16: pairing secuencial según como los participantes ingresaron sus pronósticos
-  // (r32_1 vs r32_2 → r16_1, r32_3 vs r32_4 → r16_2, etc.)
-  for (let pos = 1; pos <= 8; pos++) {
-    teamMap[`r16_${pos}`] = {
-      homeTeam: getPredWinner(`r32_${pos * 2 - 1}`),
-      awayTeam: getPredWinner(`r32_${pos * 2}`),
+  // R16: cruce oficial FIFA 2026 (mismo mapeo que usa el bracket real del admin),
+  // no un pairing lineal por posición.
+  R16_FROM_R32.forEach(([id1, id2], i) => {
+    teamMap[`r16_${i + 1}`] = {
+      homeTeam: getPredWinner(id1),
+      awayTeam: getPredWinner(id2),
     }
-  }
+  })
 
   // Cuartos de Final
-  for (let pos = 1; pos <= 4; pos++) {
-    teamMap[`qf_${pos}`] = {
-      homeTeam: getPredWinner(`r16_${pos * 2 - 1}`),
-      awayTeam: getPredWinner(`r16_${pos * 2}`),
+  QF_FROM_R16.forEach(([id1, id2], i) => {
+    teamMap[`qf_${i + 1}`] = {
+      homeTeam: getPredWinner(id1),
+      awayTeam: getPredWinner(id2),
     }
-  }
+  })
 
   // Semifinal
-  for (let pos = 1; pos <= 2; pos++) {
-    teamMap[`sf_${pos}`] = {
-      homeTeam: getPredWinner(`qf_${pos * 2 - 1}`),
-      awayTeam: getPredWinner(`qf_${pos * 2}`),
+  SF_FROM_QF.forEach(([id1, id2], i) => {
+    teamMap[`sf_${i + 1}`] = {
+      homeTeam: getPredWinner(id1),
+      awayTeam: getPredWinner(id2),
     }
-  }
+  })
 
   // Tercer lugar: perdedores de las semis
   teamMap['third_1'] = {
