@@ -49,7 +49,7 @@ export default function Login() {
         <div className="text-center">
           <div className="text-7xl mb-4">⚽</div>
           <h1 className="text-3xl font-bold text-black">{config?.name || 'Polla Mundial'}</h1>
-          <p className="text-green-300 mt-1 text-sm">
+          <p className="text-green-700 mt-1 text-sm">
             {config?.tournamentName} {config?.year}
           </p>
         </div>
@@ -63,7 +63,7 @@ export default function Login() {
               onClick={() => { setTab('participante'); setLoginError('') }}
               className={`flex-1 py-3.5 text-sm font-semibold transition-colors ${
                 tab === 'participante'
-                  ? 'bg-gray-100 text-green-400 border-b-2 border-green-500'
+                  ? 'bg-gray-100 text-green-600 border-b-2 border-green-500'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -73,7 +73,7 @@ export default function Login() {
               onClick={() => { setTab('admin'); setAdminError('') }}
               className={`flex-1 py-3.5 text-sm font-semibold transition-colors ${
                 tab === 'admin'
-                  ? 'bg-gray-100 text-green-400 border-b-2 border-green-500'
+                  ? 'bg-gray-100 text-green-600 border-b-2 border-green-500'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >

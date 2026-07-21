@@ -29,7 +29,7 @@ export default function Registro() {
 
       {currentParticipant && (
         <div className="bg-green-900/20 border border-green-800 rounded-xl px-5 py-3 flex items-center gap-2">
-          <span className="text-green-400 text-sm font-medium">
+          <span className="text-green-600 text-sm font-medium">
             Participando como: <strong>{currentParticipant.name}</strong>
           </span>
           {currentPolla && (
@@ -60,11 +60,11 @@ export default function Registro() {
                   className={`flex items-center gap-3 px-5 py-3 ${isMe ? 'bg-green-900/20' : ''}`}
                 >
                   <span className="text-gray-500 text-sm w-5 text-center shrink-0">{position}</span>
-                  <span className={`font-medium flex-1 ${isMe ? 'text-green-400' : 'text-black'}`}>
+                  <span className={`font-medium flex-1 ${isMe ? 'text-green-600' : 'text-black'}`}>
                     {participant.name}
                     {isMe && <span className="ml-2 text-xs bg-green-700 text-green-200 px-2 py-0.5 rounded-full">Tú</span>}
                   </span>
-                  <span className="text-green-400 font-bold text-sm shrink-0">{stats.total} pts</span>
+                  <span className="text-green-600 font-bold text-sm shrink-0">{stats.total} pts</span>
                 </div>
               )
             })}

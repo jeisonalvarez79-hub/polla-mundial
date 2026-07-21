@@ -60,7 +60,7 @@ function StandingsTable({ standings }) {
                 }`}>{i + 1}</span>
               </td>
               <td className="py-1.5 font-medium truncate max-w-[90px]">{t.name}</td>
-              <td className="py-1.5 text-center px-1 font-bold text-green-400">{t.Pts}</td>
+              <td className="py-1.5 text-center px-1 font-bold text-green-600">{t.Pts}</td>
               <td className="py-1.5 text-center px-1">{t.J}</td>
               <td className="py-1.5 text-center px-1">{t.G}</td>
               <td className="py-1.5 text-center px-1">{t.E}</td>
@@ -236,7 +236,7 @@ function PartidosTab() {
           <span className="text-xl">🔒</span>
           <div>
             <p className="font-semibold">Carga de pronósticos cerrada</p>
-            <p className="text-xs text-red-400 mt-0.5">El administrador ha bloqueado los pronósticos de grupos. Solo lectura.</p>
+            <p className="text-xs text-red-600 mt-0.5">El administrador ha bloqueado los pronósticos de grupos. Solo lectura.</p>
           </div>
         </div>
       )}
@@ -245,7 +245,7 @@ function PartidosTab() {
         <div className="bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm inline-flex items-center gap-3">
           <span className="text-gray-600">Jugando como:</span>
           <span className="font-semibold text-black">{currentParticipant.name}</span>
-          <span className="text-green-400">{myPredCount}/{matches.length} pronosticados</span>
+          <span className="text-green-600">{myPredCount}/{matches.length} pronosticados</span>
         </div>
       )}
 
@@ -275,8 +275,8 @@ function PartidosTab() {
                   <th className="text-left px-2 py-2 font-semibold whitespace-nowrap">Hora</th>
                   <th className="text-left px-2 py-2 font-semibold">Jor.</th>
                   <th className="text-right px-3 py-2 font-semibold">Local</th>
-                  <th className="text-center px-1 py-2 font-semibold text-blue-400">Pred.</th>
-                  <th className="text-center px-1 py-2 font-semibold text-blue-400">Pred.</th>
+                  <th className="text-center px-1 py-2 font-semibold text-blue-600">Pred.</th>
+                  <th className="text-center px-1 py-2 font-semibold text-blue-600">Pred.</th>
                   <th className="text-left px-3 py-2 font-semibold">Visitante</th>
                   <th className="px-2 py-2"></th>
                 </tr>
@@ -320,7 +320,7 @@ function PartidosTab() {
                       <td className="px-3 py-2 text-right">
                         <span className="font-medium text-black text-xs whitespace-nowrap">{match.homeTeam || '—'}</span>
                         {match.homeScore !== null && (
-                          <span className="ml-1 font-bold text-yellow-400 text-xs">({match.homeScore})</span>
+                          <span className="ml-1 font-bold text-yellow-600 text-xs">({match.homeScore})</span>
                         )}
                       </td>
                       {/* Pred. local */}
@@ -345,7 +345,7 @@ function PartidosTab() {
                       <td className="px-3 py-2">
                         <span className="font-medium text-black text-xs whitespace-nowrap">{match.awayTeam || '—'}</span>
                         {match.awayScore !== null && (
-                          <span className="ml-1 font-bold text-yellow-400 text-xs">({match.awayScore})</span>
+                          <span className="ml-1 font-bold text-yellow-600 text-xs">({match.awayScore})</span>
                         )}
                       </td>
                       {/* Estado / puntos / guardar */}
@@ -391,7 +391,7 @@ function PartidosTab() {
               <h3 className="text-black font-semibold text-sm mb-1">
                 Mi pronóstico · Grupo {activeGroup}
               </h3>
-              <p className="text-xs text-blue-400 mb-3">
+              <p className="text-xs text-blue-600 mb-3">
                 Calculada con tus marcadores pronosticados. Top 2 pasan al bracket.
               </p>
               {predictedStandings.length > 0 ? (
@@ -416,7 +416,7 @@ function PartidosTab() {
               Tabla real · Grupo {activeGroup}
             </h3>
             <p className="text-xs text-gray-500 mb-3">
-              Basada en resultados reales <span className="text-yellow-400">(amarillo)</span> ingresados por el administrador.
+              Basada en resultados reales <span className="text-yellow-600">(amarillo)</span> ingresados por el administrador.
             </p>
             <StandingsTable standings={standings} />
             {standings.length > 0 && (
@@ -485,7 +485,7 @@ function GoleadoresTab() {
       {!currentParticipant && (
         <div className="bg-yellow-900/20 border border-yellow-800 rounded-xl p-4 text-yellow-300 text-sm">
           ⚠️ Selecciona o{' '}
-          <Link to="/registro" className="underline hover:text-yellow-200">registra un participante</Link>
+          <Link to="/registro" className="underline hover:text-yellow-700">registra un participante</Link>
           {' '}para guardar pronósticos.
         </div>
       )}
@@ -530,7 +530,7 @@ function GoleadoresTab() {
               <span className="text-lg">🥇</span>
               <span className="text-black font-medium flex-1">{topScorers[0]}</span>
               {pred?.scorers?.[0] === topScorers[0] && (
-                <span className="text-green-400 text-xs font-bold">+{pts}pt</span>
+                <span className="text-green-600 text-xs font-bold">+{pts}pt</span>
               )}
             </div>
           ) : (
@@ -575,7 +575,7 @@ export default function Pronosticos() {
       {!currentParticipant && (
         <div className="bg-yellow-900/20 border border-yellow-800 rounded-xl p-4 text-yellow-300 text-sm">
           ⚠️ Selecciona o{' '}
-          <Link to="/registro" className="underline hover:text-yellow-200">registra un participante</Link>
+          <Link to="/registro" className="underline hover:text-yellow-700">registra un participante</Link>
           {' '}para poder guardar pronósticos.
         </div>
       )}
@@ -586,7 +586,7 @@ export default function Pronosticos() {
           <button key={t.id} onClick={() => setTab(t.id)}
             className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 -mb-px transition-colors ${
               tab === t.id
-                ? 'border-green-500 text-green-400'
+                ? 'border-green-500 text-green-600'
                 : 'border-transparent text-gray-600 hover:text-black'
             }`}
           >

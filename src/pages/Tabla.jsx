@@ -40,7 +40,7 @@ function ParticipantDetail({
                     {pred ? `(${pred.homeScore}-${pred.awayScore})` : '—'}
                   </span>
                   <span className={`w-8 text-center font-bold text-sm ${
-                    score === ptEx ? 'text-yellow-400' : score > 0 ? 'text-blue-400' : 'text-gray-500'
+                    score === ptEx ? 'text-yellow-600' : score > 0 ? 'text-blue-600' : 'text-gray-500'
                   }`}>{score}</span>
                 </div>
               </div>
@@ -68,7 +68,7 @@ function ParticipantDetail({
                   <span className="text-gray-700 text-xs">Grupo {group}</span>
                   <div className="flex items-center gap-2 shrink-0 ml-2">
                     <span className="text-gray-500 text-xs">{pred.filter(Boolean).join(' · ')}</span>
-                    <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-purple-300' : 'text-gray-500'}`}>
+                    <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-purple-700' : 'text-gray-500'}`}>
                       {score}
                     </span>
                   </div>
@@ -95,7 +95,7 @@ function ParticipantDetail({
             <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">Clasificados a {SEED_ROUND_LABEL} ({TOTAL_QUALIFIERS})</p>
             <div className="flex items-center justify-between py-1">
               <span className="text-gray-500 text-xs">{aciertos.length}/{TOTAL_QUALIFIERS} equipos acertados</span>
-              <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-purple-400' : 'text-gray-500'}`}>
+              <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-purple-600' : 'text-gray-500'}`}>
                 {score}
               </span>
             </div>
@@ -119,15 +119,15 @@ function ParticipantDetail({
             <div className="space-y-1">
               <div className="flex justify-between py-1 border-b border-gray-200">
                 <span className="text-gray-600 text-xs">Llaves acertadas (ambos equipos)</span>
-                <span className={`font-bold text-sm ${ptsPairing > 0 ? 'text-green-400' : 'text-gray-500'}`}>{ptsPairing}</span>
+                <span className={`font-bold text-sm ${ptsPairing > 0 ? 'text-green-600' : 'text-gray-500'}`}>{ptsPairing}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-gray-200">
                 <span className="text-gray-600 text-xs">Equipos clasificados por ronda</span>
-                <span className={`font-bold text-sm ${ptsTeam > 0 ? 'text-cyan-400' : 'text-gray-500'}`}>{ptsTeam}</span>
+                <span className={`font-bold text-sm ${ptsTeam > 0 ? 'text-cyan-600' : 'text-gray-500'}`}>{ptsTeam}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-gray-200">
                 <span className="text-gray-600 text-xs">Bonus (campeón / subcampeón / 3ro / 4to)</span>
-                <span className={`font-bold text-sm ${ptsBonus > 0 ? 'text-orange-400' : 'text-gray-500'}`}>{ptsBonus}</span>
+                <span className={`font-bold text-sm ${ptsBonus > 0 ? 'text-orange-600' : 'text-gray-500'}`}>{ptsBonus}</span>
               </div>
               <div className="flex justify-between py-1">
                 <span className="text-gray-700 text-xs font-semibold">Total bracket</span>
@@ -150,7 +150,7 @@ function ParticipantDetail({
                 <span className="text-gray-700 text-xs">
                   {pred ? pred.scorers.filter(Boolean).join(' · ') : '—'}
                 </span>
-                <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-orange-400' : 'text-gray-500'}`}>
+                <span className={`w-8 text-center font-bold text-sm ${score > 0 ? 'text-orange-600' : 'text-gray-500'}`}>
                   {score}
                 </span>
               </div>
@@ -217,10 +217,10 @@ export default function Tabla() {
           <p className="text-xs text-gray-500 mb-1.5">Fase de grupos</p>
           <div className="flex flex-wrap gap-4 text-xs">
             {[
-              { label: 'Marcador exacto',        value: pts?.exacto,      color: 'text-yellow-400' },
-              { label: 'Resultado correcto',      value: pts?.resultado,   color: 'text-blue-400' },
-              { label: `Clasificado a ${SEED_ROUND_LABEL}`, value: pts?.clasificado, color: 'text-purple-400' },
-              { label: 'Posición exacta grupo',   value: pts?.ordenGrupo,  color: 'text-purple-300' },
+              { label: 'Marcador exacto',        value: pts?.exacto,      color: 'text-yellow-600' },
+              { label: 'Resultado correcto',      value: pts?.resultado,   color: 'text-blue-600' },
+              { label: `Clasificado a ${SEED_ROUND_LABEL}`, value: pts?.clasificado, color: 'text-purple-600' },
+              { label: 'Posición exacta grupo',   value: pts?.ordenGrupo,  color: 'text-purple-700' },
             ].map(item => (
               <span key={item.label} className="flex items-center gap-1.5">
                 <span className={`font-bold text-sm ${item.color}`}>{item.value}</span>
@@ -237,7 +237,7 @@ export default function Tabla() {
               .map(r => ({
                 label: `${r.shortLabel || r.label} llave`,
                 value: BRACKET_PAIRING_PTS[r.pairingPtsKey || r.id],
-                color: 'text-green-400',
+                color: 'text-green-600',
               })).map(item => (
               <span key={item.label} className="flex items-center gap-1.5">
                 <span className={`font-bold text-sm ${item.color}`}>{item.value}</span>
@@ -254,10 +254,10 @@ export default function Tabla() {
               .map(r => ({
                 label: `Equipo en ${(r.shortLabel || r.label).toLowerCase()}`,
                 value: BRACKET_TEAM_PTS[r.teamPtsKey || r.id],
-                color: 'text-cyan-400',
+                color: 'text-cyan-600',
               }))
               .concat(BRACKET_TEAM_PTS.finalFour != null
-                ? [{ label: 'Equipo final/3er puesto', value: BRACKET_TEAM_PTS.finalFour, color: 'text-cyan-400' }]
+                ? [{ label: 'Equipo final/3er puesto', value: BRACKET_TEAM_PTS.finalFour, color: 'text-cyan-600' }]
                 : [])
               .map(item => (
               <span key={item.label} className="flex items-center gap-1.5">
@@ -271,11 +271,11 @@ export default function Tabla() {
           <p className="text-xs text-gray-500 mb-1.5">Bonus final</p>
           <div className="flex flex-wrap gap-4 text-xs">
             {[
-              { label: 'Campeón',     value: BONUS_PTS.champion,    color: 'text-orange-400' },
-              { label: 'Subcampeón',  value: BONUS_PTS.runnerUp,    color: 'text-orange-400' },
-              { label: '3er puesto',  value: BONUS_PTS.thirdPlace,  color: 'text-orange-400' },
-              { label: '4to puesto',  value: BONUS_PTS.fourthPlace, color: 'text-orange-400' },
-              { label: 'Goleador',    value: pts?.goleador,         color: 'text-orange-400' },
+              { label: 'Campeón',     value: BONUS_PTS.champion,    color: 'text-orange-600' },
+              { label: 'Subcampeón',  value: BONUS_PTS.runnerUp,    color: 'text-orange-600' },
+              { label: '3er puesto',  value: BONUS_PTS.thirdPlace,  color: 'text-orange-600' },
+              { label: '4to puesto',  value: BONUS_PTS.fourthPlace, color: 'text-orange-600' },
+              { label: 'Goleador',    value: pts?.goleador,         color: 'text-orange-600' },
             ].map(item => (
               <span key={item.label} className="flex items-center gap-1.5">
                 <span className={`font-bold text-sm ${item.color}`}>{item.value}</span>
@@ -302,7 +302,7 @@ export default function Tabla() {
                   'bg-orange-900/20 border border-orange-900'
                 }`}>
                   <p className="font-bold text-black text-sm truncate">{entry.participant.name}</p>
-                  <p className={`text-xl font-bold mt-1 ${realPos === 0 ? 'text-yellow-400' : 'text-gray-700'}`}>
+                  <p className={`text-xl font-bold mt-1 ${realPos === 0 ? 'text-yellow-600' : 'text-gray-700'}`}>
                     {entry.stats.total}
                   </p>
                   <p className="text-xs text-gray-500">pts</p>
@@ -319,11 +319,11 @@ export default function Tabla() {
         <div className="grid grid-cols-[2rem_1fr_3.5rem_3.5rem_3.5rem_3.5rem_3.5rem_4.5rem] gap-1 px-4 py-3 bg-gray-100 text-xs font-semibold text-gray-600 uppercase tracking-wide">
           <span>#</span>
           <span>Nombre</span>
-          <span className="text-center text-yellow-500">Exact.</span>
-          <span className="text-center text-blue-400">Resul.</span>
-          <span className="text-center text-green-400">Brack.</span>
-          <span className="text-center text-purple-400">Grupos</span>
-          <span className="text-center text-orange-400">Goles</span>
+          <span className="text-center text-yellow-600">Exact.</span>
+          <span className="text-center text-blue-600">Resul.</span>
+          <span className="text-center text-green-600">Brack.</span>
+          <span className="text-center text-purple-600">Grupos</span>
+          <span className="text-center text-orange-600">Goles</span>
           <span className="text-center text-black">Total</span>
         </div>
 
@@ -339,15 +339,15 @@ export default function Tabla() {
                 }`}
               >
                 <span className="text-gray-500 text-sm self-center">{MEDAL[position - 1] ?? position}</span>
-                <span className={`font-medium self-center truncate ${isMe ? 'text-green-400' : 'text-black'}`}>
+                <span className={`font-medium self-center truncate ${isMe ? 'text-green-600' : 'text-black'}`}>
                   {participant.name}
                   {isMe && <span className="ml-1 text-xs text-green-600">(tú)</span>}
                 </span>
-                <span className="text-center text-yellow-400 font-bold self-center">{stats.ptsExacto}</span>
-                <span className="text-center text-blue-400 font-bold self-center">{stats.ptsResultado}</span>
-                <span className="text-center text-green-400 font-bold self-center">{stats.ptsBracket}</span>
-                <span className="text-center text-purple-400 font-bold self-center">{stats.ptsStandings}</span>
-                <span className="text-center text-orange-400 font-bold self-center">{stats.ptsScorers}</span>
+                <span className="text-center text-yellow-600 font-bold self-center">{stats.ptsExacto}</span>
+                <span className="text-center text-blue-600 font-bold self-center">{stats.ptsResultado}</span>
+                <span className="text-center text-green-600 font-bold self-center">{stats.ptsBracket}</span>
+                <span className="text-center text-purple-600 font-bold self-center">{stats.ptsStandings}</span>
+                <span className="text-center text-orange-600 font-bold self-center">{stats.ptsScorers}</span>
                 <span className="text-center text-black text-lg font-bold self-center">{stats.total}</span>
               </button>
 

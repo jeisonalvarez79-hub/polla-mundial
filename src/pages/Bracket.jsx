@@ -134,8 +134,8 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
     displayWinner === team  ? 'bg-blue-900/40 border-blue-700'   : 'bg-gray-100 border-gray-300'
 
   const nameColor = (team) =>
-    match.winner === team   ? 'text-green-300' :
-    displayWinner === team  ? 'text-blue-200'  : 'text-gray-700'
+    match.winner === team   ? 'text-green-700' :
+    displayWinner === team  ? 'text-blue-700'  : 'text-gray-700'
 
   if (empty) {
     return (
@@ -158,7 +158,7 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
         <p className="text-xs text-gray-500 font-medium">{match.label}</p>
         <div className="flex items-center gap-1.5">
           {saving && <span className="text-xs text-gray-500">guardando…</span>}
-          {saved && !saving && <span className="text-xs text-green-500">✓</span>}
+          {saved && !saving && <span className="text-xs text-green-600">✓</span>}
           {realScore !== null && realScore > 0 && (
             <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-green-800 text-green-300">
               {realScore} pts
@@ -171,7 +171,7 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
       <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border mb-1 ${rowBg(homeTeam)}`}>
         <span className={`flex-1 text-sm font-medium truncate ${nameColor(homeTeam)}`}>{homeTeam}</span>
         {match.winner === homeTeam  && <span className="shrink-0 text-xs">✅</span>}
-        {displayWinner === homeTeam && !match.winner && <span className="text-blue-400 shrink-0 text-xs">★</span>}
+        {displayWinner === homeTeam && !match.winner && <span className="text-blue-600 shrink-0 text-xs">★</span>}
         {canScore ? (
           <input
             type="number" min="0" max="99"
@@ -191,7 +191,7 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
         <span className="flex-1 border-t border-gray-200" />
         <span>vs</span>
         {match.homeScore !== null && (
-          <span className="text-yellow-400 font-bold ml-1">({match.homeScore}–{match.awayScore} real)</span>
+          <span className="text-yellow-600 font-bold ml-1">({match.homeScore}–{match.awayScore} real)</span>
         )}
         <span className="flex-1 border-t border-gray-200" />
       </div>
@@ -212,7 +212,7 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
         )}
         <span className={`flex-1 text-sm font-medium truncate ${nameColor(awayTeam)}`}>{awayTeam}</span>
         {match.winner === awayTeam  && <span className="shrink-0 text-xs">✅</span>}
-        {displayWinner === awayTeam && !match.winner && <span className="text-blue-400 shrink-0 text-xs">★</span>}
+        {displayWinner === awayTeam && !match.winner && <span className="text-blue-600 shrink-0 text-xs">★</span>}
       </div>
 
       {/* Desempate */}
@@ -227,7 +227,7 @@ function BracketCard({ match, homeTeam, awayTeam, participantId, prediction, con
                 className={`flex-1 text-xs py-1.5 rounded-lg border font-medium transition-colors ${
                   prediction?.predictedWinner === team
                     ? 'bg-blue-700 border-blue-600 text-white'
-                    : 'bg-gray-100 border-gray-300 text-gray-600 hover:border-blue-600 hover:text-blue-300'
+                    : 'bg-gray-100 border-gray-300 text-gray-600 hover:border-blue-600 hover:text-blue-700'
                 }`}
               >
                 {team}
@@ -344,7 +344,7 @@ export default function Bracket() {
               .filter(r => r.id !== 'third' && BRACKET_PAIRING_PTS[r.pairingPtsKey || r.id] != null)
               .map(r => (
                 <span key={r.id} className="bg-gray-100 px-2 py-1 rounded">
-                  {r.shortLabel || r.label}: <span className="text-green-400 font-semibold">{BRACKET_PAIRING_PTS[r.pairingPtsKey || r.id]}pts</span>
+                  {r.shortLabel || r.label}: <span className="text-green-600 font-semibold">{BRACKET_PAIRING_PTS[r.pairingPtsKey || r.id]}pts</span>
                 </span>
               ))}
           </div>
@@ -353,7 +353,7 @@ export default function Bracket() {
           <div className="bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm">
             <span className="text-gray-600">Jugando como: </span>
             <span className="font-semibold text-black">{currentParticipant.name}</span>
-            <span className="ml-3 text-green-400">{myPredCount}/{totalWithTeams} guardados</span>
+            <span className="ml-3 text-green-600">{myPredCount}/{totalWithTeams} guardados</span>
           </div>
         )}
       </div>
@@ -362,14 +362,14 @@ export default function Bracket() {
       {currentParticipant && (
         <div className="bg-blue-950/30 border border-blue-900 rounded-xl p-4 text-sm text-blue-300">
           <p className="font-semibold mb-1">¿Cómo funciona?</p>
-          <ol className="list-decimal list-inside space-y-0.5 text-blue-400 ml-2 text-xs">
+          <ol className="list-decimal list-inside space-y-0.5 text-blue-600 ml-2 text-xs">
             <li>Los equipos de la primera ronda eliminatoria vienen de tus <Link to="/pronosticos" className="underline">pronósticos de grupos</Link> (o del sorteo real si aún no los llenaste).</li>
             <li>Ingresa el marcador (goles) de cada llave. Si no hay empate, el ganador (★) pasa automáticamente a la siguiente ronda. El auto-guardado se activa 700 ms después de ingresar ambos goles.</li>
             <li>Si hay empate, elige quién avanza (penales). Ese equipo pasa a la siguiente ronda.</li>
             <li>Usa el botón <strong>Guardar</strong> para guardar en cualquier momento.</li>
           </ol>
           {groupPredCount > 0 && (
-            <p className="text-green-400 mt-2 text-xs">
+            <p className="text-green-600 mt-2 text-xs">
               ✓ {groupPredCount} partido(s) de grupos pronosticado(s) — la primera ronda eliminatoria se calcula automáticamente.
             </p>
           )}
@@ -379,7 +379,7 @@ export default function Bracket() {
       {!currentParticipant && (
         <div className="bg-yellow-900/20 border border-yellow-800 rounded-xl p-4 text-yellow-300 text-sm">
           ⚠️ Selecciona o{' '}
-          <Link to="/registro" className="underline hover:text-yellow-200">registra un participante</Link>
+          <Link to="/registro" className="underline hover:text-yellow-700">registra un participante</Link>
           {' '}para pronosticar el bracket.
         </div>
       )}
@@ -444,10 +444,10 @@ export default function Bracket() {
       {/* Campeón pronosticado */}
       {currentParticipant && champion && (
         <div className="bg-yellow-900/20 border-2 border-yellow-600 rounded-2xl p-8 text-center">
-          <p className="text-yellow-500 text-xs uppercase tracking-widest font-bold mb-3">
+          <p className="text-yellow-600 text-xs uppercase tracking-widest font-bold mb-3">
             Tu Campeón Pronosticado
           </p>
-          <p className="text-4xl font-black text-yellow-300">🏆 {champion}</p>
+          <p className="text-4xl font-black text-yellow-700">🏆 {champion}</p>
         </div>
       )}
 
@@ -465,7 +465,7 @@ export default function Bracket() {
           <div className="text-5xl mb-4">⚽</div>
           <p className="text-lg font-medium">Tu bracket está vacío.</p>
           <p className="text-sm mt-2">
-            <Link to="/pronosticos" className="text-green-500 hover:text-green-400 underline">
+            <Link to="/pronosticos" className="text-green-600 hover:text-green-600 underline">
               Pronóstica los partidos de grupos
             </Link>
             {' '}para que los clasificados aparezcan aquí, o pide al admin que cargue el sorteo.
